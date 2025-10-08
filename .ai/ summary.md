@@ -97,6 +97,8 @@ Tygodniowy przegląd (Podsumowanie): Jako uwierzytelniony użytkownik, pod konie
 
 Jedna z opcji dodawania wpisu bedzie przycisk w glównym oknie aplikacji 'dodaj wpis'. Po otworzeniu aplikacji kilkam przycisk dodaj wpis abym dodac nad czym teraz pracuje.
 
+Wpisy codziennie będą mialy możliwość edycji i usuwania. W podsumowaniach tez będzie możliwość edycji, ale nie będzie opcji usuwania.
+
 c. Ważne kryteria sukcesu i sposoby ich mierzenia:
 
 Wskaźnik "North Star" (Główny cel): Procent uwierzytelnionych użytkowników, którzy co tydzień otwierają i przeglądają swoje automatycznie wygenerowane podsumowanie.
@@ -107,13 +109,10 @@ Zaangażowanie: Średnia liczba zapisów dodawanych przez aktywnego użytkownika
 
 Retencja: Procent użytkowników, którzy nadal korzystają z aplikacji po 1 i 4 tygodniach od instalacji.
 
+Limit podsumowań: gdy AI wygeneruje podsumowanie, to będzie zapisane w bazie danych. Gdy użytkownik osiągnie limit 5 podsumowań w miesiącu, przy próbie wygenerowania kolejnego podsumowania, pojawi się komunikat informujący o osiągnięciu limitu i zachęcający do odczekania do następnego miesiąca.
+
+Podsumowania będą generowane o 23.00 w nocy w niedzielę.
+
 </prd_planning_summary>
 
-<unresolved_issues>
-
-Logika limitu podsumowań: Decyzja o "5 podsumowaniach miesięcznie" dla funkcji, która jest automatyczna i cotygodniowa, wymaga doprecyzowania. Miesiąc ma zazwyczaj 4 tygodnie. Jak dokładnie ten limit będzie egzekwowany i komunikowany użytkownikowi?
-
-Harmonogram generowania podsumowań: Nie określono, kiedy dokładnie (dzień tygodnia, godzina) generowane i dostarczane jest cotygodniowe podsumowanie. Czy użytkownik będzie miał na to wpływ?
-
-</unresolved_issues>
 </conversation_summary>
