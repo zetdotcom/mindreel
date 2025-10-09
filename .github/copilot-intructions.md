@@ -1,6 +1,6 @@
 # AI Rules for MindReel
 
-at .ai/summary.md
+Project description at .ai/summary.md
 
 ## CODING_PRACTICES
 
