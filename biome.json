@@ -1,0 +1,75 @@
+{
+  "$schema": "https://biomejs.dev/schemas/latest/schema.json",
+
+  "formatter": {
+    "enabled": true,
+    "lineWidth": 100,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "useEditorconfig": true
+  },
+
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+
+      "style": {
+        "noVar": "error",
+        "useConst": "warn"
+      },
+
+      "correctness": {
+        "noUnusedVariables": "error"
+      },
+
+      "nursery": {
+        "useExhaustiveDependencies": "error"
+      }
+    }
+  },
+
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "trailingCommas": "all"
+    }
+  },
+
+  "overrides": [
+    {
+      "include": ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "warn"
+          }
+        }
+      }
+    },
+    {
+      "include": ["scripts/**"],
+      "linter": {
+        "enabled": false
+      }
+    }
+  ],
+
+  "files": {
+    "ignore": [
+      "node_modules",
+      "dist",
+      "build",
+      "out",
+      "make",
+      ".vite",
+      "*.d.ts"
+    ]
+  },
+
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  }
+}

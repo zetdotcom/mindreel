@@ -1,0 +1,49 @@
+# .biomeignore
+#
+# This file provides explicit per-path ignores for Biome’s formatter & linter.
+# Many of these are also covered by the "files.ignore" section in biome.json;
+# keeping them here makes local experimentation (temporarily commenting things out)
+# easier without editing the main config.
+#
+# Patterns follow .gitignore-style globbing.
+
+# Dependency directories
+node_modules/
+
+# Build / bundle outputs
+dist/
+build/
+out/
+make/
+.vite/
+
+# Electron Forge artifacts
+*.asar
+
+# Logs
+*.log
+
+# Coverage / test output
+coverage/
+.nyc_output/
+
+# TypeScript artifacts & declarations (often generated or not meaningful to lint)
+*.d.ts
+*.tsbuildinfo
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+
+# Environment files (generally not linted / formatted)
+.env
+.env.*
+
+# Biome internal cache (if it appears)
+.biome/
+
+# Package managers' lock backups (rare)
+package-lock.backup*.json
+
+# Generated source maps
+*.js.map
