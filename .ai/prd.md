@@ -37,7 +37,7 @@ W dynamicznym środowisku pracy, specjaliści często zapominają o wykonanych z
 - Do generowania podsumowań wykorzystywane jest API openrouter.ai.
 - Wygenerowane podsumowanie jest prezentowane jako specjalna karta w historii, z tytułem zawierającym zakres dat i numer tygodnia (np. "6/10/2025 - 12/10/2025. Tydzień 35").
 - Użytkownik może edytować treść wygenerowanego podsumowania, ale nie może go usunąć.
-- Obowiązuje limit 5 darmowych podsumowań na miesiąc na użytkownika.
+- Obowiązuje limit 5 darmowych podsumowań na 28-dniowy cykl na użytkownika.
 
 ### 3.6. Konfiguracja
 - Użytkownik może w ustawieniach aplikacji skonfigurować częstotliwość pojawiania się okien pop-up (w zakresie od 30 minut do 4 godzin).
@@ -173,12 +173,12 @@ W dynamicznym środowisku pracy, specjaliści często zapominają o wykonanych z
 
 ### US-011: Osiągnięcie limitu podsumowań
 - ID: US-011
-- Tytuł: Obsługa limitu miesięcznych podsumowań
-- Opis: Jako użytkownik, który wykorzystał już 5 podsumowań w danym miesiącu, chcę otrzymać jasną informację, że kolejne podsumowanie będzie dostępne dopiero w następnym miesiącu.
+- Tytuł: Obsługa limitu podsumowań w cyklu
+- Opis: Jako użytkownik, który wykorzystał już 5 podsumowań w bieżącym 28-dniowym cyklu, chcę otrzymać jasną informację, że kolejne podsumowanie będzie dostępne dopiero po odnowieniu cyklu.
 - Kryteria akceptacji:
-  1. System zlicza liczbę wygenerowanych podsumowań dla każdego użytkownika w danym miesiącu kalendarzowym.
-  2. Gdy licznik osiągnie 5, automatyczne generowanie podsumowań w danym miesiącu jest wstrzymywane.
-  3. W miejscu, gdzie powinno pojawić się podsumowanie, wyświetlany jest komunikat informujący o osiągnięciu limitu i dacie odnowienia.
+  1. System zlicza liczbę wygenerowanych podsumowań dla każdego użytkownika w ramach jego bieżącego 28-dniowego cyklu.
+  2. Gdy licznik osiągnie 5, automatyczne generowanie podsumowań jest wstrzymywane aż do rozpoczęcia nowego cyklu.
+  3. W miejscu, gdzie powinno pojawić się podsumowanie, wyświetlany jest komunikat informujący o osiągnięciu limitu i dacie odnowienia cyklu.
 
 ### US-012: Konfiguracja częstotliwości powiadomień
 - ID: US-012

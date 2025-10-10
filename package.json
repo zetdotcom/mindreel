@@ -14,7 +14,11 @@
     "lint:fix": "biome check --write .",
     "format": "biome format .",
     "format:write": "biome format --write .",
-    "validate": "npm run typecheck && npm run lint"
+    "validate": "npm run typecheck && npm run lint",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:reset": "supabase db reset",
+    "supabase:push": "supabase db push"
   },
   "keywords": [],
   "author": "michalzadarnowski",
@@ -30,15 +34,16 @@
     "@electron-forge/plugin-fuses": "^7.9.0",
     "@electron-forge/plugin-vite": "^7.9.0",
     "@electron/fuses": "^1.8.0",
+    "@tailwindcss/postcss": "^4.0.0",
     "@types/electron-squirrel-startup": "^1.0.2",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.1",
     "@vitejs/plugin-react": "^5.0.4",
     "electron": "^38.2.2",
+    "tailwindcss": "^4.0.0",
     "typescript": "^5.9.3",
     "vite": "^5.4.20",
-    "tailwindcss": "^4.0.0",
-    "@tailwindcss/postcss": "^4.0.0"
+    "supabase": "^2.48.3"
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.1",
