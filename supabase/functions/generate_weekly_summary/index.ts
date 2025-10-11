@@ -3,12 +3,9 @@
 
 // Import shared utilities
 import type {
-  Entry,
   RequestPayload,
-  SuccessResponse,
-  ErrorResponse,
-  QuotaState,
   SupportedLanguage,
+  QuotaState,
 } from "../_shared/types.ts";
 import { validateEnvironment, getNumericConfig } from "../_shared/env.ts";
 import { buildPromptData, formatSummary } from "../_shared/normalization.ts";
@@ -17,229 +14,20 @@ import {
   createOpenRouterConfig,
 } from "../_shared/openrouter.ts";
 
-// Constants
-const QUOTA_LIMIT = 5;
-const CYCLE_DAYS = 28;
-const MAX_ENTRIES = 1000; // Prevent abuse
-const MAX_ENTRY_LENGTH = 10000; // Per entry character limit
-
-// Helper functions for JSON responses
-function jsonResponse(
-  data: SuccessResponse | ErrorResponse,
-  status = 200,
-): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      "Content-Type": "application/json",
-      Connection: "keep-alive",
-    },
-  });
-}
-
-function errorResponse(
-  reason: ErrorResponse["reason"],
-  message: string,
-  status = 400,
-  extra: Partial<ErrorResponse> = {},
-): Response {
-  return jsonResponse(
-    {
-      ok: false,
-      reason,
-      message,
-      ...extra,
-    },
-    status,
-  );
-}
-
-// Quota management functions
-async function getOrInitUserQuota(
-  supabase: any,
-  userId: string,
-): Promise<QuotaState> {
-  const { data, error } = await supabase.rpc("get_or_init_user_quota", {
-    p_user_id: userId,
-  });
-
-  if (error) {
-    console.error("Error getting user quota:", error);
-    throw new Error(`Failed to get quota: ${error.message}`);
-  }
-
-  return data;
-}
-
-async function resetQuotaIfExpired(
-  supabase: any,
-  userId: string,
-): Promise<QuotaState> {
-  const { data, error } = await supabase.rpc("reset_quota_if_expired", {
-    p_user_id: userId,
-  });
-
-  if (error) {
-    console.error("Error resetting quota:", error);
-    throw new Error(`Failed to reset quota: ${error.message}`);
-  }
-
-  return data;
-}
-
-function calculateQuotaInfo(quota: QuotaState): {
-  remaining: number;
-  cycleEnd: string;
-  isExceeded: boolean;
-} {
-  const remaining = Math.max(0, QUOTA_LIMIT - quota.ai_summaries_count);
-  const cycleStartDate = new Date(quota.cycle_start_at);
-  const cycleEndDate = new Date(
-    cycleStartDate.getTime() + CYCLE_DAYS * 24 * 60 * 60 * 1000,
-  );
-
-  return {
-    remaining,
-    cycleEnd: cycleEndDate.toISOString(),
-    isExceeded: quota.ai_summaries_count >= QUOTA_LIMIT,
-  };
-}
-
-// Concurrency-safe quota increment function
-async function conditionalIncrementQuota(
-  supabase: any,
-  userId: string,
-  expectedCount: number,
-): Promise<QuotaState | null> {
-  const { data, error } = await supabase.rpc("conditional_increment_quota", {
-    p_user_id: userId,
-    p_expected_count: expectedCount,
-  });
-
-  if (error) {
-    console.error("Error incrementing quota:", error);
-    throw new Error(`Failed to increment quota: ${error.message}`);
-  }
-
-  return data; // Will be null if race condition occurred
-}
-
-async function fetchCurrentQuota(
-  supabase: any,
-  userId: string,
-): Promise<QuotaState> {
-  const { data, error } = await supabase.rpc("get_or_init_user_quota", {
-    p_user_id: userId,
-  });
-
-  if (error) {
-    console.error("Error fetching quota:", error);
-    throw new Error(`Failed to fetch quota: ${error.message}`);
-  }
-
-  return data;
-}
-
-// Validation functions
-function validateWeekRange(
-  weekStart: string,
-  weekEnd: string,
-  serverNow: Date,
-): string | null {
-  // Parse dates as UTC
-  const startDate = new Date(weekStart + "T00:00:00.000Z");
-  const endDate = new Date(weekEnd + "T23:59:59.999Z");
-
-  // Check if dates are valid
-  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-    return "Invalid date format. Use YYYY-MM-DD";
-  }
-
-  // Check if week_start is Monday (1) and week_end is Sunday (0)
-  if (startDate.getUTCDay() !== 1) {
-    return "week_start must be a Monday";
-  }
-  if (endDate.getUTCDay() !== 0) {
-    return "week_end must be a Sunday";
-  }
-
-  // Check if the range is exactly 6 days (Monday to Sunday)
-  const daysDiff = Math.floor(
-    (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
-  );
-  if (daysDiff !== 6) {
-    return "Week range must be exactly 7 days (Monday to Sunday)";
-  }
-
-  // Check if week_start is not more than 1 day in the future
-  const oneDayFromNow = new Date(serverNow.getTime() + 24 * 60 * 60 * 1000);
-  if (startDate > oneDayFromNow) {
-    return "week_start cannot be more than 1 day in the future";
-  }
-
-  return null; // Valid
-}
-
-function validateEntries(
-  entries: Entry[],
-  weekStart: string,
-  weekEnd: string,
-): string | null {
-  if (!Array.isArray(entries) || entries.length === 0) {
-    return "entries array cannot be empty";
-  }
-
-  if (entries.length > MAX_ENTRIES) {
-    return `Too many entries. Maximum allowed: ${MAX_ENTRIES}`;
-  }
-
-  const weekStartTime = new Date(weekStart + "T00:00:00.000Z").getTime();
-  const weekEndTime = new Date(weekEnd + "T23:59:59.999Z").getTime();
-
-  for (let i = 0; i < entries.length; i++) {
-    const entry = entries[i];
-
-    // Check required fields
-    if (!entry.timestamp || typeof entry.timestamp !== "string") {
-      return `Entry ${i + 1}: timestamp is required and must be a string`;
-    }
-    if (!entry.text || typeof entry.text !== "string") {
-      return `Entry ${i + 1}: text is required and must be a string`;
-    }
-
-    // Check text length
-    if (entry.text.length > MAX_ENTRY_LENGTH) {
-      return `Entry ${i + 1}: text too long. Maximum ${MAX_ENTRY_LENGTH} characters`;
-    }
-
-    // Validate timestamp format and range
-    const entryTime = new Date(entry.timestamp);
-    if (isNaN(entryTime.getTime())) {
-      return `Entry ${i + 1}: invalid timestamp format`;
-    }
-
-    const entryTimeMs = entryTime.getTime();
-    if (entryTimeMs < weekStartTime || entryTimeMs > weekEndTime) {
-      return `Entry ${i + 1}: timestamp outside week range`;
-    }
-  }
-
-  // Check total payload size (rough estimate)
-  const totalChars = entries.reduce((sum, entry) => sum + entry.text.length, 0);
-  if (totalChars > 50000) {
-    // Conservative limit for all entries combined
-    return "Total content too large. Please reduce entry text or count";
-  }
-
-  return null; // Valid
-}
-
-function validateLanguage(language?: string): string | null {
-  if (language && !["pl", "en"].includes(language)) {
-    return 'language must be either "pl" or "en"';
-  }
-  return null;
-}
+// Import local helper functions
+import { jsonResponse, errorResponse } from "./http-helpers.ts";
+import {
+  getOrInitUserQuota,
+  resetQuotaIfExpired,
+  calculateQuotaInfo,
+  conditionalIncrementQuota,
+  fetchCurrentQuota,
+} from "./quota.ts";
+import {
+  validateWeekRange,
+  validateEntries,
+  validateLanguage,
+} from "./validation.ts";
 
 // Main edge function
 (globalThis as any).Deno.serve(async (req: Request) => {
