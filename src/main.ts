@@ -1,7 +1,14 @@
+/// <reference types="@electron-forge/plugin-vite/forge-vite-env" />
+
 import { app, BrowserWindow } from "electron";
 import path from "node:path";
 import started from "electron-squirrel-startup";
 import { registerPing } from "./ipc/setupPing";
+import {
+  registerDatabaseHandlers,
+  initializeDatabase,
+  closeDatabase,
+} from "./ipc/databaseHandlers";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -34,16 +41,33 @@ const createWindow = () => {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on("ready", () => {
-  registerPing();
-  createWindow();
+app.on("ready", async () => {
+  try {
+    // Initialize database first
+    await initializeDatabase();
+
+    // Register IPC handlers
+    registerPing();
+    registerDatabaseHandlers();
+
+    // Create the main window
+    createWindow();
+  } catch (error) {
+    console.error("Failed to initialize app:", error);
+    app.quit();
+  }
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
-app.on("window-all-closed", () => {
+app.on("window-all-closed", async () => {
   if (process.platform !== "darwin") {
+    try {
+      await closeDatabase();
+    } catch (error) {
+      console.error("Error closing database:", error);
+    }
     app.quit();
   }
 });
@@ -53,6 +77,15 @@ app.on("activate", () => {
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
+  }
+});
+
+// Handle app quit to ensure database is closed properly
+app.on("before-quit", async (event) => {
+  try {
+    await closeDatabase();
+  } catch (error) {
+    console.error("Error closing database on quit:", error);
   }
 });
 
