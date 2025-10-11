@@ -77,27 +77,6 @@ declare global {
           settings: Settings | null;
         }>;
       };
-
-      /**
-       * Privileged Supabase IPC surface (service role guarded in main process).
-       */
-      supabase: {
-        incrementQuota: (userId: string) => Promise<{
-          success: boolean;
-          newCount?: number;
-          error?: string;
-          inserted?: boolean;
-          userId?: string;
-        }>;
-        getQuota: (userId: string) => Promise<{
-          success: boolean;
-          count?: number;
-          cycleStartAt?: string;
-          updatedAt?: string;
-          error?: string;
-          userId?: string;
-        }>;
-      };
     };
   }
 }

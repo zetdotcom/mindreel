@@ -6,28 +6,6 @@ import type { Session, User } from "@supabase/supabase-js";
  * Internal helper to safely access the preload-exposed Supabase IPC API.
  * We defensively type it to avoid hard runtime failures if preload didn't mount it yet.
  */
-function getPreloadSupabaseApi():
-  | {
-      incrementQuota: (userId: string) => Promise<{
-        success: boolean;
-        newCount?: number;
-        error?: string;
-        inserted?: boolean;
-        userId?: string;
-      }>;
-      getQuota: (userId: string) => Promise<{
-        success: boolean;
-        count?: number;
-        cycleStartAt?: string;
-        updatedAt?: string;
-        error?: string;
-        userId?: string;
-      }>;
-    }
-  | undefined {
-  // @ts-expect-error Window global is augmented by preload; ambient types may be added separately.
-  return typeof window !== "undefined" ? window?.appApi?.supabase : undefined;
-}
 
 /**
  * Hook managing Supabase auth session + current user.
@@ -120,53 +98,11 @@ export function useSupabaseAuth() {
 }
 
 /**
- * Hook exposing privileged quota operations via preload IPC bridge.
+ * Main Supabase hook providing authentication functionality.
  *
- * Only returns functions if the preload Supabase API is present; otherwise they
- * are undefined (allowing conditional UI).
- *
- * These operations depend on the service role key (in main process) and
- * SHOULD NOT be directly accessible using the anon client.
- */
-export function useQuotaApi() {
-  const api = getPreloadSupabaseApi();
-
-  const incrementQuota = useCallback(
-    async (userId: string) => {
-      if (!api) {
-        throw new Error(
-          "Quota API unavailable (preload supabase handlers not registered).",
-        );
-      }
-      return api.incrementQuota(userId);
-    },
-    [api],
-  );
-
-  const getQuota = useCallback(
-    async (userId: string) => {
-      if (!api) {
-        throw new Error(
-          "Quota API unavailable (preload supabase handlers not registered).",
-        );
-      }
-      return api.getQuota(userId);
-    },
-    [api],
-  );
-
-  return {
-    available: Boolean(api),
-    incrementQuota: api ? incrementQuota : undefined,
-    getQuota: api ? getQuota : undefined,
-  };
-}
-
-/**
- * Convenience composite hook if you often need auth + quota actions together.
+ * Note: Quota management is now handled by the Edge Function API client.
+ * Use the EdgeFunctionClient from @/lib/api for weekly summary generation.
  */
 export function useSupabase() {
-  const auth = useSupabaseAuth();
-  const quota = useQuotaApi();
-  return { ...auth, quota };
+  return useSupabaseAuth();
 }

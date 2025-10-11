@@ -9,7 +9,6 @@ import {
   initializeDatabase,
   closeDatabase,
 } from "./ipc/databaseHandlers";
-import { registerSupabaseHandlers } from "./ipc/supabaseHandlers";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -50,7 +49,6 @@ app.on("ready", async () => {
     // Register IPC handlers
     registerPing();
     registerDatabaseHandlers();
-    registerSupabaseHandlers();
 
     // Create the main window
     createWindow();

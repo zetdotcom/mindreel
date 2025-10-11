@@ -71,11 +71,4 @@ const databaseApi = {
 contextBridge.exposeInMainWorld("appApi", {
   ping: () => ipcRenderer.invoke("ping"),
   db: databaseApi,
-  supabase: {
-    // Privileged quota operations routed through main process
-    incrementQuota: (userId: string) =>
-      ipcRenderer.invoke("supabase:quota:increment", { userId }),
-    getQuota: (userId: string) =>
-      ipcRenderer.invoke("supabase:quota:get", userId),
-  },
 });
