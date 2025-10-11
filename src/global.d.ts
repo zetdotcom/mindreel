@@ -16,6 +16,9 @@ declare global {
   interface Window {
     appApi: {
       ping: () => Promise<string>;
+      /*
+       * SQLite-backed database API
+       */
       db: {
         // Entries
         createEntry: (input: CreateEntryInput) => Promise<Entry>;
@@ -72,6 +75,27 @@ declare global {
           currentWeekSummary: Summary | null;
           recentSummaries: Summary[];
           settings: Settings | null;
+        }>;
+      };
+
+      /**
+       * Privileged Supabase IPC surface (service role guarded in main process).
+       */
+      supabase: {
+        incrementQuota: (userId: string) => Promise<{
+          success: boolean;
+          newCount?: number;
+          error?: string;
+          inserted?: boolean;
+          userId?: string;
+        }>;
+        getQuota: (userId: string) => Promise<{
+          success: boolean;
+          count?: number;
+          cycleStartAt?: string;
+          updatedAt?: string;
+          error?: string;
+          userId?: string;
         }>;
       };
     };
