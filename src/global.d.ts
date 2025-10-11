@@ -6,7 +6,7 @@ import {
   CreateSummaryInput,
   UpdateSettingsInput,
   EntryFilters,
-} from "./src/sqlite/types";
+} from "./sqlite/types";
 
 // Vite environment variables for Electron Forge
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
