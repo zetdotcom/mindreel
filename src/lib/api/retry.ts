@@ -1,20 +1,23 @@
 // Retry logic with exponential backoff for MindReel Edge Function integration
 // Provides robust retry mechanisms for handling transient failures
 
-import type { RetryConfig, EdgeFunctionError, NetworkError } from './types';
-import { DEFAULT_RETRY_CONFIG } from './types';
+import type { RetryConfig, EdgeFunctionError, NetworkError } from "./types";
+import { DEFAULT_RETRY_CONFIG } from "./types";
 
 /**
  * Sleep for a specified number of milliseconds
  */
 function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
  * Determines if an error is retryable based on configuration
  */
-export function isRetryableError(error: Error, config: RetryConfig = DEFAULT_RETRY_CONFIG): boolean {
+export function isRetryableError(
+  error: Error,
+  config: RetryConfig = DEFAULT_RETRY_CONFIG,
+): boolean {
   // Network errors are generally retryable
   if (error instanceof NetworkError) {
     return error.retryable;
@@ -26,7 +29,7 @@ export function isRetryableError(error: Error, config: RetryConfig = DEFAULT_RET
   }
 
   // Timeout errors are retryable
-  if (error.name === 'TimeoutError' || error.name === 'AbortError') {
+  if (error.name === "TimeoutError" || error.name === "AbortError") {
     return true;
   }
 
@@ -42,7 +45,7 @@ export function calculateRetryDelay(
   baseDelay: number,
   backoffMultiplier: number,
   maxDelay: number,
-  jitter: boolean = true
+  jitter: boolean = true,
 ): number {
   // Calculate exponential backoff: baseDelay * (backoffMultiplier ^ attempt)
   let delay = baseDelay * Math.pow(backoffMultiplier, attempt - 1);
@@ -69,7 +72,7 @@ export class RetryManager {
   constructor(config: Partial<RetryConfig> = {}) {
     this.config = {
       ...DEFAULT_RETRY_CONFIG,
-      ...config
+      ...config,
     };
 
     this.validateConfig();
@@ -77,32 +80,29 @@ export class RetryManager {
 
   private validateConfig(): void {
     if (this.config.attempts < 1) {
-      throw new Error('Retry attempts must be at least 1');
+      throw new Error("Retry attempts must be at least 1");
     }
     if (this.config.delay < 0) {
-      throw new Error('Retry delay must be non-negative');
+      throw new Error("Retry delay must be non-negative");
     }
     if (this.config.backoffMultiplier < 1) {
-      throw new Error('Backoff multiplier must be at least 1');
+      throw new Error("Backoff multiplier must be at least 1");
     }
     if (this.config.maxDelay < this.config.delay) {
-      throw new Error('Max delay must be at least equal to base delay');
+      throw new Error("Max delay must be at least equal to base delay");
     }
   }
 
   /**
    * Executes a function with retry logic
    */
-  async execute<T>(
-    fn: () => Promise<T>,
-    signal?: AbortSignal
-  ): Promise<T> {
+  async execute<T>(fn: () => Promise<T>, signal?: AbortSignal): Promise<T> {
     let lastError: Error | null = null;
 
     for (let attempt = 1; attempt <= this.config.attempts; attempt++) {
       // Check if operation was cancelled
       if (signal?.aborted) {
-        throw new Error('Operation was cancelled');
+        throw new Error("Operation was cancelled");
       }
 
       try {
@@ -125,12 +125,12 @@ export class RetryManager {
           attempt,
           this.config.delay,
           this.config.backoffMultiplier,
-          this.config.maxDelay
+          this.config.maxDelay,
         );
 
         console.log(
           `Retry attempt ${attempt}/${this.config.attempts} failed: ${lastError.message}. ` +
-          `Retrying in ${delay}ms...`
+            `Retrying in ${delay}ms...`,
         );
 
         // Wait before retrying, but respect cancellation
@@ -138,8 +138,10 @@ export class RetryManager {
           await Promise.race([
             sleep(delay),
             new Promise<never>((_, reject) => {
-              signal.addEventListener('abort', () => reject(new Error('Operation was cancelled')));
-            })
+              signal.addEventListener("abort", () =>
+                reject(new Error("Operation was cancelled")),
+              );
+            }),
           ]);
         } else {
           await sleep(delay);
@@ -148,7 +150,7 @@ export class RetryManager {
     }
 
     // All retry attempts failed, throw the last error
-    throw lastError || new Error('All retry attempts failed');
+    throw lastError || new Error("All retry attempts failed");
   }
 
   /**
@@ -176,7 +178,7 @@ export const defaultRetryManager = new RetryManager();
  */
 export async function withRetry<T>(
   fn: () => Promise<T>,
-  options: Partial<RetryConfig> & { signal?: AbortSignal } = {}
+  options: Partial<RetryConfig> & { signal?: AbortSignal } = {},
 ): Promise<T> {
   const { signal, ...config } = options;
   const retryManager = new RetryManager(config);
@@ -186,13 +188,15 @@ export async function withRetry<T>(
 /**
  * Creates a retry manager optimized for network requests
  */
-export function createNetworkRetryManager(baseDelay: number = 1000): RetryManager {
+export function createNetworkRetryManager(
+  baseDelay: number = 1000,
+): RetryManager {
   return new RetryManager({
     attempts: 3,
     delay: baseDelay,
     backoffMultiplier: 2,
     maxDelay: 10000,
-    retryableErrors: ['provider_error', 'other_error']
+    retryableErrors: ["provider_error", "other_error"],
   });
 }
 
@@ -205,7 +209,7 @@ export function createQuickRetryManager(): RetryManager {
     delay: 500,
     backoffMultiplier: 1.5,
     maxDelay: 2000,
-    retryableErrors: ['provider_error', 'other_error']
+    retryableErrors: ["provider_error", "other_error"],
   });
 }
 
@@ -218,6 +222,6 @@ export function createAggressiveRetryManager(): RetryManager {
     delay: 1000,
     backoffMultiplier: 2,
     maxDelay: 30000,
-    retryableErrors: ['provider_error', 'other_error']
+    retryableErrors: ["provider_error", "other_error"],
   });
 }

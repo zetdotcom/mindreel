@@ -1,16 +1,16 @@
 // React hooks for MindReel Edge Function integration
 // Provides easy-to-use React hooks for weekly summary generation
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect } from "react";
 import type {
   WeeklySummaryRequest,
   WeeklySummarySuccessResponse,
-  EdgeFunctionError,
   QuotaInfo,
   WeekRange,
-} from './types';
-import { EdgeFunctionClient } from './client';
-import { getCurrentWeekRange, getPreviousWeekRange } from './validation';
+} from "./types";
+import { EdgeFunctionError } from "./types";
+import { EdgeFunctionClient } from "./client";
+import { getCurrentWeekRange, getPreviousWeekRange } from "./validation";
 
 // Hook state types
 export interface UseWeeklySummaryState {
@@ -27,7 +27,8 @@ export interface UseWeeklySummaryActions {
   reset: () => void;
 }
 
-export type UseWeeklySummaryReturn = UseWeeklySummaryState & UseWeeklySummaryActions;
+export type UseWeeklySummaryReturn = UseWeeklySummaryState &
+  UseWeeklySummaryActions;
 
 // Options for the hook
 export interface UseWeeklySummaryOptions {
@@ -40,7 +41,9 @@ export interface UseWeeklySummaryOptions {
 /**
  * Main hook for generating weekly summaries
  */
-export function useWeeklySummary(options: UseWeeklySummaryOptions = {}): UseWeeklySummaryReturn {
+export function useWeeklySummary(
+  options: UseWeeklySummaryOptions = {},
+): UseWeeklySummaryReturn {
   const [state, setState] = useState<UseWeeklySummaryState>({
     loading: false,
     error: null,
@@ -67,78 +70,91 @@ export function useWeeklySummary(options: UseWeeklySummaryOptions = {}): UseWeek
     };
   }, []);
 
-  const generateSummary = useCallback(async (request: WeeklySummaryRequest) => {
-    if (!clientRef.current) {
-      const error = new EdgeFunctionError('other_error', 'EdgeFunctionClient not provided');
-      setState(prev => ({ ...prev, error }));
-      options.onError?.(error);
-      return;
-    }
+  const generateSummary = useCallback(
+    async (request: WeeklySummaryRequest) => {
+      if (!clientRef.current) {
+        const error = new EdgeFunctionError(
+          "other_error",
+          "EdgeFunctionClient not provided",
+        );
+        setState((prev) => ({ ...prev, error }));
+        options.onError?.(error);
+        return;
+      }
 
-    if (!options.authToken) {
-      const error = new EdgeFunctionError('auth_error', 'Authentication token not provided');
-      setState(prev => ({ ...prev, error }));
-      options.onError?.(error);
-      return;
-    }
+      if (!options.authToken) {
+        const error = new EdgeFunctionError(
+          "auth_error",
+          "Authentication token not provided",
+        );
+        setState((prev) => ({ ...prev, error }));
+        options.onError?.(error);
+        return;
+      }
 
-    // Cancel any ongoing request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
+      // Cancel any ongoing request
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
 
-    // Create new abort controller for this request
-    abortControllerRef.current = new AbortController();
+      // Create new abort controller for this request
+      abortControllerRef.current = new AbortController();
 
-    setState(prev => ({
-      ...prev,
-      loading: true,
-      error: null,
-    }));
-
-    try {
-      const result = await clientRef.current.generateWeeklySummary(
-        request,
-        options.authToken,
-        { signal: abortControllerRef.current.signal }
-      );
-
-      // Update quota info from client
-      const quota = clientRef.current.getQuotaInfo();
-
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
-        loading: false,
-        data: result,
-        quota,
+        loading: true,
+        error: null,
       }));
 
-      options.onSuccess?.(result);
-    } catch (error) {
-      const edgeError = error instanceof EdgeFunctionError
-        ? error
-        : new EdgeFunctionError('other_error', error instanceof Error ? error.message : String(error));
+      try {
+        const result = await clientRef.current.generateWeeklySummary(
+          request,
+          options.authToken,
+          { signal: abortControllerRef.current.signal },
+        );
 
-      // Update quota info even on error (might be quota_exceeded)
-      const quota = clientRef.current.getQuotaInfo();
+        // Update quota info from client
+        const quota = clientRef.current.getQuotaInfo();
 
-      setState(prev => ({
-        ...prev,
-        loading: false,
-        error: edgeError,
-        quota,
-      }));
+        setState((prev) => ({
+          ...prev,
+          loading: false,
+          data: result,
+          quota,
+        }));
 
-      options.onError?.(edgeError);
-    }
-  }, [options.authToken, options.onSuccess, options.onError]);
+        options.onSuccess?.(result);
+      } catch (error) {
+        const edgeError =
+          error instanceof EdgeFunctionError
+            ? error
+            : new EdgeFunctionError(
+                "other_error",
+                error instanceof Error ? error.message : String(error),
+              );
+
+        // Update quota info even on error (might be quota_exceeded)
+        const quota = clientRef.current.getQuotaInfo();
+
+        setState((prev) => ({
+          ...prev,
+          loading: false,
+          error: edgeError,
+          quota,
+        }));
+
+        options.onError?.(edgeError);
+      }
+    },
+    [options.authToken, options.onSuccess, options.onError],
+  );
 
   const clearError = useCallback(() => {
-    setState(prev => ({ ...prev, error: null }));
+    setState((prev) => ({ ...prev, error: null }));
   }, []);
 
   const clearData = useCallback(() => {
-    setState(prev => ({ ...prev, data: null }));
+    setState((prev) => ({ ...prev, data: null }));
   }, []);
 
   const reset = useCallback(() => {
@@ -184,7 +200,9 @@ export function useQuotaInfo(client?: EdgeFunctionClient) {
 
   const isAvailable = quota ? quota.remaining > 0 : true;
   const isNearLimit = quota ? quota.remaining <= 1 : false;
-  const daysUntilReset = quota ? Math.ceil((quota.cycleEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
+  const daysUntilReset = quota
+    ? Math.ceil((quota.cycleEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    : null;
 
   return {
     quota,
@@ -200,7 +218,7 @@ export function useQuotaInfo(client?: EdgeFunctionClient) {
  */
 export function useWeekRange(initialWeek?: WeekRange) {
   const [currentWeek, setCurrentWeek] = useState<WeekRange>(
-    initialWeek || getCurrentWeekRange()
+    initialWeek || getCurrentWeekRange(),
   );
 
   const goToCurrentWeek = useCallback(() => {
@@ -235,11 +253,14 @@ export function useWeekRange(initialWeek?: WeekRange) {
 export function useValidation() {
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
-  const validate = useCallback((client: EdgeFunctionClient, request: WeeklySummaryRequest) => {
-    const result = client.validateRequest(request);
-    setValidationErrors(result.errors);
-    return result.valid;
-  }, []);
+  const validate = useCallback(
+    (client: EdgeFunctionClient, request: WeeklySummaryRequest) => {
+      const result = client.validateRequest(request);
+      setValidationErrors(result.errors);
+      return result.valid;
+    },
+    [],
+  );
 
   const clearValidation = useCallback(() => {
     setValidationErrors([]);
@@ -260,7 +281,7 @@ export function useValidation() {
  */
 export function useWeeklySummaryComplete(
   client: EdgeFunctionClient,
-  authToken?: string
+  authToken?: string,
 ) {
   const summary = useWeeklySummary({ client, authToken });
   const quota = useQuotaInfo(client);
@@ -274,12 +295,15 @@ export function useWeeklySummaryComplete(
     }
   }, [summary.data, validation.clearValidation]);
 
-  const generateSummaryWithValidation = useCallback(async (request: WeeklySummaryRequest) => {
-    const isValid = validation.validate(client, request);
-    if (isValid) {
-      await summary.generateSummary(request);
-    }
-  }, [client, validation.validate, summary.generateSummary]);
+  const generateSummaryWithValidation = useCallback(
+    async (request: WeeklySummaryRequest) => {
+      const isValid = validation.validate(client, request);
+      if (isValid) {
+        await summary.generateSummary(request);
+      }
+    },
+    [client, validation.validate, summary.generateSummary],
+  );
 
   return {
     // Summary state and actions
@@ -319,21 +343,21 @@ export function useOfflineQueue() {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, []);
 
   const addToQueue = useCallback((request: WeeklySummaryRequest) => {
-    setQueue(prev => [...prev, request]);
+    setQueue((prev) => [...prev, request]);
   }, []);
 
   const removeFromQueue = useCallback((index: number) => {
-    setQueue(prev => prev.filter((_, i) => i !== index));
+    setQueue((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
   const clearQueue = useCallback(() => {

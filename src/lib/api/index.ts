@@ -1,8 +1,10 @@
 // Main export file for MindReel Edge Function API client library
 // Provides a clean, organized interface for all API functionality
 
+import EdgeFunctionClient from "./client";
+
 // Core client and types
-export { EdgeFunctionClient, createClient } from './client';
+export { EdgeFunctionClient, createClient } from "./client";
 export type {
   WeeklySummaryRequest,
   WeeklySummaryResponse,
@@ -17,14 +19,10 @@ export type {
   SupportedLanguage,
   ValidationResult,
   RetryConfig,
-} from './types';
+} from "./types";
 
 // Error classes
-export {
-  EdgeFunctionError,
-  NetworkError,
-  TimeoutError,
-} from './types';
+export { EdgeFunctionError, NetworkError, TimeoutError } from "./types";
 
 // Constants
 export {
@@ -32,7 +30,7 @@ export {
   SUPPORTED_LANGUAGES,
   VALIDATION_RULES,
   DEFAULT_RETRY_CONFIG,
-} from './types';
+} from "./types";
 
 // Validation utilities
 export {
@@ -51,7 +49,7 @@ export {
   sanitizeEntryText,
   sanitizeEntries,
   preprocessRequest,
-} from './validation';
+} from "./validation";
 
 // Retry utilities
 export {
@@ -63,7 +61,7 @@ export {
   createAggressiveRetryManager,
   isRetryableError,
   calculateRetryDelay,
-} from './retry';
+} from "./retry";
 
 // React hooks
 export {
@@ -73,7 +71,7 @@ export {
   useValidation,
   useWeeklySummaryComplete,
   useOfflineQueue,
-} from './hooks';
+} from "./hooks";
 
 // Hook types
 export type {
@@ -81,22 +79,22 @@ export type {
   UseWeeklySummaryActions,
   UseWeeklySummaryReturn,
   UseWeeklySummaryOptions,
-} from './hooks';
+} from "./hooks";
 
 // Test data (for development/testing)
-export {
-  sampleEntriesEN,
-  sampleEntriesPL,
-  sampleEntriesWithDuplicates,
-  sampleEntriesLongText,
-  validRequestEN,
-  validRequestPL,
-  requestWithoutLanguage,
-  invalidRequests,
-  mockEnvVars,
-  mockOpenRouterResponse,
-  mockQuotaStates,
-} from './test-data';
+// export {
+//   sampleEntriesEN,
+//   sampleEntriesPL,
+//   sampleEntriesWithDuplicates,
+//   sampleEntriesLongText,
+//   validRequestEN,
+//   validRequestPL,
+//   requestWithoutLanguage,
+//   invalidRequests,
+//   mockEnvVars,
+//   mockOpenRouterResponse,
+//   mockQuotaStates,
+// } from "./test-data";
 
 // Convenience factory functions
 export const createMockClient = EdgeFunctionClient.createMock;
