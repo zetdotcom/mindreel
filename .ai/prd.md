@@ -35,9 +35,11 @@ W dynamicznym środowisku pracy, specjaliści często zapominają o wykonanych z
 - Funkcja dostępna wyłącznie dla uwierzytelnionych użytkowników, którzy wyrazili zgodę na przetwarzanie danych.
 - System automatycznie generuje podsumowanie w każdą niedzielę o 23:00, analizując wpisy od poniedziałku do niedzieli.
 - Do generowania podsumowań wykorzystywane jest API openrouter.ai.
+- Wywołanie odbywa się przez funkcję brzegową Supabase (Edge Function), która uwierzytelnia użytkownika, egzekwuje limit oraz ukrywa klucz API OpenRouter przed klientem.
 - Wygenerowane podsumowanie jest prezentowane jako specjalna karta w historii, z tytułem zawierającym zakres dat i numer tygodnia (np. "6/10/2025 - 12/10/2025. Tydzień 35").
 - Użytkownik może edytować treść wygenerowanego podsumowania, ale nie może go usunąć.
 - Obowiązuje limit 5 darmowych podsumowań na 28-dniowy cykl na użytkownika.
+- Nieudane próby (błąd sieci lub modelu) nie zmniejszają dostępnego limitu.
 
 ### 3.6. Konfiguracja
 - Użytkownik może w ustawieniach aplikacji skonfigurować częstotliwość pojawiania się okien pop-up (w zakresie od 30 minut do 4 godzin).
@@ -46,6 +48,8 @@ W dynamicznym środowisku pracy, specjaliści często zapominają o wykonanych z
 ### 3.7. Prywatność i przechowywanie danych
 - Wszystkie zapisy użytkownika są domyślnie przechowywane lokalnie na jego komputerze.
 - Wysłanie danych do zewnętrznego API w celu wygenerowania podsumowania wymaga jawnej zgody użytkownika (akceptacja regulaminu podczas rejestracji).
+- Tylko wpisy z danego tygodnia są tymczasowo przesyłane do funkcji brzegowej; żadne z nich nie są tam persistentnie przechowywane.
+- Funkcja brzegowa nie zapisuje treści wpisów ani treści wygenerowanych podsumowań – przetwarzanie jest efemeryczne.
 
 ## 4. Granice produktu
 - Wersja MVP będzie dostępna wyłącznie na platformę macOS. Wsparcie dla systemów Windows i Linux nie jest objęte zakresem tego wydania.
@@ -54,6 +58,7 @@ W dynamicznym środowisku pracy, specjaliści często zapominają o wykonanych z
 - Uwierzytelnianie będzie realizowane tylko przez e-mail i hasło. Inne metody (np. logowanie przez Google, GitHub) nie będą dostępne w MVP.
 - Aplikacja nie będzie oferować bezpośrednich integracji z innymi narzędziami (np. Jira, Asana, Git). Użytkownicy mogą używać hashtagów do kategoryzacji wpisów.
 - Przechowywanie danych w chmurze ogranicza się do tymczasowego przetwarzania na potrzeby generowania podsumowań. Pełna synchronizacja i backup danych w chmurze nie są częścią MVP.
+- Brak trwałego przechowywania wpisów w chmurze; jedynym komponentem serwerowym jest funkcja brzegowa służąca do generowania podsumowań i liczenia limitu.
 
 ## 5. Historyjki użytkowników
 ### US-001: Pierwsze uruchomienie aplikacji
@@ -64,6 +69,7 @@ W dynamicznym środowisku pracy, specjaliści często zapominają o wykonanych z
   1. Przy pierwszym uruchomieniu aplikacji wyświetla się okno modalne z krótkim opisem działania aplikacji.
   2. Okno zawiera informację o cyklicznych pop-upach i możliwości dodawania wpisów.
   3. Po zamknięciu okna wprowadzającego, natychmiast pojawia się pierwszy pop-up, zachęcający do dodania pierwszego wpisu.
+...
 
 ### US-002: Rejestracja użytkownika
 - ID: US-002
