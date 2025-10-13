@@ -1,4 +1,5 @@
 import { defineConfig, UserConfig } from "vite";
+import path from "path";
 
 /**
  * Renderer Vite configuration.
@@ -28,7 +29,7 @@ export default defineConfig(async (): Promise<UserConfig> => {
     },
     resolve: {
       alias: {
-        // Place renderer-side aliases here if you add them later
+        "@": path.resolve(__dirname, "./src"),
       },
     },
     optimizeDeps: {

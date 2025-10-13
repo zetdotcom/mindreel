@@ -221,6 +221,8 @@ const {
 
 Manages quota information and status.
 
+**Note:** In the current MVP, this hook is intended for internal application logic to check if the user has reached their summary generation limit. The quota information (e.g., remaining count) should **not** be displayed to the user.
+
 ```typescript
 const {
   quota,           // Current quota info

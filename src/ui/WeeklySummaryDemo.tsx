@@ -11,7 +11,7 @@ import {
   type Entry,
   type WeeklySummaryRequest,
   EdgeFunctionError,
-} from "../lib/api";
+} from "@/supabase/api";
 
 // Mock Supabase configuration for demo
 const mockClient = EdgeFunctionClient.createMock({

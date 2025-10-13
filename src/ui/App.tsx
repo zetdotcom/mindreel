@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import type { Entry, Summary, Settings } from "../sqlite/types";
+import { Button } from "@/components/ui/button";
 
 // Custom hook for managing entries
 const useEntries = () => {
@@ -301,13 +302,13 @@ const WeekSummarySection = ({
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold">Current Week Summary</h2>
         {!summary && (
-          <button
+          <Button
+            variant="secondary"
             onClick={handleCreateSummary}
             disabled={creating}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-neutral-700 disabled:cursor-not-allowed rounded font-medium transition"
           >
             {creating ? "Generating..." : "Generate Summary"}
-          </button>
+          </Button>
         )}
       </div>
       {summary ? (
