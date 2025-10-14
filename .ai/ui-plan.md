@@ -43,7 +43,7 @@ Guiding principles:
   - Focus trapped;  Continue triggers first capture pop-up
   - Initial focus on heading then move to primary button for screen reader
   - No PII; no external calls
-  - Not shown again (flag persisted locally)
+  - Not shown again (flag persisted locally in localStorage)
 
 ### 2.2 Capture Pop-Up (Scheduled / Manual / Shortcut)
 - View path: system overlay window (not navigable route)

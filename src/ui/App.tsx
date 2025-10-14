@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import type { Entry, Summary, Settings } from "../sqlite/types";
 import { Button } from "@/components/ui/button";
+import { OnboardingModal } from "@/components/composites/OnboardingModal";
+import { hasSeenOnboarding, setOnboardingSeen } from "@/lib/onboarding";
 
 // Custom hook for managing entries
 const useEntries = () => {
@@ -367,6 +369,14 @@ export function App() {
   } = useDashboard();
 
   const [globalError, setGlobalError] = useState<string | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Check if onboarding should be shown
+  useEffect(() => {
+    if (!hasSeenOnboarding()) {
+      setShowOnboarding(true);
+    }
+  }, []);
 
   // Load initial data
   useEffect(() => {
@@ -381,6 +391,34 @@ export function App() {
 
     initializeApp();
   }, [loadTodayEntries, loadDashboardData]);
+
+  // Handle onboarding completion
+  const handleOnboardingConfirm = useCallback(() => {
+    // Persist the flag so onboarding won't show again
+    setOnboardingSeen();
+
+    // Hide the modal
+    setShowOnboarding(false);
+
+    // Trigger first capture popup after a short delay
+    // to allow dialog unmount and avoid nested focus traps
+    setTimeout(() => {
+      triggerFirstCapture();
+    }, 120);
+  }, []);
+
+  // Placeholder for first capture trigger
+  // This will be replaced when the capture popup is implemented
+  const triggerFirstCapture = useCallback(() => {
+    // Check if capture API exists
+    if (window.appApi?.capture?.openCapturePopup) {
+      window.appApi.capture.openCapturePopup();
+    } else {
+      // Fallback: log for now, can show a toast later
+      console.log("First capture trigger - capture popup not yet implemented");
+      // Future: Could show an inline prompt or toast here
+    }
+  }, []);
 
   const handleCreateEntry = useCallback(
     async (content: string) => {
@@ -406,103 +444,118 @@ export function App() {
   };
 
   return (
-    <main className="min-h-screen p-8 bg-neutral-950 text-neutral-100 font-sans">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <header className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight mb-2">MindReel</h1>
-          <p className="text-neutral-400">Your personal productivity journal</p>
-        </header>
+    <>
+      {/* Onboarding Modal - Shows only on first run */}
+      <OnboardingModal
+        open={showOnboarding}
+        onConfirm={handleOnboardingConfirm}
+      />
 
-        {/* Global Error Display */}
-        {globalError && (
-          <ErrorDisplay
-            error={globalError}
-            onDismiss={() => setGlobalError(null)}
+      <main className="min-h-screen p-8 bg-neutral-950 text-neutral-100 font-sans">
+        <div className="max-w-4xl mx-auto space-y-8">
+          <header className="text-center">
+            <h1 className="text-3xl font-bold tracking-tight mb-2">MindReel</h1>
+            <p className="text-neutral-400">
+              Your personal productivity journal
+            </p>
+          </header>
+
+          {/* Global Error Display */}
+          {globalError && (
+            <ErrorDisplay
+              error={globalError}
+              onDismiss={() => setGlobalError(null)}
+            />
+          )}
+
+          {/* Entries Error Display */}
+          {entriesError && (
+            <ErrorDisplay
+              error={entriesError}
+              onDismiss={() => setGlobalError(null)}
+            />
+          )}
+
+          {/* Global Loading Indicator */}
+          {(entriesLoading || dashboardLoading) && (
+            <div className="text-center text-blue-400 py-4">
+              <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-400"></div>
+              <span className="ml-2">Loading...</span>
+            </div>
+          )}
+
+          <EntryForm onSubmit={handleCreateEntry} loading={entriesLoading} />
+
+          <EntryList
+            entries={entries}
+            loading={entriesLoading}
+            onDelete={handleDeleteEntry}
           />
-        )}
 
-        {/* Entries Error Display */}
-        {entriesError && (
-          <ErrorDisplay
-            error={entriesError}
-            onDismiss={() => setGlobalError(null)}
+          <WeekSummarySection
+            summary={dashboardData?.currentWeekSummary || null}
+            onCreateSummary={async () => {
+              await createWeekSummary();
+            }}
           />
-        )}
 
-        {/* Global Loading Indicator */}
-        {(entriesLoading || dashboardLoading) && (
-          <div className="text-center text-blue-400 py-4">
-            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-400"></div>
-            <span className="ml-2">Loading...</span>
-          </div>
-        )}
-
-        <EntryForm onSubmit={handleCreateEntry} loading={entriesLoading} />
-
-        <EntryList
-          entries={entries}
-          loading={entriesLoading}
-          onDelete={handleDeleteEntry}
-        />
-
-        <WeekSummarySection
-          summary={dashboardData?.currentWeekSummary || null}
-          onCreateSummary={createWeekSummary}
-        />
-
-        {/* Recent Summaries */}
-        {dashboardData?.recentSummaries &&
-          dashboardData.recentSummaries.length > 0 && (
-            <section className="bg-neutral-900 rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Recent Summaries</h2>
-              <div className="space-y-3">
-                {dashboardData.recentSummaries.map((summary) => (
-                  <div key={summary.id} className="bg-neutral-800 p-4 rounded">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-medium">
-                        Week {summary.week_of_year}
-                      </h3>
-                      <span className="text-sm text-neutral-400">
-                        {summary.start_date} to {summary.end_date}
-                      </span>
+          {/* Recent Summaries */}
+          {dashboardData?.recentSummaries &&
+            dashboardData.recentSummaries.length > 0 && (
+              <section className="bg-neutral-900 rounded-lg p-6">
+                <h2 className="text-xl font-semibold mb-4">Recent Summaries</h2>
+                <div className="space-y-3">
+                  {dashboardData.recentSummaries.map((summary) => (
+                    <div
+                      key={summary.id}
+                      className="bg-neutral-800 p-4 rounded"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-medium">
+                          Week {summary.week_of_year}
+                        </h3>
+                        <span className="text-sm text-neutral-400">
+                          {summary.start_date} to {summary.end_date}
+                        </span>
+                      </div>
+                      <p className="text-sm text-neutral-300 line-clamp-3">
+                        {summary.content.split("\n")[0]}...
+                      </p>
                     </div>
-                    <p className="text-sm text-neutral-300 line-clamp-3">
-                      {summary.content.split("\n")[0]}...
-                    </p>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              </section>
+            )}
+
+          {/* Settings */}
+          {dashboardData?.settings && (
+            <section className="bg-neutral-900 rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Settings</h2>
+              <div className="space-y-2 text-sm">
+                <p>
+                  <span className="text-neutral-400">Popup Interval:</span>{" "}
+                  {dashboardData.settings.popup_interval_minutes} minutes
+                </p>
+                <p>
+                  <span className="text-neutral-400">Global Shortcut:</span>{" "}
+                  {dashboardData.settings.global_shortcut || "Not set"}
+                </p>
               </div>
             </section>
           )}
 
-        {/* Settings */}
-        {dashboardData?.settings && (
+          {/* Database Info */}
           <section className="bg-neutral-900 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Settings</h2>
-            <div className="space-y-2 text-sm">
-              <p>
-                <span className="text-neutral-400">Popup Interval:</span>{" "}
-                {dashboardData.settings.popup_interval_minutes} minutes
-              </p>
-              <p>
-                <span className="text-neutral-400">Global Shortcut:</span>{" "}
-                {dashboardData.settings.global_shortcut || "Not set"}
-              </p>
-            </div>
+            <h2 className="text-xl font-semibold mb-4">Database Info</h2>
+            <button
+              onClick={showDatabasePath}
+              className="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 rounded font-medium transition"
+            >
+              Show Database Path
+            </button>
           </section>
-        )}
-
-        {/* Database Info */}
-        <section className="bg-neutral-900 rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Database Info</h2>
-          <button
-            onClick={showDatabasePath}
-            className="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 rounded font-medium transition"
-          >
-            Show Database Path
-          </button>
-        </section>
-      </div>
-    </main>
+        </div>
+      </main>
+    </>
   );
 }

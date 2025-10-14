@@ -48,6 +48,7 @@ import {
       return errorResponse("other_error", "Server configuration error", 500);
     }
 
+    //@ts-ignore
     const { createClient } = await import("npm:@supabase/supabase-js@2");
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 

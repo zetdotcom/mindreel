@@ -77,6 +77,10 @@ declare global {
           settings: Settings | null;
         }>;
       };
+      // Optional capture popup API (to be implemented)
+      capture?: {
+        openCapturePopup: () => void;
+      };
     };
   }
 }
