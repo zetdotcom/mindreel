@@ -1,6 +1,11 @@
 import sqlite3 from "sqlite3";
 import { Entry, CreateEntryInput, EntryFilters } from "../types";
-import { getISOWeekNumber, formatDate } from "../dateUtils";
+import {
+  getISOWeekNumber,
+  getISOYear,
+  formatDate,
+  IsoWeekIdentifier,
+} from "../dateUtils";
 
 export class EntriesRepository {
   constructor(private db: sqlite3.Database) {}
@@ -14,30 +19,62 @@ export class EntriesRepository {
       const date = formatDate(now);
       const week_of_year = getISOWeekNumber(now);
       const created_at = now.toISOString();
+      const iso_year = getISOYear(now);
 
-      const sql = `
-        INSERT INTO entries (content, date, week_of_year, created_at)
-        VALUES (?, ?, ?, ?)
+      // First try with iso_year column
+      const sqlWithIsoYear = `
+        INSERT INTO entries (content, date, week_of_year, iso_year, created_at)
+        VALUES (?, ?, ?, ?, ?)
       `;
 
+      const db = this.db;
       this.db.run(
-        sql,
-        [input.content, date, week_of_year, created_at],
+        sqlWithIsoYear,
+        [input.content, date, week_of_year, iso_year, created_at],
         function (err) {
-          if (err) {
+          if (err && err.message.includes("no such column: iso_year")) {
+            // Fallback to old schema without iso_year
+            const sqlLegacy = `
+              INSERT INTO entries (content, date, week_of_year, created_at)
+              VALUES (?, ?, ?, ?)
+            `;
+
+            db.run(
+              sqlLegacy,
+              [input.content, date, week_of_year, created_at],
+              function (fallbackErr) {
+                if (fallbackErr) {
+                  reject(fallbackErr);
+                  return;
+                }
+
+                const newEntry: Entry = {
+                  id: this.lastID,
+                  content: input.content,
+                  date,
+                  week_of_year,
+                  iso_year, // Still include in response for consistency
+                  created_at,
+                };
+
+                resolve(newEntry);
+              },
+            );
+          } else if (err) {
             reject(err);
             return;
+          } else {
+            const newEntry: Entry = {
+              id: this.lastID,
+              content: input.content,
+              date,
+              week_of_year,
+              iso_year,
+              created_at,
+            };
+
+            resolve(newEntry);
           }
-
-          const newEntry: Entry = {
-            id: this.lastID,
-            content: input.content,
-            date,
-            week_of_year,
-            created_at,
-          };
-
-          resolve(newEntry);
         },
       );
     });
@@ -116,6 +153,28 @@ export class EntriesRepository {
    */
   async getEntriesForWeek(weekOfYear: number): Promise<Entry[]> {
     return this.getEntries({ week_of_year: weekOfYear });
+  }
+
+  /**
+   * Get entries for a specific ISO week
+   */
+  async getEntriesForIsoWeek(
+    isoYear: number,
+    weekOfYear: number,
+  ): Promise<Entry[]> {
+    return new Promise((resolve, reject) => {
+      const sql =
+        "SELECT * FROM entries WHERE iso_year = ? AND week_of_year = ? ORDER BY created_at DESC";
+
+      this.db.all(sql, [isoYear, weekOfYear], (err, rows: Entry[]) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        resolve(rows || []);
+      });
+    });
   }
 
   /**
@@ -235,12 +294,12 @@ export class EntriesRepository {
   }
 
   /**
-   * Get all unique weeks that have entries
+   * Get all weeks that have entries
    */
   async getWeeksWithEntries(): Promise<number[]> {
     return new Promise((resolve, reject) => {
       const sql =
-        "SELECT DISTINCT week_of_year FROM entries ORDER BY week_of_year DESC";
+        "SELECT DISTINCT week_of_year FROM entries ORDER BY week_of_year";
 
       this.db.all(sql, [], (err, rows: { week_of_year: number }[]) => {
         if (err) {
@@ -249,6 +308,61 @@ export class EntriesRepository {
         }
 
         resolve(rows.map((row) => row.week_of_year));
+      });
+    });
+  }
+
+  /**
+   * Get all ISO weeks that have entries
+   */
+  async getIsoWeeksWithEntries(): Promise<IsoWeekIdentifier[]> {
+    return new Promise((resolve, reject) => {
+      // Check if iso_year column exists
+      this.db.all("PRAGMA table_info(entries)", [], (err, columns: any[]) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        const hasIsoYear = columns.some((col) => col.name === "iso_year");
+
+        if (hasIsoYear) {
+          const sql =
+            "SELECT DISTINCT iso_year, week_of_year FROM entries ORDER BY iso_year DESC, week_of_year DESC";
+          this.db.all(
+            sql,
+            [],
+            (err, rows: { iso_year: number; week_of_year: number }[]) => {
+              if (err) {
+                reject(err);
+                return;
+              }
+              resolve(
+                rows.map((row) => ({
+                  iso_year: row.iso_year,
+                  week_of_year: row.week_of_year,
+                })),
+              );
+            },
+          );
+        } else {
+          // Fallback: return current year for all weeks when iso_year column doesn't exist
+          const currentYear = new Date().getFullYear();
+          const sql =
+            "SELECT DISTINCT week_of_year FROM entries ORDER BY week_of_year DESC";
+          this.db.all(sql, [], (err, rows: { week_of_year: number }[]) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+            resolve(
+              rows.map((row) => ({
+                iso_year: currentYear,
+                week_of_year: row.week_of_year,
+              })),
+            );
+          });
+        }
       });
     });
   }

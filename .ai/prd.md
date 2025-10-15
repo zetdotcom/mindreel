@@ -36,7 +36,8 @@ W dynamicznym środowisku pracy, specjaliści często zapominają o wykonanych z
 - System automatycznie generuje podsumowanie w każdą niedzielę o 23:00, analizując wpisy od poniedziałku do niedzieli.
 - Do generowania podsumowań wykorzystywane jest API openrouter.ai.
 - Wywołanie odbywa się przez funkcję brzegową Supabase (Edge Function), która uwierzytelnia użytkownika, egzekwuje limit oraz ukrywa klucz API OpenRouter przed klientem.
-- Wygenerowane podsumowanie jest prezentowane jako specjalna karta w historii, z tytułem zawierającym zakres dat i numer tygodnia (np. "6/10/2025 - 12/10/2025. Tydzień 35").
+- Wygenerowane podsumowanie jest prezentowane jako specjalna karta w historii, z tytułem zawierającym zakres dat oraz ISO numer tygodnia i rok tygodniowy (np. "2025-W35: 6/10/2025 - 12/10/2025").
+- System identyfikuje tygodnie jednoznacznie poprzez parę (iso_year, week_of_year); w implementacji używany będzie klucz złożony `weekKey = <iso_year>-W<NN>` aby uniknąć kolizji numerów tygodni między latami (np. tydzień 01 kolejnych lat).
 - Użytkownik może edytować treść wygenerowanego podsumowania, ale nie może go usunąć.
 - Obowiązuje limit 5 darmowych podsumowań na 28-dniowy cykl na użytkownika.
 - Nieudane próby (błąd sieci lub modelu) nie zmniejszają dostępnego limitu.

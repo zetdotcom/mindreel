@@ -20,6 +20,8 @@ const databaseApi = {
     ipcRenderer.invoke("db:getEntriesForDate", date),
   getEntriesForWeek: (weekOfYear: number) =>
     ipcRenderer.invoke("db:getEntriesForWeek", weekOfYear),
+  getEntriesForIsoWeek: (iso_year: number, week_of_year: number) =>
+    ipcRenderer.invoke("db:getEntriesForIsoWeek", iso_year, week_of_year),
   getEntriesForDateRange: (startDate: string, endDate: string) =>
     ipcRenderer.invoke("db:getEntriesForDateRange", startDate, endDate),
   updateEntry: (id: number, content: string) =>
@@ -27,6 +29,7 @@ const databaseApi = {
   deleteEntry: (id: number) => ipcRenderer.invoke("db:deleteEntry", id),
   getDatesWithEntries: () => ipcRenderer.invoke("db:getDatesWithEntries"),
   getWeeksWithEntries: () => ipcRenderer.invoke("db:getWeeksWithEntries"),
+  getIsoWeeksWithEntries: () => ipcRenderer.invoke("db:getIsoWeeksWithEntries"),
 
   // Summaries
   createSummary: (input: CreateSummaryInput) =>
@@ -36,6 +39,8 @@ const databaseApi = {
   getSummaryById: (id: number) => ipcRenderer.invoke("db:getSummaryById", id),
   getSummaryByWeek: (weekOfYear: number) =>
     ipcRenderer.invoke("db:getSummaryByWeek", weekOfYear),
+  getSummaryForIsoWeek: (iso_year: number, week_of_year: number) =>
+    ipcRenderer.invoke("db:getSummaryForIsoWeek", iso_year, week_of_year),
   getCurrentWeekSummary: () => ipcRenderer.invoke("db:getCurrentWeekSummary"),
   getAllSummaries: () => ipcRenderer.invoke("db:getAllSummaries"),
   getSummariesByYear: (year: number) =>
@@ -47,6 +52,8 @@ const databaseApi = {
     ipcRenderer.invoke("db:currentWeekSummaryExists"),
   summaryExistsForWeek: (weekOfYear: number) =>
     ipcRenderer.invoke("db:summaryExistsForWeek", weekOfYear),
+  summaryExistsForIsoWeek: (iso_year: number, week_of_year: number) =>
+    ipcRenderer.invoke("db:summaryExistsForIsoWeek", iso_year, week_of_year),
   getLatestSummary: () => ipcRenderer.invoke("db:getLatestSummary"),
 
   // Settings

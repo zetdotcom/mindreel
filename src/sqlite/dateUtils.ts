@@ -3,6 +3,16 @@
  * Used for the MindReel SQLite database operations
  */
 
+import { getISOWeek, getISOWeekYear } from "date-fns";
+
+// Types for ISO week handling
+export type WeekKey = `${number}-W${string}`;
+
+export interface IsoWeekIdentifier {
+  iso_year: number;
+  week_of_year: number;
+}
+
 /**
  * Get the ISO week number for a given date
  * @param date Date object or ISO string
@@ -10,26 +20,62 @@
  */
 export function getISOWeekNumber(date: Date | string): number {
   const d = new Date(date);
+  return getISOWeek(d);
+}
 
-  // Set to nearest Thursday: current date + 4 - current day number
-  // Make Sunday's day number 7
-  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+/**
+ * Get the ISO year for a given date
+ * @param date Date object or ISO string
+ * @returns ISO year
+ */
+export function getISOYear(date: Date | string): number {
+  const d = new Date(date);
+  return getISOWeekYear(d);
+}
 
-  // Get first day of year
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+/**
+ * Create a week key from ISO year and week number
+ * @param iso_year ISO year
+ * @param week_of_year ISO week number
+ * @returns WeekKey string like "2025-W01"
+ */
+export function makeWeekKey(iso_year: number, week_of_year: number): WeekKey {
+  return `${iso_year}-W${week_of_year.toString().padStart(2, "0")}`;
+}
 
-  // Calculate full weeks to nearest Thursday
-  const weekNo = Math.ceil(
-    ((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7,
-  );
+/**
+ * Parse a week key into ISO year and week number
+ * @param weekKey WeekKey string like "2025-W01"
+ * @returns IsoWeekIdentifier
+ */
+export function parseWeekKey(weekKey: WeekKey): IsoWeekIdentifier {
+  const match = weekKey.match(/^(\d{4})-W(\d{2})$/);
+  if (!match) {
+    throw new Error(`Invalid week key format: ${weekKey}`);
+  }
+  return {
+    iso_year: parseInt(match[1], 10),
+    week_of_year: parseInt(match[2], 10),
+  };
+}
 
-  return weekNo;
+/**
+ * Get ISO week identifier for a given date
+ * @param date Date object or ISO string
+ * @returns IsoWeekIdentifier
+ */
+export function getIsoWeekIdentifier(date: Date | string): IsoWeekIdentifier {
+  const d = new Date(date);
+  return {
+    iso_year: getISOWeekYear(d),
+    week_of_year: getISOWeek(d),
+  };
 }
 
 /**
  * Get the start and end dates for a given ISO week
  * @param weekNumber ISO week number (1-53)
- * @param year Year
+ * @param year ISO year
  * @returns Object with start_date (Monday) and end_date (Sunday) in ISO format
  */
 export function getWeekRange(
@@ -58,22 +104,25 @@ export function getWeekRange(
 }
 
 /**
- * Get the current week range
- * @returns Object with start_date, end_date, and week_of_year
+ * Get the current week range with ISO year
+ * @returns Object with start_date, end_date, week_of_year, and iso_year
  */
 export function getCurrentWeekRange(): {
   start_date: string;
   end_date: string;
   week_of_year: number;
+  iso_year: number;
 } {
   const now = new Date();
   const weekNumber = getISOWeekNumber(now);
-  const { start_date, end_date } = getWeekRange(weekNumber, now.getFullYear());
+  const isoYear = getISOYear(now);
+  const { start_date, end_date } = getWeekRange(weekNumber, isoYear);
 
   return {
     start_date,
     end_date,
     week_of_year: weekNumber,
+    iso_year: isoYear,
   };
 }
 
@@ -88,22 +137,84 @@ export function formatDate(date: Date | string): string {
 }
 
 /**
- * Get the week range for a specific date
+ * Get the week range for a specific date with ISO year
  * @param date Date object or ISO string
- * @returns Object with start_date, end_date, and week_of_year
+ * @returns Object with start_date, end_date, week_of_year, and iso_year
  */
 export function getWeekRangeForDate(date: Date | string): {
   start_date: string;
   end_date: string;
   week_of_year: number;
+  iso_year: number;
 } {
   const d = new Date(date);
   const weekNumber = getISOWeekNumber(d);
-  const { start_date, end_date } = getWeekRange(weekNumber, d.getFullYear());
+  const isoYear = getISOYear(d);
+  const { start_date, end_date } = getWeekRange(weekNumber, isoYear);
 
   return {
     start_date,
     end_date,
     week_of_year: weekNumber,
+    iso_year: isoYear,
   };
+}
+
+/**
+ * Get the previous ISO week identifier
+ * @param current Current ISO week identifier
+ * @returns Previous ISO week identifier
+ */
+export function getPreviousIsoWeek(
+  current: IsoWeekIdentifier,
+): IsoWeekIdentifier {
+  if (current.week_of_year > 1) {
+    return {
+      iso_year: current.iso_year,
+      week_of_year: current.week_of_year - 1,
+    };
+  } else {
+    // Go to last week of previous ISO year
+    const prevYear = current.iso_year - 1;
+    const lastWeekOfPrevYear = getWeeksInISOYear(prevYear);
+    return {
+      iso_year: prevYear,
+      week_of_year: lastWeekOfPrevYear,
+    };
+  }
+}
+
+/**
+ * Get the next ISO week identifier
+ * @param current Current ISO week identifier
+ * @returns Next ISO week identifier
+ */
+export function getNextIsoWeek(current: IsoWeekIdentifier): IsoWeekIdentifier {
+  const maxWeeks = getWeeksInISOYear(current.iso_year);
+
+  if (current.week_of_year < maxWeeks) {
+    return {
+      iso_year: current.iso_year,
+      week_of_year: current.week_of_year + 1,
+    };
+  } else {
+    // Move to first week of next ISO year
+    return {
+      iso_year: current.iso_year + 1,
+      week_of_year: 1,
+    };
+  }
+}
+
+/**
+ * Get the number of weeks in an ISO year
+ * @param isoYear ISO year
+ * @returns Number of weeks (52 or 53)
+ */
+export function getWeeksInISOYear(isoYear: number): number {
+  // January 4th is always in week 1
+  const jan4 = new Date(Date.UTC(isoYear, 0, 4));
+  // December 28th is always in the last week
+  const dec28 = new Date(Date.UTC(isoYear, 11, 28));
+  return getISOWeek(dec28);
 }

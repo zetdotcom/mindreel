@@ -7,6 +7,7 @@ import {
   UpdateSettingsInput,
   EntryFilters,
 } from "./sqlite/types";
+import { IsoWeekIdentifier } from "./features/history/model/types";
 
 // Vite environment variables for Electron Forge
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
@@ -30,6 +31,10 @@ declare global {
         getCurrentWeekEntries: () => Promise<Entry[]>;
         getEntriesForDate: (date: string) => Promise<Entry[]>;
         getEntriesForWeek: (weekOfYear: number) => Promise<Entry[]>;
+        getEntriesForIsoWeek: (
+          iso_year: number,
+          week_of_year: number,
+        ) => Promise<Entry[]>;
         getEntriesForDateRange: (
           startDate: string,
           endDate: string,
@@ -38,12 +43,17 @@ declare global {
         deleteEntry: (id: number) => Promise<boolean>;
         getDatesWithEntries: () => Promise<string[]>;
         getWeeksWithEntries: () => Promise<number[]>;
+        getIsoWeeksWithEntries: () => Promise<IsoWeekIdentifier[]>;
 
         // Summaries
         createSummary: (input: CreateSummaryInput) => Promise<Summary>;
         createCurrentWeekSummary: (content: string) => Promise<Summary>;
         getSummaryById: (id: number) => Promise<Summary | null>;
         getSummaryByWeek: (weekOfYear: number) => Promise<Summary | null>;
+        getSummaryForIsoWeek: (
+          iso_year: number,
+          week_of_year: number,
+        ) => Promise<Summary | null>;
         getCurrentWeekSummary: () => Promise<Summary | null>;
         getAllSummaries: () => Promise<Summary[]>;
         getSummariesByYear: (year: number) => Promise<Summary[]>;
@@ -51,6 +61,10 @@ declare global {
         deleteSummary: (id: number) => Promise<boolean>;
         currentWeekSummaryExists: () => Promise<boolean>;
         summaryExistsForWeek: (weekOfYear: number) => Promise<boolean>;
+        summaryExistsForIsoWeek: (
+          iso_year: number,
+          week_of_year: number,
+        ) => Promise<boolean>;
         getLatestSummary: () => Promise<Summary | null>;
 
         // Settings

@@ -1,9 +1,24 @@
-import { database } from './database';
-import { EntriesRepository } from './repositories/entriesRepository';
-import { SummariesRepository } from './repositories/summariesRepository';
-import { SettingsRepository } from './repositories/settingsRepository';
-import { Entry, Summary, Settings, CreateEntryInput, CreateSummaryInput, UpdateSettingsInput, EntryFilters } from './types';
-import { getCurrentWeekRange, getWeekRangeForDate } from './dateUtils';
+import { database } from "./database";
+import { EntriesRepository } from "./repositories/entriesRepository";
+import { SummariesRepository } from "./repositories/summariesRepository";
+import { SettingsRepository } from "./repositories/settingsRepository";
+import {
+  Entry,
+  Summary,
+  Settings,
+  CreateEntryInput,
+  CreateSummaryInput,
+  UpdateSettingsInput,
+  EntryFilters,
+} from "./types";
+import {
+  getCurrentWeekRange,
+  getWeekRangeForDate,
+  IsoWeekIdentifier,
+  getIsoWeekIdentifier,
+  makeWeekKey,
+  WeekKey,
+} from "./dateUtils";
 
 export class DatabaseService {
   private entriesRepo: EntriesRepository | null = null;
@@ -30,7 +45,7 @@ export class DatabaseService {
     await this.settingsRepo.initializeDefaults();
 
     this.isInitialized = true;
-    console.log('Database service initialized successfully');
+    console.log("Database service initialized successfully");
   }
 
   /**
@@ -48,8 +63,15 @@ export class DatabaseService {
    * Ensure the service is initialized
    */
   private ensureInitialized(): void {
-    if (!this.isInitialized || !this.entriesRepo || !this.summariesRepo || !this.settingsRepo) {
-      throw new Error('Database service not initialized. Call initialize() first.');
+    if (
+      !this.isInitialized ||
+      !this.entriesRepo ||
+      !this.summariesRepo ||
+      !this.settingsRepo
+    ) {
+      throw new Error(
+        "Database service not initialized. Call initialize() first.",
+      );
     }
   }
 
@@ -86,7 +108,7 @@ export class DatabaseService {
    */
   async getTodayEntries(): Promise<Entry[]> {
     this.ensureInitialized();
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     return this.entriesRepo!.getEntriesForDate(today);
   }
 
@@ -95,8 +117,19 @@ export class DatabaseService {
    */
   async getCurrentWeekEntries(): Promise<Entry[]> {
     this.ensureInitialized();
-    const { week_of_year } = getCurrentWeekRange();
-    return this.entriesRepo!.getEntriesForWeek(week_of_year);
+    const { week_of_year, iso_year } = getCurrentWeekRange();
+    return this.entriesRepo!.getEntriesForIsoWeek(iso_year, week_of_year);
+  }
+
+  /**
+   * Get entries for a specific ISO week
+   */
+  async getEntriesForIsoWeek(
+    iso_year: number,
+    week_of_year: number,
+  ): Promise<Entry[]> {
+    this.ensureInitialized();
+    return this.entriesRepo!.getEntriesForIsoWeek(iso_year, week_of_year);
   }
 
   /**
@@ -118,7 +151,10 @@ export class DatabaseService {
   /**
    * Get entries for a date range
    */
-  async getEntriesForDateRange(startDate: string, endDate: string): Promise<Entry[]> {
+  async getEntriesForDateRange(
+    startDate: string,
+    endDate: string,
+  ): Promise<Entry[]> {
     this.ensureInitialized();
     return this.entriesRepo!.getEntriesForDateRange(startDate, endDate);
   }
@@ -155,6 +191,14 @@ export class DatabaseService {
     return this.entriesRepo!.getWeeksWithEntries();
   }
 
+  /**
+   * Get all ISO weeks that have entries
+   */
+  async getIsoWeeksWithEntries(): Promise<IsoWeekIdentifier[]> {
+    this.ensureInitialized();
+    return this.entriesRepo!.getIsoWeeksWithEntries();
+  }
+
   // =============================================================================
   // SUMMARIES METHODS
   // =============================================================================
@@ -172,13 +216,15 @@ export class DatabaseService {
    */
   async createCurrentWeekSummary(content: string): Promise<Summary> {
     this.ensureInitialized();
-    const { start_date, end_date, week_of_year } = getCurrentWeekRange();
+    const { start_date, end_date, week_of_year, iso_year } =
+      getCurrentWeekRange();
 
     return this.summariesRepo!.createSummary({
       content,
       start_date,
       end_date,
       week_of_year,
+      iso_year,
     });
   }
 
@@ -203,8 +249,19 @@ export class DatabaseService {
    */
   async getCurrentWeekSummary(): Promise<Summary | null> {
     this.ensureInitialized();
-    const { week_of_year } = getCurrentWeekRange();
-    return this.summariesRepo!.getSummaryByWeek(week_of_year);
+    const { week_of_year, iso_year } = getCurrentWeekRange();
+    return this.summariesRepo!.getSummaryForIsoWeek(iso_year, week_of_year);
+  }
+
+  /**
+   * Get summary for a specific ISO week
+   */
+  async getSummaryForIsoWeek(
+    iso_year: number,
+    week_of_year: number,
+  ): Promise<Summary | null> {
+    this.ensureInitialized();
+    return this.summariesRepo!.getSummaryForIsoWeek(iso_year, week_of_year);
   }
 
   /**
@@ -244,8 +301,19 @@ export class DatabaseService {
    */
   async currentWeekSummaryExists(): Promise<boolean> {
     this.ensureInitialized();
-    const { week_of_year } = getCurrentWeekRange();
-    return this.summariesRepo!.summaryExistsForWeek(week_of_year);
+    const { week_of_year, iso_year } = getCurrentWeekRange();
+    return this.summariesRepo!.summaryExistsForIsoWeek(iso_year, week_of_year);
+  }
+
+  /**
+   * Check if summary exists for a specific ISO week
+   */
+  async summaryExistsForIsoWeek(
+    iso_year: number,
+    week_of_year: number,
+  ): Promise<boolean> {
+    this.ensureInitialized();
+    return this.summariesRepo!.summaryExistsForIsoWeek(iso_year, week_of_year);
   }
 
   /**
@@ -322,14 +390,22 @@ export class DatabaseService {
   /**
    * Get current week information
    */
-  getCurrentWeekInfo(): { start_date: string; end_date: string; week_of_year: number } {
+  getCurrentWeekInfo(): {
+    start_date: string;
+    end_date: string;
+    week_of_year: number;
+  } {
     return getCurrentWeekRange();
   }
 
   /**
    * Get week information for a specific date
    */
-  getWeekInfoForDate(date: string): { start_date: string; end_date: string; week_of_year: number } {
+  getWeekInfoForDate(date: string): {
+    start_date: string;
+    end_date: string;
+    week_of_year: number;
+  } {
     return getWeekRangeForDate(date);
   }
 
@@ -344,12 +420,13 @@ export class DatabaseService {
   }> {
     this.ensureInitialized();
 
-    const [todayEntries, currentWeekSummary, recentSummaries, settings] = await Promise.all([
-      this.getTodayEntries(),
-      this.getCurrentWeekSummary(),
-      this.getAllSummaries().then(summaries => summaries.slice(0, 5)), // Get last 5 summaries
-      this.getSettings(),
-    ]);
+    const [todayEntries, currentWeekSummary, recentSummaries, settings] =
+      await Promise.all([
+        this.getTodayEntries(),
+        this.getCurrentWeekSummary(),
+        this.getAllSummaries().then((summaries) => summaries.slice(0, 5)), // Get last 5 summaries
+        this.getSettings(),
+      ]);
 
     return {
       todayEntries,

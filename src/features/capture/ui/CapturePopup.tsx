@@ -160,7 +160,7 @@ export const CapturePopup: React.FC<CapturePopupProps> = ({
                 <Button
                   key={index}
                   variant="outline"
-                  className="w-full justify-start text-left h-auto py-3 px-4 text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800 border-neutral-700"
+                  className="bg-amber-800 w-full justify-start text-left h-auto py-3 px-4 text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800 border-neutral-700"
                   onClick={() => handlePrefill(entry)}
                   disabled={saving}
                   aria-label={`Prefill with: ${entry}`}

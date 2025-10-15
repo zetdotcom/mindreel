@@ -3,6 +3,7 @@ export interface Entry {
   content: string;
   date: string; // YYYY-MM-DD format
   week_of_year: number;
+  iso_year: number;
   created_at: string; // ISO 8601 timestamp
 }
 
@@ -12,6 +13,7 @@ export interface Summary {
   start_date: string; // ISO 8601 format
   end_date: string; // ISO 8601 format
   week_of_year: number;
+  iso_year: number;
   created_at: string; // ISO 8601 timestamp
 }
 
@@ -30,6 +32,7 @@ export interface CreateSummaryInput {
   start_date: string;
   end_date: string;
   week_of_year: number;
+  iso_year: number;
 }
 
 export interface UpdateSettingsInput {

@@ -45,7 +45,7 @@ Guiding principles:
   - No PII; no external calls
   - Not shown again (flag persisted locally in localStorage)
 
-### 2.2 Capture Pop-Up (Scheduled / Manual / Shortcut)
+### 2.2 Capture Pop-Up (Scheduled / Manual / Shortcut) - DONE
 - View path: system overlay window (not navigable route)
 - Main purpose: Ultra-fast entry capture
 - Key information to display:
@@ -86,7 +86,7 @@ Guiding principles:
   - EntryRow (inline edit / delete icons)
   - DuplicateGroup (expand to reveal instances)
   - SummaryCard (multi-state: Pending / Generating / Success / Failed / Gated)
-  - PaginationControl
+  - PaginationControl - this will be 'load 2 more weeks' button
   - Floating / inline AddEntryButton
 - UX / Accessibility / Security:
   - Semantic structure: week headers as h2, day headers as h3, entries list items

@@ -1,7 +1,13 @@
-import sqlite3 from 'sqlite3';
-import path from 'node:path';
-import { app } from 'electron';
-import fs from 'node:fs';
+import sqlite3 from "sqlite3";
+import path from "node:path";
+import { app } from "electron";
+import fs from "node:fs";
+import { MigrationRunner } from "./migrations";
+
+interface DatabaseVersion {
+  version: number;
+  created_at: string;
+}
 
 export class Database {
   private db: sqlite3.Database | null = null;
@@ -9,8 +15,8 @@ export class Database {
 
   constructor() {
     // Store database in user data directory
-    const userDataPath = app.getPath('userData');
-    this.dbPath = path.join(userDataPath, 'mindreel.db');
+    const userDataPath = app.getPath("userData");
+    this.dbPath = path.join(userDataPath, "mindreel.db");
 
     // Ensure the directory exists
     fs.mkdirSync(path.dirname(this.dbPath), { recursive: true });
@@ -18,17 +24,54 @@ export class Database {
 
   async init(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.db = new sqlite3.Database(this.dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
+      this.db = new sqlite3.Database(
+        this.dbPath,
+        sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
+        (err) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+
+          console.log("Connected to SQLite database at:", this.dbPath);
+          this.createVersionTable()
+            .then(() => this.createTables())
+            .then(() => this.runMigrations())
+            .then(() => this.insertDefaultSettings())
+            .then(() => resolve())
+            .catch((error) => {
+              console.error("Database initialization failed:", error);
+              reject(error);
+            });
+        },
+      );
+    });
+  }
+
+  private async createVersionTable(): Promise<void> {
+    const createVersionTableSQL = `
+      CREATE TABLE IF NOT EXISTS db_version (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        version INTEGER NOT NULL DEFAULT 1,
+        created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+      );
+
+      INSERT OR IGNORE INTO db_version (id, version) VALUES (1, 1);
+    `;
+
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error("Database not initialized"));
+        return;
+      }
+
+      this.db.exec(createVersionTableSQL, (err) => {
         if (err) {
           reject(err);
-          return;
+        } else {
+          console.log("Database version table created successfully");
+          resolve();
         }
-
-        console.log('Connected to SQLite database at:', this.dbPath);
-        this.createTables()
-          .then(() => this.insertDefaultSettings())
-          .then(() => resolve())
-          .catch(reject);
       });
     });
   }
@@ -41,6 +84,7 @@ export class Database {
         content TEXT NOT NULL,
         date TEXT NOT NULL,
         week_of_year INTEGER NOT NULL,
+        iso_year INTEGER NOT NULL,
         created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
       );
 
@@ -51,6 +95,7 @@ export class Database {
         start_date TEXT NOT NULL,
         end_date TEXT NOT NULL,
         week_of_year INTEGER NOT NULL,
+        iso_year INTEGER NOT NULL,
         created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
       );
 
@@ -64,29 +109,48 @@ export class Database {
       -- Create indexes
       CREATE INDEX IF NOT EXISTS idx_entries_date ON entries(date);
       CREATE INDEX IF NOT EXISTS idx_summaries_week ON summaries(week_of_year);
+      CREATE INDEX IF NOT EXISTS idx_entries_iso_week ON entries(iso_year, week_of_year);
+      CREATE INDEX IF NOT EXISTS idx_summaries_iso_week ON summaries(iso_year, week_of_year);
     `;
 
     return new Promise((resolve, reject) => {
       if (!this.db) {
-        reject(new Error('Database not initialized'));
+        reject(new Error("Database not initialized"));
         return;
       }
 
       this.db.exec(createTablesSQL, (err) => {
         if (err) {
+          console.error("Failed to create database tables:", err);
           reject(err);
         } else {
-          console.log('Database tables created successfully');
+          console.log("Database tables created successfully");
           resolve();
         }
       });
     });
   }
 
+  private async runMigrations(): Promise<void> {
+    if (!this.db) {
+      throw new Error("Database not initialized");
+    }
+
+    try {
+      const migrationRunner = new MigrationRunner(this.db);
+      await migrationRunner.init();
+      await migrationRunner.runMigrations();
+      console.log("Migrations completed successfully");
+    } catch (error) {
+      console.error("Migration failed:", error);
+      throw error;
+    }
+  }
+
   private async insertDefaultSettings(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.db) {
-        reject(new Error('Database not initialized'));
+        reject(new Error("Database not initialized"));
         return;
       }
 
@@ -98,9 +162,10 @@ export class Database {
 
       this.db.run(insertSQL, (err) => {
         if (err) {
+          console.error("Failed to initialize default settings:", err);
           reject(err);
         } else {
-          console.log('Default settings initialized');
+          console.log("Default settings initialized");
           resolve();
         }
       });
@@ -118,7 +183,7 @@ export class Database {
         if (err) {
           reject(err);
         } else {
-          console.log('Database connection closed');
+          console.log("Database connection closed");
           this.db = null;
           resolve();
         }
@@ -128,13 +193,93 @@ export class Database {
 
   getDatabase(): sqlite3.Database {
     if (!this.db) {
-      throw new Error('Database not initialized. Call init() first.');
+      throw new Error("Database not initialized. Call init() first.");
     }
     return this.db;
   }
 
   getDatabasePath(): string {
     return this.dbPath;
+  }
+
+  /**
+   * Get database version information
+   */
+  async getDatabaseVersion(): Promise<DatabaseVersion | null> {
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error("Database not initialized"));
+        return;
+      }
+
+      const sql = "SELECT * FROM db_version WHERE id = 1";
+      this.db.get(sql, [], (err, row: DatabaseVersion) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(row || null);
+        }
+      });
+    });
+  }
+
+  /**
+   * Check if database schema is compatible
+   */
+  async checkSchemaCompatibility(): Promise<boolean> {
+    try {
+      // Check if required columns exist
+      const entriesColumns = await this.getTableColumns("entries");
+      const summariesColumns = await this.getTableColumns("summaries");
+
+      const requiredEntriesColumns = [
+        "id",
+        "content",
+        "date",
+        "week_of_year",
+        "iso_year",
+        "created_at",
+      ];
+      const requiredSummariesColumns = [
+        "id",
+        "content",
+        "start_date",
+        "end_date",
+        "week_of_year",
+        "iso_year",
+        "created_at",
+      ];
+
+      const entriesValid = requiredEntriesColumns.every((col) =>
+        entriesColumns.includes(col),
+      );
+      const summariesValid = requiredSummariesColumns.every((col) =>
+        summariesColumns.includes(col),
+      );
+
+      return entriesValid && summariesValid;
+    } catch (error) {
+      console.error("Failed to check schema compatibility:", error);
+      return false;
+    }
+  }
+
+  private async getTableColumns(tableName: string): Promise<string[]> {
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error("Database not initialized"));
+        return;
+      }
+
+      this.db.all(`PRAGMA table_info(${tableName})`, [], (err, rows: any[]) => {
+        if (err) {
+          reject(err);
+        } else {
+          const columnNames = rows.map((row) => row.name);
+          resolve(columnNames);
+        }
+      });
+    });
   }
 }
 

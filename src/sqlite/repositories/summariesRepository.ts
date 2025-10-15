@@ -1,5 +1,6 @@
 import sqlite3 from "sqlite3";
 import { Summary, CreateSummaryInput } from "../types";
+import { IsoWeekIdentifier } from "../dateUtils";
 
 export class SummariesRepository {
   constructor(private db: sqlite3.Database) {}
@@ -11,36 +12,74 @@ export class SummariesRepository {
     return new Promise((resolve, reject) => {
       const created_at = new Date().toISOString();
 
-      const sql = `
-        INSERT INTO summaries (content, start_date, end_date, week_of_year, created_at)
-        VALUES (?, ?, ?, ?, ?)
+      const sqlWithIsoYear = `
+        INSERT INTO summaries (content, start_date, end_date, week_of_year, iso_year, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)
       `;
 
+      const db = this.db;
       this.db.run(
-        sql,
+        sqlWithIsoYear,
         [
           input.content,
           input.start_date,
           input.end_date,
           input.week_of_year,
+          input.iso_year,
           created_at,
         ],
         function (err) {
-          if (err) {
+          if (err && err.message.includes("no such column: iso_year")) {
+            // Fallback to old schema without iso_year
+            const sqlLegacy = `
+              INSERT INTO summaries (content, start_date, end_date, week_of_year, created_at)
+              VALUES (?, ?, ?, ?, ?)
+            `;
+
+            db.run(
+              sqlLegacy,
+              [
+                input.content,
+                input.start_date,
+                input.end_date,
+                input.week_of_year,
+                created_at,
+              ],
+              function (fallbackErr) {
+                if (fallbackErr) {
+                  reject(fallbackErr);
+                  return;
+                }
+
+                const newSummary: Summary = {
+                  id: this.lastID,
+                  content: input.content,
+                  start_date: input.start_date,
+                  end_date: input.end_date,
+                  week_of_year: input.week_of_year,
+                  iso_year: input.iso_year, // Still include in response for consistency
+                  created_at,
+                };
+
+                resolve(newSummary);
+              },
+            );
+          } else if (err) {
             reject(err);
             return;
+          } else {
+            const newSummary: Summary = {
+              id: this.lastID,
+              content: input.content,
+              start_date: input.start_date,
+              end_date: input.end_date,
+              week_of_year: input.week_of_year,
+              iso_year: input.iso_year,
+              created_at,
+            };
+
+            resolve(newSummary);
           }
-
-          const newSummary: Summary = {
-            id: this.lastID,
-            content: input.content,
-            start_date: input.start_date,
-            end_date: input.end_date,
-            week_of_year: input.week_of_year,
-            created_at,
-          };
-
-          resolve(newSummary);
         },
       );
     });
@@ -83,11 +122,63 @@ export class SummariesRepository {
   }
 
   /**
+   * Get summary for a specific ISO week
+   */
+  async getSummaryForIsoWeek(
+    isoYear: number,
+    weekOfYear: number,
+  ): Promise<Summary | null> {
+    return new Promise((resolve, reject) => {
+      // Check if iso_year column exists
+      this.db.all("PRAGMA table_info(summaries)", [], (err, columns: any[]) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        const hasIsoYear = columns.some((col) => col.name === "iso_year");
+
+        if (hasIsoYear) {
+          const sql =
+            "SELECT * FROM summaries WHERE iso_year = ? AND week_of_year = ?";
+
+          this.db.get(sql, [isoYear, weekOfYear], (err, row: Summary) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+
+            resolve(row || null);
+          });
+        } else {
+          // Fallback: search by week_of_year only (less precise but backward compatible)
+          const sql = "SELECT * FROM summaries WHERE week_of_year = ?";
+
+          this.db.get(sql, [weekOfYear], (err, row: Summary) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+
+            // Add iso_year to response for consistency
+            if (row) {
+              row.iso_year = isoYear;
+            }
+
+            resolve(row || null);
+          });
+        }
+      });
+    });
+  }
+
+  /**
    * Get all summaries ordered by week (most recent first)
    */
   async getAllSummaries(): Promise<Summary[]> {
     return new Promise((resolve, reject) => {
-      const sql = "SELECT * FROM summaries ORDER BY week_of_year DESC";
+      const sql =
+        "SELECT * FROM summaries ORDER BY iso_year DESC, week_of_year DESC";
 
       this.db.all(sql, [], (err, rows: Summary[]) => {
         if (err) {
@@ -193,6 +284,28 @@ export class SummariesRepository {
   }
 
   /**
+   * Delete summary for a specific ISO week
+   */
+  async deleteSummaryForIsoWeek(
+    isoYear: number,
+    weekOfYear: number,
+  ): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      const sql =
+        "DELETE FROM summaries WHERE iso_year = ? AND week_of_year = ?";
+
+      this.db.run(sql, [isoYear, weekOfYear], function (err) {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        resolve(this.changes > 0);
+      });
+    });
+  }
+
+  /**
    * Check if summary exists for a specific week
    */
   async summaryExistsForWeek(weekOfYear: number): Promise<boolean> {
@@ -207,6 +320,57 @@ export class SummariesRepository {
         }
 
         resolve((row?.count || 0) > 0);
+      });
+    });
+  }
+
+  /**
+   * Check if summary exists for a specific ISO week
+   */
+  async summaryExistsForIsoWeek(
+    isoYear: number,
+    weekOfYear: number,
+  ): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      // Check if iso_year column exists
+      this.db.all("PRAGMA table_info(summaries)", [], (err, columns: any[]) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        const hasIsoYear = columns.some((col) => col.name === "iso_year");
+
+        if (hasIsoYear) {
+          const sql =
+            "SELECT COUNT(*) as count FROM summaries WHERE iso_year = ? AND week_of_year = ?";
+
+          this.db.get(
+            sql,
+            [isoYear, weekOfYear],
+            (err, row: { count: number }) => {
+              if (err) {
+                reject(err);
+                return;
+              }
+
+              resolve((row?.count || 0) > 0);
+            },
+          );
+        } else {
+          // Fallback: check by week_of_year only
+          const sql =
+            "SELECT COUNT(*) as count FROM summaries WHERE week_of_year = ?";
+
+          this.db.get(sql, [weekOfYear], (err, row: { count: number }) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+
+            resolve((row?.count || 0) > 0);
+          });
+        }
       });
     });
   }
