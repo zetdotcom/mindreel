@@ -26,7 +26,7 @@ Guiding principles:
 
 ## 2. View List
 
-### 2.1 Onboarding Modal
+### 2.1 Onboarding Modal - DONE
 - View name: Onboarding Modal
 - View path: (transient) launched only on first run; no direct route (logic gate before showing History)
 - Main purpose: Introduce concept (periodic reminders + weekly summaries) and prime immediate first capture

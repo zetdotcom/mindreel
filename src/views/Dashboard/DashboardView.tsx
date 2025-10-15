@@ -10,6 +10,7 @@ import { EntryList } from "@/features/entries/ui/EntryList";
 import { CurrentWeekSummarySection } from "@/features/summaries/ui/CurrentWeekSummarySection";
 import { ErrorDisplay } from "@/shared/ui/ErrorDisplay";
 import { Button } from "@/components/ui/button";
+import { openCaptureWindow } from "@/features/capture";
 
 /**
  * DashboardView
@@ -86,6 +87,16 @@ export function DashboardView() {
 
   const handleDismissError = useCallback(() => setGlobalError(null), []);
 
+  // --- Utility: open capture popup -------------------------------------------
+  const handleOpenCapturePopup = useCallback(async () => {
+    try {
+      await openCaptureWindow();
+    } catch (e) {
+      console.error("Failed to open capture window", e);
+      setGlobalError("Unable to open capture window");
+    }
+  }, []);
+
   // --- Utility: show database path (debug) ------------------------------------
   const showDatabasePath = useCallback(async () => {
     try {
@@ -109,11 +120,24 @@ export function DashboardView() {
 
       <main className="min-h-screen p-8 bg-neutral-950 text-neutral-100 font-sans">
         <div className="max-w-4xl mx-auto space-y-8">
-          <header className="text-center">
-            <h1 className="text-3xl font-bold tracking-tight mb-2">MindReel</h1>
-            <p className="text-neutral-400 text-sm">
-              Your personal productivity journal
-            </p>
+          <header className="text-center space-y-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight mb-2">
+                MindReel
+              </h1>
+              <p className="text-neutral-400 text-sm">
+                Your personal productivity journal x x
+              </p>
+            </div>
+            <div>
+              <Button
+                onClick={handleOpenCapturePopup}
+                size="lg"
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                + Add Entry
+              </Button>
+            </div>
           </header>
 
           {/* Global error (cross-feature) */}

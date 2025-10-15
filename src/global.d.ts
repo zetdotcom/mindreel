@@ -11,6 +11,8 @@ import {
 // Vite environment variables for Electron Forge
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
+declare const CAPTURE_WINDOW_VITE_DEV_SERVER_URL: string;
+declare const CAPTURE_WINDOW_VITE_NAME: string;
 
 declare global {
   interface Window {
@@ -77,9 +79,10 @@ declare global {
           settings: Settings | null;
         }>;
       };
-      // Optional capture popup API (to be implemented)
-      capture?: {
-        openCapturePopup: () => void;
+      // Capture popup API
+      capture: {
+        openCapturePopup: () => Promise<void>;
+        closeCapturePopup: () => Promise<void>;
       };
     };
   }

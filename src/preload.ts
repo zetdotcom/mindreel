@@ -67,8 +67,15 @@ const databaseApi = {
   getDashboardData: () => ipcRenderer.invoke("db:getDashboardData"),
 };
 
+// Capture window API
+const captureApi = {
+  openCapturePopup: () => ipcRenderer.invoke("capture:openPopup"),
+  closeCapturePopup: () => ipcRenderer.invoke("capture:closePopup"),
+};
+
 // Expose APIs to renderer process
 contextBridge.exposeInMainWorld("appApi", {
   ping: () => ipcRenderer.invoke("ping"),
   db: databaseApi,
+  capture: captureApi,
 });

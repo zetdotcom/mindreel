@@ -9,6 +9,10 @@ import {
   initializeDatabase,
   closeDatabase,
 } from "./ipc/databaseHandlers";
+import {
+  registerCaptureWindowHandlers,
+  cleanupCaptureWindow,
+} from "./ipc/captureWindowHandlers";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -16,7 +20,6 @@ if (started) {
 }
 
 const createWindow = () => {
-  // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
@@ -25,17 +28,20 @@ const createWindow = () => {
     },
   });
 
-  // and load the index.html of the app.
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
-    mainWindow.loadFile(
-      path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`),
+    const prodMainPath = path.join(
+      __dirname,
+      `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`,
     );
+    mainWindow.loadFile(prodMainPath);
   }
 
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  // Open DevTools only in development
+  if (process.env.NODE_ENV === "development") {
+    mainWindow.webContents.openDevTools();
+  }
 };
 
 // This method will be called when Electron has finished
@@ -43,15 +49,26 @@ const createWindow = () => {
 // Some APIs can only be used after this event occurs.
 app.on("ready", async () => {
   try {
+    console.log("=== MindReel App Starting ===");
+
     // Initialize database first
+    console.log("Initializing database...");
     await initializeDatabase();
+    console.log("Database initialized successfully");
 
     // Register IPC handlers
+    console.log("Registering IPC handlers...");
     registerPing();
+    console.log("Ping handler registered");
     registerDatabaseHandlers();
+    console.log("Database handlers registered");
+    registerCaptureWindowHandlers();
+    console.log("Capture window handlers registered");
 
     // Create the main window
+    console.log("Creating main window...");
     createWindow();
+    console.log("=== MindReel App Started Successfully ===");
   } catch (error) {
     console.error("Failed to initialize app:", error);
     app.quit();
@@ -64,6 +81,7 @@ app.on("ready", async () => {
 app.on("window-all-closed", async () => {
   if (process.platform !== "darwin") {
     try {
+      cleanupCaptureWindow();
       await closeDatabase();
     } catch (error) {
       console.error("Error closing database:", error);
@@ -83,6 +101,7 @@ app.on("activate", () => {
 // Handle app quit to ensure database is closed properly
 app.on("before-quit", async (event) => {
   try {
+    cleanupCaptureWindow();
     await closeDatabase();
   } catch (error) {
     console.error("Error closing database on quit:", error);
