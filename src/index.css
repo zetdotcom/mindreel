@@ -74,6 +74,12 @@
     #953356 70%,
     #b9486d 100%
   );
+  /* Layout / Sidebar extended variables */
+  --sidebar-active-bg: var(--sidebar-primary);
+  --sidebar-active-fg: var(--sidebar-primary-foreground);
+  --layout-content-bg: var(--background);
+  --layout-scrollbar-track: #e3e9ed;
+  --layout-scrollbar-thumb: #c2d0db;
 }
 
 .dark {
@@ -117,6 +123,12 @@
   --shadow-brutal-xl: 0 0 0 2px #41657b, 0 0 18px 6px rgba(62, 75, 84, 0.55);
   --border-brutal: 2px solid #41657b;
   --border-brutal-thick: 3px solid #41657b;
+  /* Dark mode extended layout variables */
+  --sidebar-active-bg: #25313c;
+  --sidebar-active-fg: var(--foreground);
+  --layout-content-bg: var(--background);
+  --layout-scrollbar-track: #25313c;
+  --layout-scrollbar-thumb: #3e4b54;
 }
 
 @theme inline {

@@ -24,14 +24,24 @@ views/
 
 ## Current Views
 
-### `Dashboard/`
-**Purpose**: Main application screen showing entries, summaries, and onboarding.
-- **Composes**: `entries`, `summaries`, `onboarding` features
-- **Responsibilities**: 
-  - Initial data loading coordination
-  - Global error handling
-  - Layout and section arrangement
-  - Onboarding flow trigger
+### `History/`
+**Purpose**: Primary application view showing chronological weeks, entry history, and capture entry creation via the History header.
+- **Composes**: `history` feature (weeks list, pagination, delete confirmation, toasts), `onboarding` feature (modal trigger)
+- **Responsibilities**:
+  - History loading, refresh, pagination orchestration
+  - Integrates onboarding first-run modal
+  - Provides capture entry action via `HistoryHeader` button
+  - Displays error states and toast notifications
+
+### `Settings/`
+**Purpose**: Placeholder route for future configuration (capture shortcuts, data export, privacy).
+- **Composes**: (none yet — future `settings` feature)
+- **Responsibilities**: Establish stable `/settings` route and layout scaffold
+
+### `Profile/`
+**Purpose**: Placeholder route for future user identity & activity insights.
+- **Composes**: (none yet — future `profile` feature)
+- **Responsibilities**: Establish stable `/profile` route and layout scaffold
 
 ## Guidelines
 
@@ -72,15 +82,16 @@ views/
 
 ### Pattern 1: Simple Composition
 ```typescript
-export function DashboardView() {
-  const { entries, createEntry } = useEntries();
-  const { summary } = useCurrentWeekSummary();
+export function HistoryPageView() {
+  const { weeks } = useHistoryState();
   
   return (
     <main>
-      <EntryForm onSubmit={createEntry} />
-      <EntryList entries={entries} />
-      <CurrentWeekSummarySection />
+      <HistoryView />
+      {/* Example: Future sidebar or summary panel could be composed here */}
+      <p className="text-xs text-muted-foreground">
+        Total weeks loaded: {weeks.length}
+      </p>
     </main>
   );
 }
@@ -88,22 +99,22 @@ export function DashboardView() {
 
 ### Pattern 2: Coordinated Loading
 ```typescript
-export function DashboardView() {
+export function HistoryPageView() {
   const [globalError, setGlobalError] = useState(null);
-  const entries = useEntries();
-  const summaries = useCurrentWeekSummary();
+  const { refreshWeeks, loadMoreWeeks } = useHistoryState();
   
   useEffect(() => {
     Promise.all([
-      entries.loadToday(),
-      summaries.load()
-    ]).catch(e => setGlobalError(e.message));
-  }, []);
+      refreshWeeks(),
+      // Potential future parallel loads (e.g. user profile, settings)
+    ]).catch(e => setGlobalError(e instanceof Error ? e.message : String(e)));
+  }, [refreshWeeks]);
   
   return (
     <main>
       {globalError && <ErrorDisplay error={globalError} />}
-      {/* ... feature compositions */}
+      <HistoryView />
+      <button onClick={loadMoreWeeks}>Load More</button>
     </main>
   );
 }
@@ -121,15 +132,16 @@ function SectionCard({ title, children }) {
   );
 }
 
-// DashboardView.tsx
-export function DashboardView() {
+// HistoryPageView.tsx
+export function HistoryPageView() {
   return (
     <main>
-      <SectionCard title="Today's Work">
-        <EntryList {...} />
+      <SectionCard title="History">
+        <HistoryView />
       </SectionCard>
-      <SectionCard title="This Week">
-        <CurrentWeekSummarySection />
+      <SectionCard title="Actions">
+        {/* Placeholder: manual refresh / filters */}
+        <button onClick={() => {/* trigger refresh */}}>Refresh</button>
       </SectionCard>
     </main>
   );
@@ -144,10 +156,9 @@ Create a new view when:
 - You're implementing a new navigation destination
 
 **Future view examples:**
-- `views/Settings/` - dedicated settings configuration screen
-- `views/History/` - full history browser with date filtering
 - `views/Export/` - export wizard interface
 - `views/Capture/` - popup capture window (if separate from main window)
+- `views/Analytics/` - aggregate metrics & trends
 
 ## View-Specific Components (`components/`)
 
@@ -155,11 +166,11 @@ Small helper components used ONLY within a single view can live in that view's `
 
 ```
 views/
-└── Dashboard/
-    ├── DashboardView.tsx
+└── History/
+    ├── HistoryPageView.tsx
     └── components/
-        ├── DayGroupCard.tsx      # Used only in Dashboard
-        └── SummaryWeekSlot.tsx   # Used only in Dashboard
+        ├── WeekGroup.tsx         # Used only in History
+        └── PaginationControl.tsx # Used only in History
 ```
 
 **When to promote to higher level:**
@@ -173,9 +184,10 @@ When React Router or similar is introduced:
 ```typescript
 // App.tsx or router/index.tsx
 <Routes>
-  <Route path="/" element={<DashboardView />} />
+  <Route path="/" element={<Navigate to="/history" replace />} />
+  <Route path="/history" element={<HistoryPageView />} />
   <Route path="/settings" element={<SettingsView />} />
-  <Route path="/history" element={<HistoryView />} />
+  <Route path="/profile" element={<ProfileView />} />
 </Routes>
 ```
 

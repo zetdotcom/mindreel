@@ -1,8 +1,10 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import { DashboardView } from "./views/Dashboard/DashboardView";
+
 import { HistoryPageView } from "./views/History";
+import Main from "./views/Main/Main";
+import { BrowserRouter } from "react-router";
 
 const container = document.getElementById("root");
 if (!container) {
@@ -10,4 +12,8 @@ if (!container) {
 }
 
 const root = createRoot(container);
-root.render(<HistoryPageView />);
+root.render(
+  <BrowserRouter>
+    <Main />
+  </BrowserRouter>,
+);

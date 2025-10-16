@@ -123,7 +123,7 @@ export function DashboardView() {
           <header className="text-center space-y-4">
             <div>
               <h1 className="text-3xl font-bold tracking-tight mb-2">
-                MindReel
+                MindReel sss
               </h1>
               <p className="text-neutral-400 text-sm">
                 Your personal productivity journal x x

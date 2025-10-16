@@ -162,15 +162,16 @@ The capture window is managed by `ipc/captureWindowHandlers.ts`:
 
 ## Integration Points
 
-### Dashboard Integration
+### History Integration
 The Dashboard includes a "+ Add Entry" button that opens the capture window:
 
 ```typescript
-// In DashboardView.tsx
+// In HistoryView (capture button lives in HistoryHeader)
 import { openCaptureWindow } from '@/features/capture';
 
+// Example usage inside HistoryHeader or a handler passed to it:
 <Button onClick={() => openCaptureWindow()}>
-  + Add Entry
+  + Capture Entry
 </Button>
 ```
 

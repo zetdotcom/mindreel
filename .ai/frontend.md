@@ -84,7 +84,9 @@ features/<feature-name>/
 **Purpose**: Route-level screens that orchestrate features into complete UIs.
 
 **Current views**:
-- `Dashboard/` - Main application screen
+- `History/` - Primary application history view (weekly groups, capture action via header)
+- `Settings/` - Configuration placeholder (future capture shortcuts, data/export)
+- `Profile/` - User identity & activity placeholder
 
 **View structure**:
 ```
@@ -145,7 +147,7 @@ User Clicks "Generate"
 ### Pattern 3: Onboarding
 ```
 App Mount
-  → View (DashboardView)
+  → View (HistoryPageView)
     → Feature State (hasSeenOnboarding from localStorage)
       → Show Modal (OnboardingModal)
         → User Confirms
@@ -172,7 +174,7 @@ App Mount
 
 ## File Naming Conventions
 
-- **Components**: PascalCase (`EntryForm.tsx`, `DashboardView.tsx`)
+- **Components**: PascalCase (`EntryForm.tsx`, `HistoryPageView.tsx`)
 - **Hooks**: camelCase with `use` prefix (`useEntries.ts`, `useCurrentWeekSummary.ts`)
 - **Utilities**: camelCase (`repository.ts`, `onboardingState.ts`)
 - **Types**: camelCase (`types.ts`)
@@ -226,12 +228,7 @@ Configured in `tsconfig.json`:
 - Cross-feature workflows (auto-generate summaries Sunday 23:00)
 - Scheduled operations
 
-## Migration Path from Old Structure
 
-Previously, all logic lived in `src/ui/App.tsx` (560+ lines). Now:
-- `ui/App.tsx` → Deprecated wrapper (delegates to DashboardView)
-- Inline hooks → `features/*/model/use*.ts`
-- Inline components → `features/*/ui/*.tsx`
 - Utils → `shared/lib/*` or `features/*/lib/*`
 
 **Old imports still work** for backward compatibility during transition.
@@ -260,14 +257,14 @@ export const myFeatureRepository = {
 export function useMyFeature() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
-  
+
   const load = useCallback(async () => {
     setLoading(true);
     const result = await myFeatureRepository.get();
     setData(result);
     setLoading(false);
   }, []);
-  
+
   return { data, loading, load };
 }
 ```
@@ -298,14 +295,14 @@ import { useOtherFeature } from '@features/other-feature';
 export function MyView() {
   const myFeature = useMyFeature();
   const otherFeature = useOtherFeature();
-  
+
   useEffect(() => {
     Promise.all([
       myFeature.load(),
       otherFeature.load()
     ]);
   }, []);
-  
+
   return (
     <main>
       <MyFeatureView />

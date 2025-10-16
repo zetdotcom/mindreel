@@ -100,7 +100,6 @@ export function HistoryView() {
         onRefresh={refreshWeeks}
         onAddEntry={handleAddEntry}
       />
-
       {/* Error Banner */}
       {error && weeks.length > 0 && (
         <div className="bg-destructive/10 border border-destructive/20 rounded-md p-4">
@@ -120,7 +119,6 @@ export function HistoryView() {
           </div>
         </div>
       )}
-
       {/* Weeks Container */}
       <div className="space-y-8">
         {weeks.map((week) => (
@@ -141,7 +139,6 @@ export function HistoryView() {
           />
         ))}
       </div>
-
       {/* Pagination */}
       <PaginationControl
         loading={pagination.loading}
@@ -149,7 +146,6 @@ export function HistoryView() {
         onLoadMore={loadMoreWeeks}
         loadedCount={weeks.length}
       />
-
       {/* Global Modals and Notifications */}
       <DeleteConfirmationModal
         open={deleteModal.open}
@@ -171,7 +167,6 @@ export function HistoryView() {
         }}
         onCancel={hideDeleteModal}
       />
-
       <ToastArea toasts={toasts} onRemoveToast={removeToast} />
     </div>
   );
