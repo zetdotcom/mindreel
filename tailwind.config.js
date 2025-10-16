@@ -47,17 +47,56 @@ export default {
         },
       },
       boxShadow: {
-        brutal: "4px 4px 0px oklch(0.1 0 0)",
-        "brutal-lg": "8px 8px 0px oklch(0.1 0 0)",
-        "brutal-xl": "12px 12px 0px oklch(0.1 0 0)",
-        "brutal-2xl": "16px 16px 0px oklch(0.1 0 0)",
-        "brutal-primary": "4px 4px 0px oklch(0.6 0.3 270)",
-        "brutal-primary-lg": "8px 8px 0px oklch(0.6 0.3 270)",
-        "brutal-secondary": "4px 4px 0px oklch(0.85 0.15 60)",
-        "brutal-accent": "4px 4px 0px oklch(0.7 0.25 180)",
-        "brutal-destructive": "4px 4px 0px oklch(0.65 0.3 15)",
-        neon: "0 0 20px currentColor, inset 0 0 20px currentColor",
-        "neon-lg": "0 0 30px currentColor, inset 0 0 30px currentColor",
+        brutal: "0 0 0 2px #3e4b54, 0 0 8px 2px rgba(65,101,123,0.4)",
+        "brutal-lg": "0 0 0 2px #41657b, 0 0 10px 3px rgba(65,101,123,0.45)",
+        "brutal-xl": "0 0 0 2px #41657b, 0 0 14px 4px rgba(62,75,84,0.5)",
+        "brutal-2xl": "0 0 0 2px #41657b, 0 0 18px 6px rgba(62,75,84,0.55)",
+        "brutal-primary":
+          "0 0 0 2px #c78226, 0 0 10px 2px rgba(199,130,38,0.45)",
+        "brutal-primary-lg":
+          "0 0 0 2px #c78226, 0 0 14px 3px rgba(199,130,38,0.5)",
+        "brutal-secondary":
+          "0 0 0 2px #41657b, 0 0 8px 2px rgba(65,101,123,0.4)",
+        "brutal-accent": "0 0 0 2px #b9486d, 0 0 12px 3px rgba(185,72,109,0.5)",
+        "brutal-destructive":
+          "0 0 0 2px #b9486d, 0 0 12px 3px rgba(149,51,86,0.55)",
+        glow: "0 0 4px 1px rgba(65,101,123,0.4), 0 0 10px 4px rgba(199,130,38,0.25)",
+        "glow-subtle": "0 0 3px 1px rgba(62,75,84,0.35)",
+      },
+      colors: {
+        brand: {
+          dark: "#3e4b54",
+          steel: "#41657b",
+          light: "#c2d0db",
+          warm: "#c78226",
+        },
+        spice: {
+          DEFAULT: "#b9486d",
+          light: "#d8648b",
+          dark: "#953356",
+        },
+        primary: "#41657b",
+        secondary: "#3e4b54",
+        accent: "#c78226",
+        muted: "#c2d0db",
+        foreground: "#3e4b54",
+        background: "#ffffff",
+        destructive: "#b9486d",
+      },
+      borderRadius: {
+        lg: "0.75rem",
+        xl: "1rem",
+        "2xl": "1.25rem",
+      },
+      backgroundImage: {
+        "card-gradient":
+          "linear-gradient(135deg, #c2d0db 0%, #ffffff 45%, #e3e9ed 100%)",
+        "button-primary":
+          "linear-gradient(135deg, #41657b 0%, #3e4b54 60%, #41657b 100%)",
+        "button-warm":
+          "linear-gradient(135deg, #c78226 0%, #d69745 55%, #e3a857 100%)",
+        "button-accent":
+          "linear-gradient(135deg, #b9486d 0%, #953356 70%, #b9486d 100%)",
       },
       borderWidth: {
         3: "3px",
@@ -93,36 +132,52 @@ export default {
     function ({ addUtilities, theme }) {
       addUtilities({
         ".text-shadow-brutal": {
-          textShadow: "2px 2px 0px oklch(0.1 0 0)",
+          textShadow: "0 1px 2px rgba(62,75,84,0.4)",
         },
         ".text-shadow-brutal-lg": {
-          textShadow: "4px 4px 0px oklch(0.1 0 0)",
+          textShadow: "0 2px 6px rgba(65,101,123,0.5)",
         },
         ".transform-brutal": {
           transform: "translate(0, 0)",
-          transition: "all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+          transition: "all 0.25s cubic-bezier(0.33, 1, 0.68, 1)",
         },
         ".transform-brutal:hover": {
-          transform: "translate(2px, 2px)",
+          transform: "translate(0, 0)",
+          boxShadow: "0 0 6px 2px rgba(65,101,123,0.35)",
         },
         ".transform-brutal:active": {
-          transform: "translate(4px, 4px)",
+          transform: "scale(0.97)",
+          boxShadow: "0 0 4px 2px rgba(62,75,84,0.4)",
         },
         ".border-style-brutal": {
           borderStyle: "solid",
-          borderColor: "oklch(0.1 0 0)",
+          borderColor: "#41657b",
+          borderRadius: theme("borderRadius.lg"),
         },
-        ".bg-glitch": {
-          background:
-            "linear-gradient(45deg, oklch(0.6 0.3 270) 0%, oklch(0.7 0.25 180) 50%, oklch(0.85 0.15 60) 100%)",
-          backgroundSize: "400% 400%",
-          animation: "glitch 3s ease-in-out infinite",
+        ".border-glow": {
+          boxShadow: "0 0 0 2px #41657b, 0 0 8px 2px rgba(65,101,123,0.45)",
+          borderColor: "#41657b",
+          borderWidth: "2px",
+          borderStyle: "solid",
+          borderRadius: theme("borderRadius.lg"),
+        },
+        ".bg-card-gradient": {
+          backgroundImage: theme("backgroundImage.card-gradient"),
+        },
+        ".bg-button-primary": {
+          backgroundImage: theme("backgroundImage.button-primary"),
+        },
+        ".bg-button-warm": {
+          backgroundImage: theme("backgroundImage.button-warm"),
+        },
+        ".bg-button-accent": {
+          backgroundImage: theme("backgroundImage.button-accent"),
         },
         ".text-cyber": {
           fontWeight: "900",
           textTransform: "uppercase",
           letterSpacing: "0.1em",
-          textShadow: "2px 2px 0px oklch(0.8 0.25 180)",
+          textShadow: "0 2px 6px rgba(185,72,109,0.5)",
         },
         ".neon-glow": {
           animation: "neon-pulse 1.5s ease-in-out infinite alternate",

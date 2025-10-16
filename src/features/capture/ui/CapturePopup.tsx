@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { useCapture } from "../model/useCapture";
 import { closeCaptureWindow } from "../model/repository";
 
@@ -100,23 +101,25 @@ export const CapturePopup: React.FC<CapturePopupProps> = ({
 
   const charCountColor =
     charCount > MAX_CHARACTERS
-      ? "text-red-500"
+      ? "text-destructive"
       : charCount > MAX_CHARACTERS * 0.9
-        ? "text-yellow-500"
-        : "text-neutral-400";
+        ? "text-accent"
+        : "text-muted-foreground";
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 p-6">
-      <div className="max-w-2xl mx-auto space-y-4">
+    <div className="min-h-screen bg-background text-foreground p-6">
+      <div className="max-w-2xl mx-auto space-y-6 bg-card rounded-lg border-glow shadow-glow-subtle p-6">
         {/* Header */}
         <header className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">What are you working on?</h1>
+          <h1 className="text-2xl font-black uppercase tracking-wide">
+            What are you working on?
+          </h1>
           <Button
             variant="ghost"
             size="sm"
             onClick={handleClose}
             aria-label="Close popup"
-            className="text-neutral-400 hover:text-neutral-100"
+            className="text-muted-foreground hover:text-foreground"
           >
             ✕
           </Button>
@@ -124,17 +127,17 @@ export const CapturePopup: React.FC<CapturePopupProps> = ({
 
         {/* Main textarea */}
         <div className="space-y-2">
-          <textarea
+          <Textarea
             ref={textareaRef}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             onKeyDown={handleKeyDownInTextarea}
             placeholder="Describe what you're currently working on..."
-            className="w-full h-40 px-4 py-3 bg-neutral-900 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
             maxLength={MAX_CHARACTERS}
             aria-label="Entry content"
             aria-describedby="char-counter-hint"
             disabled={saving}
+            className="h-40 resize-none"
           />
 
           {/* Character counter */}
@@ -152,7 +155,7 @@ export const CapturePopup: React.FC<CapturePopupProps> = ({
         {/* Recent entries prefill */}
         {recentEntries.length > 0 && (
           <div className="space-y-2">
-            <h2 className="text-sm font-medium text-neutral-400">
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
               Recent activities
             </h2>
             <div className="space-y-2">
@@ -160,12 +163,12 @@ export const CapturePopup: React.FC<CapturePopupProps> = ({
                 <Button
                   key={index}
                   variant="outline"
-                  className="bg-amber-800 w-full justify-start text-left h-auto py-3 px-4 text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800 border-neutral-700"
+                  className="w-full justify-start text-left h-auto py-3 px-4 font-semibold bg-card hover:bg-muted"
                   onClick={() => handlePrefill(entry)}
                   disabled={saving}
                   aria-label={`Prefill with: ${entry}`}
                 >
-                  <span className="truncate">{entry}</span>
+                  <span className="truncate text-foreground">{entry}</span>
                 </Button>
               ))}
             </div>
@@ -173,7 +176,7 @@ export const CapturePopup: React.FC<CapturePopupProps> = ({
         )}
 
         {loadingRecent && recentEntries.length === 0 && (
-          <p className="text-sm text-neutral-500 text-center">
+          <p className="text-sm text-muted-foreground/70 text-center">
             Loading recent entries...
           </p>
         )}
@@ -204,12 +207,20 @@ export const CapturePopup: React.FC<CapturePopupProps> = ({
         </div>
 
         {/* Keyboard hint */}
-        <p className="text-xs text-neutral-500 text-center">
-          Press <kbd className="px-1.5 py-0.5 bg-neutral-800 rounded">ESC</kbd>{" "}
+        <p className="text-xs text-muted-foreground text-center">
+          Press{" "}
+          <kbd className="px-1.5 py-0.5 bg-muted text-foreground rounded-lg shadow-glow-subtle">
+            ESC
+          </kbd>{" "}
           to close •{" "}
-          <kbd className="px-1.5 py-0.5 bg-neutral-800 rounded">⌘/Ctrl</kbd> +{" "}
-          <kbd className="px-1.5 py-0.5 bg-neutral-800 rounded">Enter</kbd> to
-          save
+          <kbd className="px-1.5 py-0.5 bg-muted text-foreground rounded-lg shadow-glow-subtle">
+            ⌘/Ctrl
+          </kbd>{" "}
+          +{" "}
+          <kbd className="px-1.5 py-0.5 bg-muted text-foreground rounded-lg shadow-glow-subtle">
+            Enter
+          </kbd>{" "}
+          to save
         </p>
       </div>
     </div>

@@ -4,19 +4,19 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const alertVariants = cva(
-  "relative w-full border-brutal shadow-brutal px-6 py-4 text-sm grid has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>svg]:gap-x-4 gap-y-2 items-start [&>svg]:size-5 [&>svg]:translate-y-0.5 [&>svg]:text-current font-bold transform-gpu hover:shadow-brutal-lg hover:translate-x-1 hover:translate-y-1 transition-all",
+  "relative w-full rounded-lg border-glow shadow-glow-subtle px-6 py-4 text-sm grid has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>svg]:gap-x-4 gap-y-2 items-start [&>svg]:size-5 [&>svg]:translate-y-0.5 [&>svg]:text-current font-bold transform-gpu hover:shadow-glow hover:-translate-y-0.5 active:scale-[0.97] transition-all",
   {
     variants: {
       variant: {
-        default: "bg-card text-card-foreground border-foreground",
+        default: "bg-card text-card-foreground",
         destructive:
-          "text-destructive-foreground bg-destructive border-foreground [&>svg]:text-current *:data-[slot=alert-description]:text-destructive-foreground/90",
+          "bg-button-spice-gradient text-destructive-foreground [&>svg]:text-current *:data-[slot=alert-description]:text-destructive-foreground/90",
         warning:
-          "text-secondary-foreground bg-secondary border-foreground [&>svg]:text-current *:data-[slot=alert-description]:text-secondary-foreground/90",
+          "bg-button-accent-gradient text-accent-foreground [&>svg]:text-current *:data-[slot=alert-description]:text-accent-foreground/90",
         success:
-          "text-accent-foreground bg-accent border-foreground [&>svg]:text-current *:data-[slot=alert-description]:text-accent-foreground/90",
+          "bg-button-primary-gradient text-primary-foreground [&>svg]:text-current *:data-[slot=alert-description]:text-primary-foreground/90",
         cyber:
-          "text-primary-foreground bg-primary border-foreground shadow-brutal-lg [&>svg]:text-current *:data-[slot=alert-description]:text-primary-foreground/90",
+          "bg-button-spice-gradient text-destructive-foreground shadow-glow [&>svg]:text-current *:data-[slot=alert-description]:text-destructive-foreground/90",
       },
     },
     defaultVariants: {

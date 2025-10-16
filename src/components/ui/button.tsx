@@ -5,24 +5,23 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-black transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent uppercase tracking-wide border-brutal shadow-brutal hover:shadow-none hover:translate-x-1 hover:translate-y-1 active:translate-x-2 active:translate-y-2 active:shadow-none transform-gpu",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-black transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent uppercase tracking-wide rounded-lg shadow-glow-subtle border-glow hover:shadow-glow hover:-translate-y-0.5 active:scale-[0.97] active:shadow-glow-subtle transform-gpu",
   {
     variants: {
       variant: {
-        default:
-          "bg-primary text-primary-foreground hover:bg-primary/90 border-foreground",
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 border-foreground",
-        outline:
-          "border-foreground bg-background hover:bg-accent hover:text-accent-foreground shadow-brutal",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 border-foreground",
+        default: "bg-button-primary-gradient text-primary-foreground",
+        destructive: "bg-button-spice-gradient text-destructive-foreground",
+        outline: "bg-background text-foreground border-glow hover:bg-muted",
+        secondary: "bg-button-primary-gradient text-primary-foreground",
         ghost:
-          "hover:bg-accent hover:text-accent-foreground border-transparent shadow-none hover:shadow-brutal hover:border-foreground",
-        link: "text-primary underline-offset-4 hover:underline border-transparent shadow-none uppercase font-black",
+          "bg-transparent text-foreground border-transparent shadow-none hover:bg-muted/40 hover:border-glow hover:shadow-glow",
+        link: "text-primary underline-offset-4 hover:underline border-transparent shadow-none uppercase font-black bg-transparent",
+        warm: "bg-button-accent-gradient text-accent-foreground",
+        accent: "bg-button-accent-gradient text-accent-foreground",
+        spice: "bg-button-spice-gradient text-destructive-foreground",
         cyber:
-          "bg-accent text-accent-foreground hover:bg-accent/90 border-foreground shadow-brutal-lg",
-        neon: "bg-gradient-to-r from-primary to-accent text-primary-foreground hover:from-primary/90 hover:to-accent/90 border-foreground shadow-brutal-lg",
+          "bg-button-spice-gradient text-destructive-foreground shadow-glow",
+        neon: "bg-button-accent-gradient text-accent-foreground shadow-glow",
       },
       size: {
         default: "h-11 px-6 py-3 has-[>svg]:px-5",

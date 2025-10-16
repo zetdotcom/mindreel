@@ -4,26 +4,21 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center border-brutal shadow-brutal px-3 py-1 text-xs font-black uppercase tracking-brutal transition-all focus:outline-none focus:ring-0 transform-gpu hover:shadow-brutal-lg hover:translate-x-0.5 hover:translate-y-0.5",
+  "inline-flex items-center rounded-lg border-glow shadow-glow-subtle px-3 py-1 text-xs font-black uppercase tracking-wide transition-all focus:outline-none focus:ring-0 transform-gpu hover:shadow-glow hover:-translate-y-0.5 active:scale-[0.97]",
   {
     variants: {
       variant: {
-        default:
-          "bg-primary text-primary-foreground border-foreground hover:bg-primary/90",
-        secondary:
-          "bg-secondary text-secondary-foreground border-foreground hover:bg-secondary/80",
-        destructive:
-          "bg-destructive text-destructive-foreground border-foreground hover:bg-destructive/90",
-        outline:
-          "bg-background text-foreground border-foreground hover:bg-accent hover:text-accent-foreground",
-        accent:
-          "bg-accent text-accent-foreground border-foreground hover:bg-accent/90",
+        default: "bg-button-primary-gradient text-primary-foreground",
+        secondary: "bg-button-accent-gradient text-accent-foreground",
+        destructive: "bg-button-spice-gradient text-destructive-foreground",
+        outline: "bg-card text-foreground border-glow hover:shadow-glow",
+        accent: "bg-button-accent-gradient text-accent-foreground",
+        spice: "bg-button-spice-gradient text-destructive-foreground",
         cyber:
-          "bg-gradient-to-r from-primary to-accent text-primary-foreground border-foreground shadow-brutal-lg hover:from-primary/90 hover:to-accent/90",
-        neon:
-          "bg-primary text-primary-foreground border-foreground neon-glow",
+          "bg-button-spice-gradient text-destructive-foreground shadow-glow",
+        neon: "bg-button-accent-gradient text-accent-foreground shadow-glow",
         ghost:
-          "text-foreground border-transparent shadow-none hover:shadow-brutal hover:border-foreground hover:bg-accent hover:text-accent-foreground",
+          "text-foreground bg-transparent border-transparent shadow-none hover:border-glow hover:shadow-glow hover:bg-muted/40",
       },
       size: {
         default: "px-3 py-1 text-xs",
