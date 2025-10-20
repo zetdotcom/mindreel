@@ -35,11 +35,19 @@ interface SummaryCardProps {
   onStateChange?: (newState: SummaryCardState) => void;
   onLoginRequest?: () => void; // Trigger auth modal from unauthorized state
   className?: string;
+  /**
+   * TEST-ONLY: external handler to clear a summary (e.g. delete it server-side).
+   * If not provided, clear will fallback to calling onUpdate(summaryId, "").
+   */
+  onClearSummary?: (summaryId: number) => Promise<void> | void;
 }
 
 /**
  * SummaryCard component for displaying and managing AI-generated weekly summaries
  * Supports multiple states: pending, generating, success, failed, unauthorized, limitReached
+ *
+ * Includes a TEST-ONLY "Clear (TEST)" button (visible in success state) to wipe the summary
+ * and revert the card to the pending state. Remove before production release.
  */
 export function SummaryCard({
   summary,
@@ -53,6 +61,7 @@ export function SummaryCard({
   onStateChange,
   onLoginRequest,
   className,
+  onClearSummary,
 }: SummaryCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(summary?.content || "");
@@ -60,7 +69,7 @@ export function SummaryCard({
   const [error, setError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  console.log("xxxx week summary", { weekKey, weekIdentifier });
+  console.log("xxxx week summary", { summary });
 
   // Update edit content when summary changes
   useEffect(() => {
@@ -143,6 +152,26 @@ export function SummaryCard({
     } else if (e.key === "Escape") {
       e.preventDefault();
       handleCancelEdit();
+    }
+  };
+
+  const handleClearSummary = async () => {
+    if (!summary?.id) return;
+    try {
+      // Prefer dedicated clear handler if provided
+      if (onClearSummary) {
+        await onClearSummary(summary.id);
+      } else if (onUpdate) {
+        // Fallback: overwrite content with empty string
+        await onUpdate(summary.id, "");
+      }
+      setEditContent("");
+      // Move back to pending so generate button reappears
+      if (onStateChange) {
+        onStateChange("pending");
+      }
+    } catch (err) {
+      console.error("Error clearing summary (TEST ONLY):", err);
     }
   };
 
@@ -291,15 +320,30 @@ export function SummaryCard({
                   <>Generated {formatSummaryDate(summary.created_at)}</>
                 )}
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleStartEdit}
-                className="gap-2"
-              >
-                <Edit2 className="h-3 w-3" />
-                Edit
-              </Button>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleStartEdit}
+                  className="gap-2"
+                >
+                  <Edit2 className="h-3 w-3" />
+                  Edit
+                </Button>
+                {/* TEST-ONLY clear summary button */}
+                {summary?.id && (
+                  <Button
+                    data-testid="clear-summary-test-button"
+                    variant="destructive"
+                    size="sm"
+                    className="gap-1"
+                    onClick={handleClearSummary}
+                  >
+                    <X className="h-3 w-3" />
+                    Clear (TEST)
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         );
@@ -382,8 +426,22 @@ export function SummaryCard({
           </div>
 
           {summaryState === "success" && (
-            <div className="text-xs text-muted-foreground font-normal">
-              Week {weekIdentifier.week_of_year}, {weekIdentifier.iso_year}
+            <div className="flex items-center space-x-3">
+              <div className="text-xs text-muted-foreground font-normal">
+                Week {weekIdentifier.week_of_year}, {weekIdentifier.iso_year}
+              </div>
+              {/* Duplicate clear button in header (optional). Commented out.
+              <Button
+                data-testid="clear-summary-test-button-header"
+                variant="destructive"
+                size="sm"
+                className="gap-1"
+                onClick={handleClearSummary}
+              >
+                <X className="h-3 w-3" />
+                Clear (TEST)
+              </Button>
+              */}
             </div>
           )}
         </CardTitle>
