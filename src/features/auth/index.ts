@@ -14,6 +14,7 @@ export { AuthFormPasswordChange } from "./ui/AuthFormPasswordChange";
 export { AuthErrorBanner } from "./ui/AuthErrorBanner";
 export { FormField } from "./ui/FormField";
 export { AuthModalExample } from "./ui/AuthModalExample";
+export { ProtectedFeatureGate } from "./ui/ProtectedFeatureGate";
 
 // Types
 export type {
@@ -39,3 +40,7 @@ export {
   ValidationMessages,
   MIN_PASSWORD_LENGTH,
 } from "./model/types";
+
+export { AuthProvider, useAuthContext } from "./model/AuthContext";
+
+export type { UseAuthReturn, UseAuthState, UseAuthActions } from "./model/useAuth";

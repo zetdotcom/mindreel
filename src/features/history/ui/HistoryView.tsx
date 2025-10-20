@@ -6,16 +6,13 @@ import { PaginationControl } from "./PaginationControl";
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
 import { ToastArea } from "./ToastArea";
 import { openCaptureWindow } from "@/features/capture";
-import { cn } from "@/lib/utils";
-import { useSupabase } from "@/supabase/useSupabase";
-import { AuthModal } from "@/features/auth/ui/AuthModal";
+import { useAuthContext } from "@/features/auth";
 
 /**
  * Main History View component
  * Displays chronological history of entries grouped by ISO weeks
  */
 export function HistoryView() {
-  const [authModalOpen, setAuthModalOpen] = React.useState(false);
   const {
     weeks,
     loading,
@@ -29,24 +26,26 @@ export function HistoryView() {
     showDeleteModal,
     hideDeleteModal,
     updateWeek,
-    removeWeek,
     addToast,
     removeToast,
   } = useHistoryState();
 
-  // Auth state (used to gate summary generation)
-  const { user } = useSupabase();
+  const { authenticated, openAuthModal } = useAuthContext();
 
-  // Derive weeks with unauthorized summary state when user is not authenticated
   const displayWeeks = React.useMemo(() => {
-    if (user) return weeks;
+    if (authenticated) return weeks;
     return weeks.map((week) => {
-      if (!user && week.summaryState === "pending" && week.totalEntries > 0 && !week.summary) {
-        return { ...week, summaryState: "unauthorized" };
+      if (
+        !authenticated &&
+        week.summaryState === "pending" &&
+        week.totalEntries > 0 &&
+        !week.summary
+      ) {
+        return { ...week, summaryState: "unauthorized" as const };
       }
       return week;
     });
-  }, [weeks, user]);
+  }, [weeks, authenticated]);
 
   // Handle add entry action
   const handleAddEntry = async () => {
@@ -143,7 +142,7 @@ export function HistoryView() {
               // This is for coordination if needed
             }}
             onWeekUpdate={(updates) => updateWeek(week.weekKey, updates)}
-            onLoginRequest={() => setAuthModalOpen(true)}
+            onLoginRequest={() => openAuthModal("login")}
           />
         ))}
       </div>
@@ -176,9 +175,6 @@ export function HistoryView() {
         onCancel={hideDeleteModal}
       />
       <ToastArea toasts={toasts} onRemoveToast={removeToast} />
-
-      {/* Auth Modal (opens when user clicks Sign In in summary card) */}
-      <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} initialState="login" />
     </div>
   );
 }

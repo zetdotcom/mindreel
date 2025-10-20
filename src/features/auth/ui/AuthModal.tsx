@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,104 +21,85 @@ import {
   PasswordChangeFormData,
 } from "../model/types";
 import { cn } from "@/lib/utils";
+import { useAuthContext } from "../model/AuthContext";
 
 interface AuthModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  initialState?: AuthState;
-  onLogin?: (data: LoginFormData) => Promise<void>;
-  onRegister?: (data: RegisterFormData) => Promise<void>;
-  onPasswordResetRequest?: (data: PasswordResetRequestFormData) => Promise<void>;
-  onPasswordSetNew?: (data: PasswordSetNewFormData) => Promise<void>;
-  onPasswordChange?: (data: PasswordChangeFormData) => Promise<void>;
-  onCheckEmailVerification?: () => Promise<boolean>;
-  onResendVerificationEmail?: () => Promise<void>;
-  userEmail?: string;
-  isLoading?: boolean;
-  error?: string | null;
-  onErrorDismiss?: () => void;
   className?: string;
 }
 
-/**
- * AuthModal - Main authentication modal component
- * Orchestrates all authentication states and forms
- * Handles state transitions between login, register, password reset, etc.
- */
-export function AuthModal({
-  open,
-  onOpenChange,
-  initialState = "login",
-  onLogin,
-  onRegister,
-  onPasswordResetRequest,
-  onPasswordSetNew,
-  onPasswordChange,
-  onCheckEmailVerification,
-  onResendVerificationEmail,
-  userEmail = "",
-  isLoading = false,
-  error = null,
-  onErrorDismiss,
-  className,
-}: AuthModalProps) {
-  const [authState, setAuthState] = useState<AuthState>(initialState);
+export function AuthModal({ className }: AuthModalProps) {
+  const {
+    isAuthModalOpen,
+    authModalInitialState,
+    closeAuthModal,
+    login,
+    register,
+    resetPassword,
+    updatePassword,
+    checkEmailVerification,
+    resendVerification,
+    user,
+    loading,
+    error,
+    clearError,
+  } = useAuthContext();
+
+  const [authState, setAuthState] = useState<AuthState>(authModalInitialState);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
   const [isResending, setIsResending] = useState(false);
 
-  // Reset to initial state when modal opens
   useEffect(() => {
-    if (open) {
-      setAuthState(initialState);
+    if (isAuthModalOpen) {
+      setAuthState(authModalInitialState);
       setShowSuccessMessage(false);
     }
-  }, [open, initialState]);
+  }, [isAuthModalOpen, authModalInitialState]);
 
-  // State transition handlers
   const handleSwitchToRegister = useCallback(() => {
     setAuthState("register");
-    onErrorDismiss?.();
-  }, [onErrorDismiss]);
+    clearError();
+  }, [clearError]);
 
   const handleSwitchToLogin = useCallback(() => {
     setAuthState("login");
-    onErrorDismiss?.();
+    clearError();
     setShowSuccessMessage(false);
-  }, [onErrorDismiss]);
+  }, [clearError]);
 
   const handleForgotPassword = useCallback(() => {
     setAuthState("password_reset_request");
-    onErrorDismiss?.();
-  }, [onErrorDismiss]);
+    clearError();
+  }, [clearError]);
 
   const handleBackToLogin = useCallback(() => {
     setAuthState("login");
-    onErrorDismiss?.();
+    clearError();
     setShowSuccessMessage(false);
-  }, [onErrorDismiss]);
+  }, [clearError]);
 
-  // Form submission handlers
   const handleLogin = async (data: LoginFormData) => {
-    if (onLogin) {
-      await onLogin(data);
-      // Note: Parent component should handle state transition to email_verification_pending if needed
+    const result = await login(data.email, data.password);
+    if (result.ok) {
+      if (result.data?.emailVerified) {
+        closeAuthModal();
+      } else {
+        setAuthState("email_verification_pending");
+      }
     }
   };
 
   const handleRegister = async (data: RegisterFormData) => {
-    if (onRegister) {
-      await onRegister(data);
-      // After successful registration, transition to email verification
+    const result = await register(data.email, data.password);
+    if (result.ok) {
       setAuthState("email_verification_pending");
     }
   };
 
   const handlePasswordResetRequest = async (data: PasswordResetRequestFormData) => {
-    if (onPasswordResetRequest) {
-      await onPasswordResetRequest(data);
+    const result = await resetPassword(data.email);
+    if (result.ok) {
       setShowSuccessMessage(true);
-      // Optionally transition back to login after a delay
       setTimeout(() => {
         handleBackToLogin();
       }, 3000);
@@ -126,63 +107,55 @@ export function AuthModal({
   };
 
   const handlePasswordSetNew = async (data: PasswordSetNewFormData) => {
-    if (onPasswordSetNew) {
-      await onPasswordSetNew(data);
+    const result = await updatePassword(data.password);
+    if (result.ok) {
       setShowSuccessMessage(true);
-      // Close modal after successful password reset
       setTimeout(() => {
-        onOpenChange(false);
+        closeAuthModal();
       }, 2000);
     }
   };
 
   const handlePasswordChange = async (data: PasswordChangeFormData) => {
-    if (onPasswordChange) {
-      await onPasswordChange(data);
+    const result = await updatePassword(data.newPassword);
+    if (result.ok) {
       setShowSuccessMessage(true);
-      // Close modal after successful password change
       setTimeout(() => {
-        onOpenChange(false);
+        closeAuthModal();
       }, 2000);
     }
   };
 
   const handleCheckEmailVerification = async () => {
-    if (onCheckEmailVerification) {
-      setIsChecking(true);
-      try {
-        const isVerified = await onCheckEmailVerification();
-        if (isVerified) {
-          // Close modal on successful verification
-          onOpenChange(false);
-        }
-      } finally {
-        setIsChecking(false);
+    setIsChecking(true);
+    try {
+      const isVerified = await checkEmailVerification();
+      if (isVerified) {
+        closeAuthModal();
       }
+    } finally {
+      setIsChecking(false);
     }
   };
 
   const handleResendVerificationEmail = async () => {
-    if (onResendVerificationEmail) {
-      setIsResending(true);
-      try {
-        await onResendVerificationEmail();
-      } finally {
-        setIsResending(false);
-      }
+    if (!user?.email) return;
+    setIsResending(true);
+    try {
+      await resendVerification(user.email);
+    } finally {
+      setIsResending(false);
     }
   };
 
   const handleOpenRegulations = () => {
-    // TODO: Open regulations modal or navigate to regulations page
     console.log("Open regulations modal");
   };
 
   const handleCancelPasswordChange = () => {
-    onOpenChange(false);
+    closeAuthModal();
   };
 
-  // Get modal title based on state
   const getModalTitle = (): string => {
     switch (authState) {
       case "login":
@@ -202,7 +175,6 @@ export function AuthModal({
     }
   };
 
-  // Get modal description based on state
   const getModalDescription = (): string => {
     switch (authState) {
       case "login":
@@ -223,7 +195,7 @@ export function AuthModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isAuthModalOpen} onOpenChange={closeAuthModal}>
       <DialogContent
         className={cn("sm:max-w-md", className)}
         showCloseButton={authState !== "password_set_new"}
@@ -239,9 +211,9 @@ export function AuthModal({
               onSubmit={handleLogin}
               onForgotPassword={handleForgotPassword}
               onSwitchToRegister={handleSwitchToRegister}
-              isLoading={isLoading}
+              isLoading={loading}
               error={error}
-              onErrorDismiss={onErrorDismiss}
+              onErrorDismiss={clearError}
             />
           )}
 
@@ -250,15 +222,15 @@ export function AuthModal({
               onSubmit={handleRegister}
               onSwitchToLogin={handleSwitchToLogin}
               onOpenRegulations={handleOpenRegulations}
-              isLoading={isLoading}
+              isLoading={loading}
               error={error}
-              onErrorDismiss={onErrorDismiss}
+              onErrorDismiss={clearError}
             />
           )}
 
           {authState === "email_verification_pending" && (
             <AuthEmailVerificationNotice
-              email={userEmail}
+              email={user?.email ?? ""}
               onCheckVerification={handleCheckEmailVerification}
               onResendEmail={handleResendVerificationEmail}
               onBackToLogin={handleBackToLogin}
@@ -271,9 +243,9 @@ export function AuthModal({
             <AuthFormPasswordResetRequest
               onSubmit={handlePasswordResetRequest}
               onBackToLogin={handleBackToLogin}
-              isLoading={isLoading}
+              isLoading={loading}
               error={error}
-              onErrorDismiss={onErrorDismiss}
+              onErrorDismiss={clearError}
               showSuccessMessage={showSuccessMessage}
             />
           )}
@@ -281,9 +253,9 @@ export function AuthModal({
           {authState === "password_set_new" && (
             <AuthFormPasswordSetNew
               onSubmit={handlePasswordSetNew}
-              isLoading={isLoading}
+              isLoading={loading}
               error={error}
-              onErrorDismiss={onErrorDismiss}
+              onErrorDismiss={clearError}
               showSuccessMessage={showSuccessMessage}
             />
           )}
@@ -293,9 +265,9 @@ export function AuthModal({
               onSubmit={handlePasswordChange}
               onCancel={handleCancelPasswordChange}
               requireCurrentPassword={false}
-              isLoading={isLoading}
+              isLoading={loading}
               error={error}
-              onErrorDismiss={onErrorDismiss}
+              onErrorDismiss={clearError}
               showSuccessMessage={showSuccessMessage}
             />
           )}

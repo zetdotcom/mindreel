@@ -4,24 +4,7 @@ import { AppRoutes } from "@/routes";
 import { History, Settings, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { RouteErrorBoundary } from "@/components/RouteErrorBoundary";
-
-/**
- * Main
- *
- * Root application layout handling:
- *  - Sidebar navigation (History, Settings, Profile)
- *  - Routed content area (scrollable)
- *  - Persistent, non-scrollable left sidebar
- *
- * Notes:
- *  - Capture button lives inside HistoryHeader / HistoryView (not duplicated here)
- *  - Uses declarative react-router v7 via <AppRoutes/>
- *  - Sidebar highlights active route by background change
- *
- * Accessibility:
- *  - <nav aria-label="Primary"> for navigation landmarks
- *  - Uses NavLink which applies aria-current="page" automatically
- */
+import { AuthModal } from "@/features/auth";
 
 type NavItem = {
   to: string;
@@ -47,11 +30,7 @@ const NAV_ITEMS: NavItem[] = [
 
 function SidebarNav() {
   return (
-    <nav
-      aria-label="Primary"
-      className="flex flex-col gap-2 px-3 pt-4"
-      role="navigation"
-    >
+    <nav aria-label="Primary" className="flex flex-col gap-2 px-3 pt-4" role="navigation">
       {NAV_ITEMS.map((item) => (
         <NavLink
           key={item.to}
@@ -61,8 +40,7 @@ function SidebarNav() {
             cn(
               "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
               "text-neutral-300 hover:text-[var(--sidebar-active-fg)] hover:bg-[var(--sidebar-active-bg)]",
-              isActive &&
-                "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-fg)]",
+              isActive && "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-fg)]",
             )
           }
         >
@@ -82,9 +60,7 @@ function SidebarNav() {
 function AppBrand() {
   return (
     <div className="px-4 py-4 border-b border-neutral-800">
-      <h1 className="text-lg font-semibold tracking-tight text-neutral-100">
-        MindReel
-      </h1>
+      <h1 className="text-lg font-semibold tracking-tight text-neutral-100">MindReel</h1>
       <p className="text-xs text-neutral-400 mt-0.5">Productivity Journal</p>
     </div>
   );
@@ -104,20 +80,15 @@ export function Main() {
         .custom-scroll { scrollbar-width: thin; scrollbar-color: var(--layout-scrollbar-thumb) var(--layout-scrollbar-track); }
       `}</style>
       <div className="flex h-screen w-screen overflow-hidden bg-neutral-950 text-neutral-100">
-        {/* Sidebar (non-scrollable) */}
         <aside
           className="flex h-full w-64 flex-col border-r border-[var(--sidebar-border)] bg-[var(--sidebar)] text-[var(--sidebar-foreground)] select-none"
           aria-label="Application Sidebar"
         >
           <AppBrand />
           <SidebarNav />
-          {/* Future: footer / version info */}
-          <div className="mt-auto px-4 py-3 text-[10px] text-neutral-500">
-            v1.0.0
-          </div>
+          <div className="mt-auto px-4 py-3 text-[10px] text-neutral-500">v1.0.0</div>
         </aside>
 
-        {/* Main Content (scrollable) */}
         <div
           className="flex-1 h-full overflow-y-auto bg-background custom-scroll"
           id="layout-scroll-container"
@@ -125,11 +96,7 @@ export function Main() {
           <div id="app-content" className="min-h-full">
             <RouteErrorBoundary>
               <Suspense
-                fallback={
-                  <div className="p-6 text-sm text-muted-foreground">
-                    Loading…
-                  </div>
-                }
+                fallback={<div className="p-6 text-sm text-muted-foreground">Loading…</div>}
               >
                 <AppRoutes />
               </Suspense>
@@ -137,6 +104,7 @@ export function Main() {
           </div>
         </div>
       </div>
+      <AuthModal />
     </>
   );
 }

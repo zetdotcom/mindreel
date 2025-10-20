@@ -20,39 +20,39 @@ Use this checklist to integrate the authentication UI with Supabase backend.
 
 ### Create `src/features/auth/model/useAuth.ts`
 
-- [ ] Set up state: `session`, `user`, `loading`, `error`
-- [ ] Create `login()` wrapper calling repository
-- [ ] Create `register()` wrapper calling repository
-- [ ] Create `logout()` wrapper calling repository
-- [ ] Create `resetPassword()` wrapper
-- [ ] Create `updatePassword()` wrapper
-- [ ] Create `checkEmailVerification()` wrapper
-- [ ] Handle loading states
-- [ ] Handle error states
-- [ ] Return auth state and methods
+- [x] Set up state: `session`, `user`, `loading`, `error`
+- [x] Create `login()` wrapper calling repository
+- [x] Create `register()` wrapper calling repository
+- [x] Create `logout()` wrapper calling repository
+- [x] Create `resetPassword()` wrapper
+- [x] Create `updatePassword()` wrapper
+- [x] Create `checkEmailVerification()` wrapper
+- [x] Handle loading states
+- [x] Handle error states
+- [x] Return auth state and methods
 
 ## Phase 3: Auth Context
 
 ### Create `src/features/auth/model/AuthContext.tsx`
 
-- [ ] Create React context
-- [ ] Create provider component
-- [ ] Use `useAuth()` hook internally
-- [ ] Listen to Supabase auth state changes
-- [ ] Update context on auth events
-- [ ] Persist session (localStorage or cookies)
-- [ ] Handle token refresh
-- [ ] Export `useAuthContext()` hook
+- [x] Create React context
+- [x] Create provider component
+- [x] Use `useAuth()` hook internally
+- [x] Listen to Supabase auth state changes
+- [x] Update context on auth events
+- [x] Persist session (handled by Supabase SDK)
+- [x] Handle token refresh (handled by Supabase SDK)
+- [x] Export `useAuthContext()` hook
 
 ## Phase 4: App Integration
 
 ### Update root component
 
-- [ ] Wrap app with `AuthProvider`
-- [ ] Add AuthModal to root layout
-- [ ] Connect modal handlers to auth context
-- [ ] Handle initial auth state check
-- [ ] Add loading screen during auth check
+- [x] Wrap app with `AuthProvider`
+- [x] Add AuthModal to root layout
+- [x] Connect modal handlers to auth context
+- [x] Handle initial auth state check (via useAuth)
+- [ ] Add loading screen during auth check (optional)
 
 ### Example:
 ```tsx
@@ -69,11 +69,11 @@ import { AuthModal } from '@/features/auth';
 
 ### Create `src/features/auth/ui/ProtectedFeatureGate.tsx`
 
-- [ ] Check if user is authenticated
-- [ ] Check if email is verified
-- [ ] Show AuthModal if not authenticated
-- [ ] Show email verification notice if needed
-- [ ] Render children when authorized
+- [x] Check if user is authenticated
+- [x] Check if email is verified
+- [x] Show AuthModal if not authenticated
+- [x] Show email verification notice if needed
+- [x] Render children when authorized
 
 ### Usage:
 ```tsx
