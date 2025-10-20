@@ -17,7 +17,8 @@
         "useConst": "warn"
       },
       "correctness": {
-        "noUnusedVariables": "error"
+        "noUnusedVariables": "error",
+        "useUniqueElementIds": "off"
       }
     }
   },
