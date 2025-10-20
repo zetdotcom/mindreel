@@ -86,12 +86,12 @@ import { AuthModal } from '@/features/auth';
 
 ### Update Supabase Dashboard
 
-- [ ] Enable email auth provider
+- [x] Enable email auth provider
 - [ ] Configure email templates (verification, reset)
 - [ ] Set up redirect URLs
 - [ ] Configure email settings (SMTP if needed)
-- [ ] Set password requirements
-- [ ] Enable email confirmation
+- [x] Set password requirements
+- [x] **MVP: Email confirmation disabled** (`enable_confirmations = false` in config.toml) - users are auto-verified for easier local development
 
 ### Environment Variables
 

@@ -18,6 +18,7 @@ W dynamicznym środowisku pracy, specjaliści często zapominają o wykonanych z
 - Użytkownicy mogą stworzyć konto i logować się za pomocą adresu e-mail i hasła.
 - System uwierzytelniania będzie oparty na usłudze Supabase.
 - Funkcje wymagające uwierzytelnienia (np. generowanie podsumowań AI) będą niedostępne dla niezalogowanych użytkowników.
+- **MVP: Email confirmation is disabled** - users are automatically verified upon registration for easier local development. Production deployment will enable email verification.
 
 ### 3.3. System zapisywania aktywności
 - Aplikacja cyklicznie wyświetla okno pop-up z pytaniem "Nad czym teraz pracujesz?".
@@ -82,6 +83,7 @@ W dynamicznym środowisku pracy, specjaliści często zapominają o wykonanych z
   3. System wymaga hasła o minimalnej długości.
   4. Podczas rejestracji muszę zaakceptować regulamin, który informuje o przetwarzaniu danych na potrzeby funkcji AI.
   5. Po pomyślnej rejestracji jestem automatycznie zalogowany i widzę ekran główny aplikacji.
+  6. **MVP: Email verification is disabled** - users are immediately verified without needing to confirm email.
 
 ### US-003: Logowanie użytkownika
 - ID: US-003

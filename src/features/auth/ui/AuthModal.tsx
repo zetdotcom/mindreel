@@ -81,18 +81,14 @@ export function AuthModal({ className }: AuthModalProps) {
   const handleLogin = async (data: LoginFormData) => {
     const result = await login(data.email, data.password);
     if (result.ok) {
-      if (result.data?.emailVerified) {
-        closeAuthModal();
-      } else {
-        setAuthState("email_verification_pending");
-      }
+      closeAuthModal();
     }
   };
 
   const handleRegister = async (data: RegisterFormData) => {
     const result = await register(data.email, data.password);
     if (result.ok) {
-      setAuthState("email_verification_pending");
+      closeAuthModal();
     }
   };
 

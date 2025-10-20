@@ -164,15 +164,17 @@ Guiding principles:
   - Email, password fields
   - Terms & AI processing consent checkbox (registration only; required)
   - Basic validation feedback
+  - **MVP: Email confirmation disabled** - users are immediately verified upon registration
 - Key view components:
   - AuthForm (shared)
   - ConsentNotice (register only)
   - Submit / SwitchMode link
 - UX / Accessibility / Security:
   - Password length validation; screen reader hints
-  - Errors generic (“Invalid credentials”)
+  - Errors generic ("Invalid credentials")
   - Token never stored in localStorage (handled through secure channel)
   - After success: redirect to History and attempt summary catch-up if applicable
+  - No email verification step required in MVP
 
 ### 2.8 Delete Confirmation Modal
 - View path: transient
