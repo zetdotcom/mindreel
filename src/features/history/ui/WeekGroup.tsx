@@ -32,6 +32,20 @@ export function WeekGroup({
   className,
 }: WeekGroupProps) {
   const hasContent = week.totalEntries > 0 || week.summary;
+  console.log("🚀 ~ week:", week);
+
+  // Determine if the current date is past the week's end_date and expose as weekPassed
+  const now = new Date();
+  const weekEndDate = week.end_date ? new Date(week.end_date) : null;
+  const weekPassed = weekEndDate ? now > weekEndDate : false;
+
+  // Inject weekPassed into SummaryCard via defaultProps so it is available without changing the existing invocation.
+  // (Assumes SummaryCard has been updated to accept a weekPassed prop in its types.)
+  (SummaryCard as any).defaultProps = {
+    ...(SummaryCard as any).defaultProps,
+    weekPassed,
+  };
+  //
 
   if (!hasContent) {
     return null; // Don't render empty weeks
@@ -60,14 +74,18 @@ export function WeekGroup({
             {/* Week Title */}
             <div className="flex items-center space-x-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
-              <h2 className="font-semibold text-foreground">{week.headerLabel}</h2>
+              <h2 className="font-semibold text-foreground">
+                {week.headerLabel}
+              </h2>
             </div>
           </div>
 
           {/* Week Stats */}
           <div className="flex items-center space-x-4 text-sm text-muted-foreground">
             <span>{week.totalEntries} entries</span>
-            {week.summary && <span className="text-primary">Summary available</span>}
+            {week.summary && (
+              <span className="text-primary">Summary available</span>
+            )}
           </div>
         </div>
       </div>
@@ -106,6 +124,8 @@ export function WeekGroup({
               }
             }}
             onLoginRequest={onLoginRequest}
+            weekPassed={weekPassed}
+            onGenerate={(x) => console.log("generate", x, week.end_date) as any}
           />
         </div>
       )}

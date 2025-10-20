@@ -2,17 +2,10 @@
 // Based on MindReel MVP edge function plan
 
 // Import shared utilities
-import type {
-  RequestPayload,
-  SupportedLanguage,
-  QuotaState,
-} from "../_shared/types.ts";
+import type { RequestPayload, SupportedLanguage, QuotaState } from "../_shared/types.ts";
 import { validateEnvironment, getNumericConfig } from "../_shared/env.ts";
 import { buildPromptData, formatSummary } from "../_shared/normalization.ts";
-import {
-  callOpenRouter,
-  createOpenRouterConfig,
-} from "../_shared/openrouter.ts";
+import { callOpenRouter, createOpenRouterConfig } from "../_shared/openrouter.ts";
 
 // Import local helper functions
 import { jsonResponse, errorResponse } from "./http-helpers.ts";
@@ -23,11 +16,7 @@ import {
   conditionalIncrementQuota,
   fetchCurrentQuota,
 } from "./quota.ts";
-import {
-  validateWeekRange,
-  validateEntries,
-  validateLanguage,
-} from "./validation.ts";
+import { validateWeekRange, validateEntries, validateLanguage } from "./validation.ts";
 
 // Main edge function
 (globalThis as any).Deno.serve(async (req: Request) => {
@@ -39,9 +28,7 @@ import {
 
     // Initialize Supabase client
     const supabaseUrl = (globalThis as any).Deno.env.get("SUPABASE_URL");
-    const serviceRoleKey = (globalThis as any).Deno.env.get(
-      "SUPABASE_SERVICE_ROLE_KEY",
-    );
+    const serviceRoleKey = (globalThis as any).Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
     if (!supabaseUrl || !serviceRoleKey) {
       console.error("Missing required environment variables");
@@ -52,27 +39,27 @@ import {
     const { createClient } = await import("npm:@supabase/supabase-js@2");
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    // Extract and validate Authorization header
-    // const authHeader = req.headers.get("authorization");
-    // if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    //   return errorResponse(
-    //     "auth_error",
-    //     "Missing or invalid Authorization header",
-    //     401,
-    //   );
-    // }
-
-    // const token = authHeader.slice(7); // Remove 'Bearer ' prefix
-
-    // // Verify user authentication
-    // const {
-    //   data: { user },
-    //   error: authError,
-    // } = await supabase.auth.getUser(token);
-    // if (authError || !user) {
-    //   console.log("Auth verification failed:", authError?.message);
-    //   return errorResponse("auth_error", "Invalid or expired token", 401);
-    // }
+    // --- Auth: Bearer token from client (Electron local storage via supabase-js) ---
+    const authHeader = req.headers.get("authorization") || req.headers.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return errorResponse("auth_error", "Missing or invalid Authorization header", 401);
+    }
+    const accessToken = authHeader.slice("Bearer ".length).trim();
+    let userId: string;
+    try {
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser(accessToken);
+      if (authError || !user) {
+        console.log("[weekly_summary] Auth verification failed:", authError?.message);
+        return errorResponse("auth_error", "Invalid or expired token", 401);
+      }
+      userId = user.id;
+    } catch (e) {
+      console.log("[weekly_summary] Auth exception:", (e as any)?.message);
+      return errorResponse("auth_error", "Auth verification failed", 401);
+    }
 
     // Parse request body
     let payload: RequestPayload;
@@ -83,40 +70,25 @@ import {
       return errorResponse("validation_error", "Invalid JSON payload");
     }
 
-    const user = {
-      id: "sss",
-    };
-
-    // Log successful auth for debugging
-    console.log(`Request from user: ${user.id}`);
+    // Log successful auth for debugging (avoid logging token)
+    console.log(`[weekly_summary] Request from user ${userId}`);
 
     // Phase 3: Validation Layer
     const serverNow = new Date();
 
     // Validate required fields
     if (!payload.week_start || !payload.week_end) {
-      return errorResponse(
-        "validation_error",
-        "week_start and week_end are required",
-      );
+      return errorResponse("validation_error", "week_start and week_end are required");
     }
 
     // Validate week range
-    const weekRangeError = validateWeekRange(
-      payload.week_start,
-      payload.week_end,
-      serverNow,
-    );
+    const weekRangeError = validateWeekRange(payload.week_start, payload.week_end, serverNow);
     if (weekRangeError) {
       return errorResponse("validation_error", weekRangeError);
     }
 
     // Validate entries
-    const entriesError = validateEntries(
-      payload.entries,
-      payload.week_start,
-      payload.week_end,
-    );
+    const entriesError = validateEntries(payload.entries, payload.week_start, payload.week_end);
     if (entriesError) {
       return errorResponse("validation_error", entriesError);
     }
@@ -132,11 +104,11 @@ import {
     // Phase 4: Quota Read & Reset Logic (Pre-LLM)
     try {
       // Get or initialize user quota
-      const initialQuota = await getOrInitUserQuota(supabase, user.id);
-      console.log(`Initial quota for user ${user.id}:`, initialQuota);
+      const initialQuota = await getOrInitUserQuota(supabase, userId);
+      console.log(`[weekly_summary] Initial quota for user ${userId}:`, initialQuota);
 
       // Reset quota if 28-day cycle has expired
-      const currentQuota = await resetQuotaIfExpired(supabase, user.id);
+      const currentQuota = await resetQuotaIfExpired(supabase, userId);
       console.log(`Current quota after reset check:`, currentQuota);
 
       // Calculate quota information
@@ -145,7 +117,7 @@ import {
       // Check if quota is exceeded
       if (quotaInfo.isExceeded) {
         console.log(
-          `Quota exceeded for user ${user.id}. Count: ${currentQuota.ai_summaries_count}`,
+          `[weekly_summary] Quota exceeded for user ${userId}. Count: ${currentQuota.ai_summaries_count}`,
         );
         return jsonResponse(
           {
@@ -193,8 +165,7 @@ import {
             {
               ok: false,
               reason: "provider_error",
-              message:
-                llmResponse.error || "AI service temporarily unavailable",
+              message: llmResponse.error || "AI service temporarily unavailable",
               retryable: true,
             },
             502,
@@ -202,21 +173,16 @@ import {
         }
 
         // Format the AI response
-        const formattedSummary = formatSummary(
-          llmResponse.summary!,
-          promptData.language,
-        );
+        const formattedSummary = formatSummary(llmResponse.summary!, promptData.language);
 
-        console.log(
-          `AI summary generated successfully (${formattedSummary.length} characters)`,
-        );
+        console.log(`AI summary generated successfully (${formattedSummary.length} characters)`);
 
         // Phase 7: Concurrency-Safe Quota Increment (Post-Success)
         try {
           // Attempt to increment quota atomically
           const incrementedQuota = await conditionalIncrementQuota(
             supabase,
-            user.id,
+            userId,
             currentQuota.ai_summaries_count,
           );
 
@@ -225,7 +191,7 @@ import {
           if (incrementedQuota === null) {
             // Race condition occurred, fetch current quota
             console.log("Race condition detected, fetching current quota");
-            finalQuota = await fetchCurrentQuota(supabase, user.id);
+            finalQuota = await fetchCurrentQuota(supabase, userId);
           } else {
             finalQuota = incrementedQuota;
           }
@@ -257,11 +223,7 @@ import {
         }
       } catch (processingError) {
         console.error("Entry processing or AI call failed:", processingError);
-        return errorResponse(
-          "other_error",
-          "Failed to process entries or generate summary",
-          500,
-        );
+        return errorResponse("other_error", "Failed to process entries or generate summary", 500);
       }
     } catch (quotaError) {
       console.error("Quota management error:", quotaError);
@@ -269,10 +231,6 @@ import {
     }
   } catch (error) {
     console.error("Unexpected error in edge function:", error);
-    return errorResponse(
-      "other_error",
-      "Unexpected internal failure; retry later",
-      500,
-    );
+    return errorResponse("other_error", "Unexpected internal failure; retry later", 500);
   }
 });
