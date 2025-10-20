@@ -7,12 +7,15 @@ import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
 import { ToastArea } from "./ToastArea";
 import { openCaptureWindow } from "@/features/capture";
 import { cn } from "@/lib/utils";
+import { useSupabase } from "@/supabase/useSupabase";
+import { AuthModal } from "@/features/auth/ui/AuthModal";
 
 /**
  * Main History View component
  * Displays chronological history of entries grouped by ISO weeks
  */
 export function HistoryView() {
+  const [authModalOpen, setAuthModalOpen] = React.useState(false);
   const {
     weeks,
     loading,
@@ -30,6 +33,20 @@ export function HistoryView() {
     addToast,
     removeToast,
   } = useHistoryState();
+
+  // Auth state (used to gate summary generation)
+  const { user } = useSupabase();
+
+  // Derive weeks with unauthorized summary state when user is not authenticated
+  const displayWeeks = React.useMemo(() => {
+    if (user) return weeks;
+    return weeks.map((week) => {
+      if (!user && week.summaryState === "pending" && week.totalEntries > 0 && !week.summary) {
+        return { ...week, summaryState: "unauthorized" };
+      }
+      return week;
+    });
+  }, [weeks, user]);
 
   // Handle add entry action
   const handleAddEntry = async () => {
@@ -57,9 +74,7 @@ export function HistoryView() {
     return (
       <div className="flex min-h-[400px] flex-col items-center justify-center space-y-4">
         <div className="text-center">
-          <h3 className="text-lg font-medium text-foreground mb-2">
-            Failed to Load History
-          </h3>
+          <h3 className="text-lg font-medium text-foreground mb-2">Failed to Load History</h3>
           <p className="text-sm text-muted-foreground mb-4">{error}</p>
           <button
             onClick={refreshWeeks}
@@ -76,9 +91,7 @@ export function HistoryView() {
     return (
       <div className="flex min-h-[400px] flex-col items-center justify-center space-y-4">
         <div className="text-center">
-          <h3 className="text-lg font-medium text-foreground mb-2">
-            No History Yet
-          </h3>
+          <h3 className="text-lg font-medium text-foreground mb-2">No History Yet</h3>
           <p className="text-sm text-muted-foreground mb-4">
             Start capturing your daily work to build your history.
           </p>
@@ -95,19 +108,13 @@ export function HistoryView() {
   return (
     <div className="w-full max-w-4xl mx-auto p-4 space-y-6">
       {/* Header */}
-      <HistoryHeader
-        showAddButton={true}
-        onRefresh={refreshWeeks}
-        onAddEntry={handleAddEntry}
-      />
+      <HistoryHeader showAddButton={true} onRefresh={refreshWeeks} onAddEntry={handleAddEntry} />
       {/* Error Banner */}
       {error && weeks.length > 0 && (
         <div className="bg-destructive/10 border border-destructive/20 rounded-md p-4">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="text-sm font-medium text-destructive">
-                Error Loading History
-              </h4>
+              <h4 className="text-sm font-medium text-destructive">Error Loading History</h4>
               <p className="text-sm text-destructive/80 mt-1">{error}</p>
             </div>
             <button
@@ -121,7 +128,7 @@ export function HistoryView() {
       )}
       {/* Weeks Container */}
       <div className="space-y-8">
-        {weeks.map((week) => (
+        {displayWeeks.map((week) => (
           <WeekGroup
             key={week.weekKey}
             week={week}
@@ -136,6 +143,7 @@ export function HistoryView() {
               // This is for coordination if needed
             }}
             onWeekUpdate={(updates) => updateWeek(week.weekKey, updates)}
+            onLoginRequest={() => setAuthModalOpen(true)}
           />
         ))}
       </div>
@@ -168,6 +176,9 @@ export function HistoryView() {
         onCancel={hideDeleteModal}
       />
       <ToastArea toasts={toasts} onRemoveToast={removeToast} />
+
+      {/* Auth Modal (opens when user clicks Sign In in summary card) */}
+      <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} initialState="login" />
     </div>
   );
 }

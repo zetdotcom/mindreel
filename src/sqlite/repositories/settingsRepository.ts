@@ -1,5 +1,5 @@
-import sqlite3 from 'sqlite3';
-import { Settings, UpdateSettingsInput } from '../types';
+import sqlite3 from "sqlite3";
+import { Settings, UpdateSettingsInput } from "../types";
 
 export class SettingsRepository {
   constructor(private db: sqlite3.Database) {}
@@ -9,7 +9,7 @@ export class SettingsRepository {
    */
   async getSettings(): Promise<Settings | null> {
     return new Promise((resolve, reject) => {
-      const sql = 'SELECT * FROM settings WHERE id = 1';
+      const sql = "SELECT * FROM settings WHERE id = 1";
 
       this.db.get(sql, [], (err, row: Settings) => {
         if (err) {
@@ -32,8 +32,14 @@ export class SettingsRepository {
         .then((currentSettings) => {
           const newSettings: Settings = {
             id: 1,
-            popup_interval_minutes: input.popup_interval_minutes ?? currentSettings?.popup_interval_minutes ?? 60,
-            global_shortcut: input.global_shortcut !== undefined ? input.global_shortcut : (currentSettings?.global_shortcut ?? null),
+            popup_interval_minutes:
+              input.popup_interval_minutes ??
+              currentSettings?.popup_interval_minutes ??
+              60,
+            global_shortcut:
+              input.global_shortcut !== undefined
+                ? input.global_shortcut
+                : (currentSettings?.global_shortcut ?? null),
           };
 
           const sql = `
@@ -41,17 +47,18 @@ export class SettingsRepository {
             VALUES (1, ?, ?)
           `;
 
-          this.db.run(sql, [
-            newSettings.popup_interval_minutes,
-            newSettings.global_shortcut
-          ], function(err) {
-            if (err) {
-              reject(err);
-              return;
-            }
+          this.db.run(
+            sql,
+            [newSettings.popup_interval_minutes, newSettings.global_shortcut],
+            function (err) {
+              if (err) {
+                reject(err);
+                return;
+              }
 
-            resolve(newSettings);
-          });
+              resolve(newSettings);
+            },
+          );
         })
         .catch(reject);
     });
@@ -79,7 +86,7 @@ export class SettingsRepository {
       const defaultSettings: Settings = {
         id: 1,
         popup_interval_minutes: 60,
-        global_shortcut: null,
+        global_shortcut: "Option+Command+Space",
       };
 
       const sql = `
@@ -87,17 +94,21 @@ export class SettingsRepository {
         VALUES (1, ?, ?)
       `;
 
-      this.db.run(sql, [
-        defaultSettings.popup_interval_minutes,
-        defaultSettings.global_shortcut
-      ], function(err) {
-        if (err) {
-          reject(err);
-          return;
-        }
+      this.db.run(
+        sql,
+        [
+          defaultSettings.popup_interval_minutes,
+          defaultSettings.global_shortcut,
+        ],
+        function (err) {
+          if (err) {
+            reject(err);
+            return;
+          }
 
-        resolve(defaultSettings);
-      });
+          resolve(defaultSettings);
+        },
+      );
     });
   }
 
@@ -106,7 +117,7 @@ export class SettingsRepository {
    */
   async settingsExist(): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      const sql = 'SELECT COUNT(*) as count FROM settings WHERE id = 1';
+      const sql = "SELECT COUNT(*) as count FROM settings WHERE id = 1";
 
       this.db.get(sql, [], (err, row: { count: number }) => {
         if (err) {

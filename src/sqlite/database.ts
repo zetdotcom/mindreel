@@ -157,7 +157,7 @@ export class Database {
       // Try to insert default settings, ignore if already exists
       const insertSQL = `
         INSERT OR IGNORE INTO settings (id, popup_interval_minutes, global_shortcut)
-        VALUES (1, 60, NULL)
+        VALUES (1, 60, 'Option+Command+Space')
       `;
 
       this.db.run(insertSQL, (err) => {

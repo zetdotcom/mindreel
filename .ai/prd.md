@@ -92,6 +92,19 @@ W dynamicznym środowisku pracy, specjaliści często zapominają o wykonanych z
   2. W przypadku podania błędnych danych, wyświetlany jest stosowny komunikat.
   3. Po pomyślnym zalogowaniu, mam dostęp do wszystkich funkcji, w tym historii i przyszłych podsumowań AI.
 
+### US-003a: Zmiana hasła użytkownika
+- ID: US-003a
+- Tytuł: Zmiana hasła użytkownika
+- Opis: Jako zalogowany użytkownik, który otrzymał tymczasowe hasło lub chce zwiększyć bezpieczeństwo, chcę móc zmienić swoje aktualne hasło na nowe, aby zapewnić prywatność mojego konta.
+- Kryteria akceptacji:
+  1. W modalu uwierzytelniania dostępna jest sekcja zmiany hasła z polami: bieżące hasło, nowe hasło, powtórzenie nowego hasła.
+
+  3. System wymaga zgodności pól „nowe hasło” i „powtórzenie”.
+
+  5. Po poprawnej zmianie hasła wyświetlany jest komunikat potwierdzający.
+  6. W przypadku błędnego bieżącego hasła lub innego błędu system wyświetla komunikat o niepowodzeniu.
+
+
 ### US-004: Zapisywanie aktywności przez pop-up
 - ID: US-004
 - Tytuł: Dodawanie wpisu za pomocą okna pop-up

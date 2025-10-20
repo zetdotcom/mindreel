@@ -7,6 +7,7 @@ import {
   EntryFilters,
 } from "../sqlite/types";
 import { IsoWeekIdentifier } from "../sqlite/dateUtils";
+import { syncShortcutFromDatabase } from "./globalShortcutManager";
 
 /**
  * Register all database-related IPC handlers
@@ -346,7 +347,10 @@ export function registerDatabaseHandlers(): void {
     "db:updateGlobalShortcut",
     async (_event, shortcut: string | null) => {
       try {
-        return await databaseService.updateGlobalShortcut(shortcut);
+        const result = await databaseService.updateGlobalShortcut(shortcut);
+        // Sync the shortcut with Electron's globalShortcut API
+        syncShortcutFromDatabase(shortcut);
+        return result;
       } catch (error) {
         console.error("Error updating global shortcut:", error);
         throw error;
@@ -430,4 +434,12 @@ export async function closeDatabase(): Promise<void> {
     console.error("Error closing database:", error);
     throw error;
   }
+}
+
+/**
+ * Get the database service instance.
+ * Used by other modules that need direct access to the database.
+ */
+export function getDatabaseService() {
+  return databaseService;
 }

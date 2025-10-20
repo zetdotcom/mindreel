@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/latest/schema.json",
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
 
   "formatter": {
     "enabled": true,
@@ -13,18 +13,11 @@
     "enabled": true,
     "rules": {
       "recommended": true,
-
       "style": {
-        "noVar": "error",
         "useConst": "warn"
       },
-
       "correctness": {
         "noUnusedVariables": "error"
-      },
-
-      "nursery": {
-        "useExhaustiveDependencies": "error"
       }
     }
   },
@@ -38,7 +31,12 @@
 
   "overrides": [
     {
-      "include": ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
+      "includes": [
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/*.spec.ts",
+        "**/*.spec.tsx"
+      ],
       "linter": {
         "rules": {
           "correctness": {
@@ -48,7 +46,7 @@
       }
     },
     {
-      "include": ["scripts/**"],
+      "includes": ["scripts/**"],
       "linter": {
         "enabled": false
       }
@@ -56,15 +54,7 @@
   ],
 
   "files": {
-    "ignore": [
-      "node_modules",
-      "dist",
-      "build",
-      "out",
-      "make",
-      ".vite",
-      "*.d.ts"
-    ]
+    "ignoreUnknown": true
   },
 
   "vcs": {

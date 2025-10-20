@@ -256,7 +256,51 @@ const migration001: Migration = {
   },
 };
 
-export const migrations: Migration[] = [migration001];
+/**
+ * Migration 2: Set default global shortcut for existing databases
+ */
+const migration002: Migration = {
+  id: 2,
+  name: "set_default_global_shortcut",
+  up: async (db: sqlite3.Database): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      // Update settings to set default shortcut if it's currently NULL or old value
+      db.run(
+        "UPDATE settings SET global_shortcut = 'Option+Command+Space' WHERE id = 1 AND (global_shortcut IS NULL OR global_shortcut = 'Command+Shift+K' OR global_shortcut = 'Option+Command+K')",
+        (err) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          console.log(
+            "Migration 002 completed: Set default global shortcut to Option+Command+Space",
+          );
+          resolve();
+        },
+      );
+    });
+  },
+  down: async (db: sqlite3.Database): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      // Rollback: Set global_shortcut back to NULL
+      db.run(
+        "UPDATE settings SET global_shortcut = NULL WHERE id = 1",
+        (err) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          console.log(
+            "Migration 002 rolled back: Reset global_shortcut to NULL",
+          );
+          resolve();
+        },
+      );
+    });
+  },
+};
+
+export const migrations: Migration[] = [migration001, migration002];
 
 export class MigrationRunner {
   private db: sqlite3.Database;

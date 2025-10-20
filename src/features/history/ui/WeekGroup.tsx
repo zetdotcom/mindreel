@@ -13,6 +13,7 @@ interface WeekGroupProps {
   onEntryDelete?: (entryId: number) => void;
   onSummaryUpdate?: (summaryId: number, content: string) => void;
   onWeekUpdate?: (updates: Partial<WeekGroupViewModel>) => void;
+  onLoginRequest?: () => void;
   className?: string;
 }
 
@@ -27,6 +28,7 @@ export function WeekGroup({
   onEntryDelete,
   onSummaryUpdate,
   onWeekUpdate,
+  onLoginRequest,
   className,
 }: WeekGroupProps) {
   const hasContent = week.totalEntries > 0 || week.summary;
@@ -58,18 +60,14 @@ export function WeekGroup({
             {/* Week Title */}
             <div className="flex items-center space-x-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
-              <h2 className="font-semibold text-foreground">
-                {week.headerLabel}
-              </h2>
+              <h2 className="font-semibold text-foreground">{week.headerLabel}</h2>
             </div>
           </div>
 
           {/* Week Stats */}
           <div className="flex items-center space-x-4 text-sm text-muted-foreground">
             <span>{week.totalEntries} entries</span>
-            {week.summary && (
-              <span className="text-primary">Summary available</span>
-            )}
+            {week.summary && <span className="text-primary">Summary available</span>}
           </div>
         </div>
       </div>
@@ -107,6 +105,7 @@ export function WeekGroup({
                 onWeekUpdate({ summaryState: newState });
               }
             }}
+            onLoginRequest={onLoginRequest}
           />
         </div>
       )}

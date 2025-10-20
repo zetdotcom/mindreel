@@ -98,6 +98,16 @@ declare global {
         openCapturePopup: () => Promise<void>;
         closeCapturePopup: () => Promise<void>;
       };
+      // Global shortcut API
+      shortcut: {
+        register: (
+          accelerator: string | null,
+        ) => Promise<{ success: boolean; error?: string }>;
+        isRegistered: () => Promise<{
+          isRegistered: boolean;
+          shortcut: string | null;
+        }>;
+      };
     };
   }
 }

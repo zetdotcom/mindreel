@@ -12,7 +12,13 @@ import {
 import {
   registerCaptureWindowHandlers,
   cleanupCaptureWindow,
+  createCaptureWindow,
 } from "./ipc/captureWindowHandlers";
+import {
+  initializeGlobalShortcut,
+  registerGlobalShortcutHandlers,
+  cleanupGlobalShortcuts,
+} from "./ipc/globalShortcutManager";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -65,6 +71,25 @@ app.on("ready", async () => {
     registerCaptureWindowHandlers();
     console.log("Capture window handlers registered");
 
+    // Register global shortcut handlers and initialize shortcuts
+    console.log("Initializing global shortcuts...");
+    const shortcutCallback = () => {
+      console.log("[SHORTCUT PRESSED] Opening capture window...");
+      try {
+        createCaptureWindow();
+        console.log("[SHORTCUT PRESSED] Capture window opened successfully");
+      } catch (error) {
+        console.error(
+          "[SHORTCUT PRESSED] Error opening capture window:",
+          error,
+        );
+      }
+    };
+
+    registerGlobalShortcutHandlers(shortcutCallback);
+    await initializeGlobalShortcut(shortcutCallback);
+    console.log("Global shortcuts initialized");
+
     // Create the main window
     console.log("Creating main window...");
     createWindow();
@@ -81,6 +106,7 @@ app.on("ready", async () => {
 app.on("window-all-closed", async () => {
   if (process.platform !== "darwin") {
     try {
+      cleanupGlobalShortcuts();
       cleanupCaptureWindow();
       await closeDatabase();
     } catch (error) {
@@ -101,6 +127,7 @@ app.on("activate", () => {
 // Handle app quit to ensure database is closed properly
 app.on("before-quit", async (event) => {
   try {
+    cleanupGlobalShortcuts();
     cleanupCaptureWindow();
     await closeDatabase();
   } catch (error) {

@@ -22,8 +22,9 @@ let captureWindow: BrowserWindow | null = null;
 /**
  * Create the capture popup window.
  * Returns existing window if already open.
+ * Exported for use by global shortcut manager.
  */
-function createCaptureWindow(): BrowserWindow {
+export function createCaptureWindow(): BrowserWindow {
   // Reuse existing (focus) if already open
   if (captureWindow && !captureWindow.isDestroyed()) {
     captureWindow.focus();

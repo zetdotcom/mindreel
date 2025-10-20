@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Shortcut Test</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #0a0a0a;
+            color: #fff;
+        }
+        .container {
+            background: #1a1a1a;
+            border: 2px solid #333;
+            border-radius: 12px;
+            padding: 30px;
+        }
+        h1 {
+            color: #60a5fa;
+            margin-top: 0;
+        }
+        .status {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            background: #1e293b;
+            border-left: 4px solid #60a5fa;
+        }
+        .success {
+            background: #064e3b;
+            border-left-color: #10b981;
+            color: #d1fae5;
+        }
+        .error {
+            background: #7f1d1d;
+            border-left-color: #ef4444;
+            color: #fecaca;
+        }
+        button {
+            background: #60a5fa;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #3b82f6;
+        }
+        button:active {
+            background: #2563eb;
+        }
+        .log {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #222;
+        }
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        .timestamp {
+            color: #666;
+            margin-right: 10px;
+        }
+        .shortcut-display {
+            font-size: 24px;
+            font-weight: bold;
+            padding: 20px;
+            background: #1e293b;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+        .key {
+            background: #374151;
+            padding: 8px 16px;
+            border-radius: 6px;
+            margin: 0 5px;
+            display: inline-block;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Global Shortcut Test</h1>
+
+        <div class="shortcut-display">
+            <span class="key">⌥ Option</span> + <span class="key">⌘ Command</span> + <span class="key">K</span>
+        </div>
+
+        <div id="status" class="status">
+            Waiting for status check...
+        </div>
+
+        <div>
+            <button onclick="checkStatus()">🔍 Check Shortcut Status</button>
+            <button onclick="testCallback()">🧪 Test Callback</button>
+            <button onclick="changeShortcut()">🔧 Change Shortcut</button>
+            <button onclick="clearLogs()">🗑️ Clear Logs</button>
+        </div>
+
+        <h2>Event Log</h2>
+        <div id="log" class="log"></div>
+
+        <h2>Instructions</h2>
+        <ol>
+            <li>Check the shortcut status above</li>
+            <li>Press <strong>Option + Command + K</strong> on your keyboard</li>
+            <li>The capture popup should open</li>
+            <li>Check the console and event log for messages</li>
+        </ol>
+
+        <h3>Troubleshooting</h3>
+        <ul>
+            <li>If shortcut is not registered, restart the app</li>
+            <li>Try pressing the keys simultaneously</li>
+            <li>Check if another app is using the same shortcut</li>
+            <li>Open DevTools (View → Toggle Developer Tools) to see console logs</li>
+        </ul>
+    </div>
+
+    <script>
+        let logCounter = 0;
+
+        function addLog(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="timestamp">[${timestamp}]</span>${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            logCounter++;
+            console.log(`[Test] ${message}`);
+        }
+
+        function clearLogs() {
+            document.getElementById('log').innerHTML = '';
+            logCounter = 0;
+            addLog('Logs cleared');
+        }
+
+        async function checkStatus() {
+            addLog('Checking shortcut status...');
+
+            if (!window.appApi) {
+                updateStatus('❌ Error: window.appApi not available', 'error');
+                addLog('ERROR: window.appApi is not available', 'error');
+                return;
+            }
+
+            try {
+                // Check if shortcut is registered
+                const status = await window.appApi.shortcut.isRegistered();
+                addLog(`Shortcut registered: ${status.isRegistered}`);
+                addLog(`Current shortcut: ${status.shortcut || '(none)'}`);
+
+                // Check database settings
+                const settings = await window.appApi.db.getSettings();
+                addLog(`Database shortcut: ${settings?.global_shortcut || '(none)'}`);
+
+                if (status.isRegistered && status.shortcut) {
+                    updateStatus(`✅ Shortcut registered: ${status.shortcut}`, 'success');
+                } else {
+                    updateStatus('⚠️ No shortcut registered', 'error');
+                    addLog('Try restarting the app');
+                }
+            } catch (error) {
+                updateStatus(`❌ Error: ${error.message}`, 'error');
+                addLog(`ERROR: ${error.message}`, 'error');
+                console.error('Status check error:', error);
+            }
+        }
+
+        async function testCallback() {
+            addLog('Testing capture window callback...');
+
+            if (!window.appApi || !window.appApi.capture) {
+                addLog('ERROR: capture API not available', 'error');
+                return;
+            }
+
+            try {
+                await window.appApi.capture.openCapturePopup();
+                addLog('✅ Capture window opened successfully!', 'success');
+            } catch (error) {
+                addLog(`ERROR opening capture window: ${error.message}`, 'error');
+                console.error('Capture error:', error);
+            }
+        }
+
+        async function changeShortcut() {
+            const newShortcut = prompt('Enter new shortcut (e.g., Command+Shift+M):');
+            if (!newShortcut) return;
+
+            addLog(`Attempting to change shortcut to: ${newShortcut}`);
+
+            try {
+                // Update in database
+                await window.appApi.db.updateGlobalShortcut(newShortcut);
+                addLog('✅ Database updated');
+
+                // Verify registration
+                const status = await window.appApi.shortcut.isRegistered();
+                addLog(`New shortcut registered: ${status.shortcut}`);
+
+                updateStatus(`✅ Shortcut changed to: ${newShortcut}`, 'success');
+            } catch (error) {
+                addLog(`ERROR: ${error.message}`, 'error');
+                updateStatus(`❌ Failed to change shortcut: ${error.message}`, 'error');
+            }
+        }
+
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = 'status';
+            if (type === 'success') statusDiv.classList.add('success');
+            if (type === 'error') statusDiv.classList.add('error');
+        }
+
+        // Auto-check status on load
+        window.addEventListener('DOMContentLoaded', () => {
+            addLog('Test page loaded');
+            addLog('Waiting 1 second before checking status...');
+            setTimeout(() => {
+                checkStatus();
+            }, 1000);
+        });
+
+        // Listen for capture window events
+        addLog('Listening for global shortcut events...');
+        addLog('Press Option + Command + K to trigger the shortcut');
+    </script>
+</body>
+</html>

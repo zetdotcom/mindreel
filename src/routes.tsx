@@ -1,6 +1,8 @@
 import React, { lazy, Suspense } from "react";
 import { useRoutes, Navigate } from "react-router";
 import type { RouteObject } from "react-router";
+import SettingsView from "./views/Settings/SettingsView";
+import ProfileView from "./views/Profile/ProfileView";
 
 /**
  * Application route definitions (declarative mode).
@@ -32,27 +34,6 @@ const HistoryPageView = lazy(() =>
 // (Settings/Profile are trivial placeholders; keeping them non-lazy is fine)
 
 // --- Placeholder / Mock Views ------------------------------------------------
-function SettingsView() {
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-semibold mb-4">Settings</h1>
-      <p className="text-sm text-muted-foreground">
-        Settings implementation pending.
-      </p>
-    </div>
-  );
-}
-
-function ProfileView() {
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-semibold mb-4">Profile</h1>
-      <p className="text-sm text-muted-foreground">
-        Profile view placeholder content.
-      </p>
-    </div>
-  );
-}
 
 function NotFoundView() {
   return (

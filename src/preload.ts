@@ -80,9 +80,17 @@ const captureApi = {
   closeCapturePopup: () => ipcRenderer.invoke("capture:closePopup"),
 };
 
+// Global shortcut API
+const shortcutApi = {
+  register: (accelerator: string | null) =>
+    ipcRenderer.invoke("shortcut:register", accelerator),
+  isRegistered: () => ipcRenderer.invoke("shortcut:isRegistered"),
+};
+
 // Expose APIs to renderer process
 contextBridge.exposeInMainWorld("appApi", {
   ping: () => ipcRenderer.invoke("ping"),
   db: databaseApi,
   capture: captureApi,
+  shortcut: shortcutApi,
 });
