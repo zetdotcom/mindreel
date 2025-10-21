@@ -39,12 +39,14 @@ export interface DayGroupViewModel {
 }
 
 export type SummaryCardState =
-  | 'unauthorized'
-  | 'limitReached'
-  | 'pending'
-  | 'generating'
-  | 'success'
-  | 'failed';
+  | "unauthorized"
+  | "limitReached"
+  | "pending"
+  | "generating"
+  | "success"
+  | "failed"
+  | "unsupported"
+  | "alreadyExists";
 
 export interface SummaryViewModel extends Summary {
   isEditing: boolean;
@@ -94,7 +96,7 @@ export interface HistoryState {
 
 export interface ToastMessage {
   id: string;
-  type: 'error' | 'success' | 'info';
+  type: "error" | "success" | "info";
   text: string;
 }
 

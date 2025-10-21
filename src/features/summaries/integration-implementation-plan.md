@@ -1,137 +1,144 @@
 # AI Weekly Summary Generation Integration Plan
 
-## Status Summary (2025-10-21)
-Core generation module (`aiGeneration.ts`) exists and calls the `generate_weekly_summary` edge function via a direct `fetch` with auth bearer token. Payload building, logging, and basic error state mapping (unauthorized / quota / failed) are implemented. Arbitrary ISO week persistence is already supported via existing IPC `db:createSummary` (preload `createSummary`). Remaining gaps: repository still guards `createForIsoWeek` (to be refactored), weekPassed validation & custom error classes, orchestrator should return the full persisted `Summary` object (currently only content), UI integration, and optional duplicate handling.
+## Status Summary (2025-10-21 – Updated)
+Generation orchestrator (`aiGeneration.ts`) implemented with:
+- Week completion (weekPassed) validation.
+- Auth token retrieval & edge function invocation via `fetch`.
+- Payload construction + dev-only logging.
+- Duplicate detection (returns `alreadyExists`).
+- Distinct UI states mapped: `unauthorized`, `limitReached`, `failed`, `unsupported`, `alreadyExists`, `success`.
+- Persistence of arbitrary ISO week summaries via existing IPC `createSummary` (guard only when handler absent).
+- Returns full persisted `Summary` object (not just content).
+- UI wired (WeekGroup → SummaryCard) including weekPassed gating and new states.
+
+Not yet done:
+- Dedicated IPC handler rename (`createSummaryForIsoWeek`) / uniqueness DB index.
+- Formal custom error classes (currently removed for simplicity; direct state mapping used instead).
+- Tooltip UX for unsupported; currently simple message block.
+- Additional validation (weekday alignment) & AbortController.
+- Docs/tests & DB uniqueness constraint.
 
 ## Summary
-Implement client-side integration for manual weekly AI summary generation using the existing Supabase Edge Function `generate_weekly_summary`. The `SummaryCard` Generate button will trigger a flow that (only after the week has passed) gathers that week's entries, calls the edge function with the required payload and auth token, persists the returned summary into local SQLite via existing (now extended) summaries repository, and updates UI state (success / failed / unauthorized / limitReached / unsupported). Quota and detailed error reasoning remain server‑side; UI shows only generic success/failure plus unauthorized or limit reached.
+Client-side manual AI weekly summary generation integrated. Users can generate after a week completes; orchestrator gathers entries, calls Supabase Edge Function, persists result, and updates UI state. Duplicate and unsupported persistence scenarios surfaced via explicit states.
 
 ## Goals
 - [x] Invoke edge function from renderer with correct payload & auth token
-- [ ] Respect product rule: generation allowed only for completed weeks (weekPassed)
+- [x] Respect product rule: generation allowed only for completed weeks (weekPassed)
 - [x] Keep repositories DB‑focused; isolate network logic in a small generation module
 - [x] Reuse existing week start/end dates from `WeekGroupViewModel`
 - [x] Use default language `en` (configurable later without refactor)
 - [x] Provide minimal but structured logging for debugging failures
-- [ ] Map all edge function errors to a single failed state (or unauthorized) per current UX requirement (currently returns distinct states)
+- [~] Map all edge function errors to a single failed state (intentionally kept distinct states: unauthorized, limitReached, failed, unsupported)
 - [x] Keep implementation simple & aligned with Feature-Sliced architecture
-- [ ] Persist summaries for any completed ISO week (not just current week)
+- [x] Persist summaries for any completed ISO week (via existing `createSummary`) 
+
+(Use [~] to denote decision change from original plan.)
 
 ## Non-Goals
-- Displaying quota or detailed error codes in UI
-- Implementing cancellation UI (AbortController wiring only for future)
-- Automatic weekly scheduled generation (manual trigger only here)
-- Multi-language selection or settings UI
-- Optimistic quota or summary state management
+Unchanged from original (quota UI, cancellation UI, scheduling, multi-language selector, optimistic quota display).
 
 ## Architecture Placement
-- [x] New module: `src/features/summaries/model/aiGeneration.ts` exporting orchestration (named `generateWeeklySummary` instead of `generateWeeklySummaryForWeek` but equivalent intent)
-- [x] Edge function invocation uses direct `fetch` (divergence from original `EdgeFunctionClient` idea; revisit if more functions added)
-- [x] Authentication token retrieved via existing Supabase renderer client: `supabaseClient.auth.getSession()`
-- [x] Entries for the target week obtained via IPC (`getEntriesForIsoWeek`); future: derive from loaded WeekGroup VM if already present
-- [ ] Persistence via new IPC handler `createSummaryForIsoWeek` (to be added) for arbitrary week creation (currently limited to current week fallback)
+- [x] Module: `src/features/summaries/model/aiGeneration.ts` exporting `generateWeeklySummary`
+- [x] Direct `fetch` acceptable for single function; abstraction deferred
+- [x] Auth via `supabaseClient.auth.getSession()`
+- [x] Entries via IPC (`getEntriesForIsoWeek`)
+- [x] Persistence via existing `createSummary` (renamed handler optional future) – returns full Summary
 
 ## Data Flow (Manual Generation)
-1. User clicks Generate on `SummaryCard` for a past (completed) week. (UI hook-up pending)
-2. `SummaryCard.onGenerate` calls orchestrator passing week meta (iso_year, week_of_year, start_date, end_date).
-3. Orchestrator gathers entries for that ISO week (via IPC or from in-memory VM) and validates Monday→Sunday range & completion.
-4. [x] Build request payload `{ week_start, week_end, entries: [{ timestamp, text }], language: 'en' }`.
-5. [x] Fetch current Supabase session; if missing → unauthorized state.
-6. [x] Invoke edge function with auth token (Abort support pending).
-7. [ ] On success: persist summary via `createSummaryForIsoWeek` IPC handler (supports arbitrary past weeks) and receive persisted `Summary`.
-8. [ ] Update week model / UI state with returned `Summary` (`summaryState='success'`).
-9. [x] On error: log details (dev) → map to unauthorized / limitReached / failed / unsupported.
+1. User clicks Generate on `SummaryCard` for a completed week.
+2. WeekGroup `onGenerate` calls orchestrator with iso meta.
+3. Orchestrator fetches entries & validates completed week window.
+4. [x] Build request payload `{ week_start, week_end, entries: [...], language }`.
+5. [x] Retrieve auth session → unauthorized if absent.
+6. [x] Invoke edge function.
+7. [x] On success: persist via repository `createForIsoWeek` (uses `createSummary`).
+8. [x] Update in-memory week model with returned `Summary` + state `success`.
+9. [x] Map error outcomes to UI states (`unauthorized`, `limitReached`, `failed`, `unsupported`, `alreadyExists`).
 
-## Implementation Steps
+## Implementation Steps (Reconciled)
 
-### Section A: Repository & IPC Adjustments (Only if Needed)
-- [x] A1. Verify existing IPC/database handler supports creating summary for arbitrary iso week (it does not yet)
-- [ ] A2. Extend `SummariesDbApi` interface in `features/summaries/model/repository.ts` with new method: `createSummaryForIsoWeek(args)`
-- [ ] A3. Update repository `createForIsoWeek` to always call new IPC method (remove current-week guard); throw distinct error if handler absent
-- [x] A4. Ensure backward compatibility (retain current-week methods)
-- [ ] A5. Add IPC handler `createSummaryForIsoWeek({ iso_year, week_of_year, start_date, end_date, content })` in `ipc/databaseHandlers.ts` and expose via preload
-- [ ] A6. Confirm DB schema includes (iso_year, week_of_year, start_date, end_date); add migration if `iso_year` or uniqueness constraint absent
-- [ ] A7. Add unique index on `(iso_year, week_of_year)` to prevent duplicates & accelerate lookups
+### Section A: Repository & IPC Adjustments
+- [x] A1. Verify existing handler supports arbitrary iso week (current `createSummary` does)
+- [x] A2. (Adjusted) Reuse existing `createSummary`; defer dedicated `createSummaryForIsoWeek`
+- [x] A3. Repository `createForIsoWeek` now directly calls handler (throws if absent)
+- [x] A4. Backward compatibility retained
+- [ ] A5. Add explicit `createSummaryForIsoWeek` IPC alias (optional)
+- [ ] A6. Confirm / add DB uniqueness migration for `(iso_year, week_of_year)`
+- [ ] A7. Add unique index enforcement & duplicate error surface (currently handled pre-call)
 
 ### Section B: Edge Function Generation Module
-- [x] B1. Create `aiGeneration.ts` under `features/summaries/model/`
-- [x] B2. Implement payload builder (implemented inline as `buildEdgePayload`)
-- [x] B3. Implement `generateWeeklySummaryForWeek` (named `generateWeeklySummary`; needs enhancement: weekPassed validation + return persisted Summary object)
-- [x] B4. Add lightweight internal logger (`logDebug` gated by env)
-- [ ] B5. Handle errors with custom error classes (`UnauthorizedGenerationError`, `QuotaExceededError`, `SummaryGenerationError`, `UnsupportedIsoWeekPersistenceError`)
-- [ ] B6. Validate week completion before invoking edge function (`end_date < now`)
+- [x] B1–B4 Implemented
+- [x] B5 (Dropped) Custom error classes removed (simplified state mapping)
+- [x] B6 Week completion validation implemented
 
-### Section C: UI Integration (SummaryCard / WeekGroup)
-- [ ] C1. Replace temporary `onGenerate` in `WeekGroup.tsx` with orchestrator call passing full week meta
-- [ ] C2. Wrap generation call in try/catch to translate custom errors into `summaryState` (unauthorized / limitReached / failed / unsupported)
-- [ ] C3. Ensure `SummaryCard` expects throw-on-failure (or state union) and remove console noise
-- [ ] C4. Enforce weekPassed logic (hide/disable Generate button if week incomplete)
-- [ ] C5. Show tooltip / disabled state if persistence unsupported (unsupported error)
+### Section C: UI Integration
+- [x] C1 Hooked orchestrator in `WeekGroup.tsx`
+- [x] C2 Error state mapping via result union (no thrown custom errors)
+- [x] C3 Removed noisy console logs (pending final sweep) – summary debug removed, week log to remove
+- [x] C4 WeekPassed gating (button hidden/disabled until complete & entries exist)
+- [x] C5 Unsupported state message (no tooltip yet)
 
 ### Section D: Supabase Client Usage
-- [x] D1. Reuse renderer client for session retrieval
-- [x] D2. Access token extraction implemented
-- [ ] D3. (Optional) Abstract edge function invocation behind shared client if more functions added
-- [ ] D4. Provide optional singleton helper if abstraction introduced
+- [x] D1–D2 Implemented
+- [ ] D3 Optional abstraction (deferred)
+- [ ] D4 Optional singleton helper (deferred)
 
 ### Section E: Types & Validation
-- [ ] E1. Reuse existing `WeeklySummaryRequest` & entry types from `supabase/api/types.ts` instead of ad-hoc local type
-- [x] E2. Ensure entries conform to expected shape (`timestamp`, `text`)
-- [x] E3. Use provided `start_date` / `end_date` directly
-- [ ] E4. Introduce `CreateIsoWeekSummaryArgs` shared between IPC handler, repository, and orchestrator
-- [ ] E5. Assert (dev) that `start_date` is Monday and `end_date` is Sunday; warn if mismatch
+- [ ] E1 Reuse server/shared request type (still local payload structure)
+- [x] E2 Entries shape conforms
+- [x] E3 Using provided start/end
+- [x] E4 Introduced shared `CreateIsoWeekSummaryArgs` (repository imports)
+- [ ] E5 Monday/Sunday structural validation (not yet implemented)
 
 ### Section F: Error Handling & Logging
-- [ ] F1. Implement error class wrappers (`UnauthorizedGenerationError`, `QuotaExceededError`, `SummaryGenerationError`, `UnsupportedIsoWeekPersistenceError`)
-- [ ] F2. UI catch block: map error classes to `summaryState`
-- [x] F3. Log detailed debug info only in dev mode
-- [x] F4. Avoid user-facing detailed error; keep generic messaging
-- [ ] F5. Distinguish `unsupported` (infra gap) from generic `failed` to guide UI disabling
+- [ ] F1–F2 Custom error classes (intentionally skipped)
+- [x] F3 Dev-only logging
+- [x] F4 Generic user messaging
+- [x] F5 Distinguish `unsupported` vs `failed`
 
 ### Section G: Persistence & State Update
-- [x] G1. Persist summary via repository wrapper (current implementation limited to current week; to be updated for arbitrary week)
-- [x] G2. Store summary content verbatim
-- [ ] G3. Return full persisted `Summary` object from orchestrator (currently only returns content)
-- [ ] G4. Update in-memory week model / context store immediately with returned `Summary`
+- [x] G1 Arbitrary ISO week persistence
+- [x] G2 Store content verbatim
+- [x] G3 Return full persisted `Summary`
+- [x] G4 Update in-memory state immediately
 
 ### Section H: Abort & Future-Proofing
-- [ ] H1. Provide optional `AbortController` / `abortSignal` parameter & pass to fetch
-- [ ] H2. (Still out of scope) Cancel UI; just ensure safe cleanup
+- [ ] H1 AbortController parameter
+- [ ] H2 Cancel UI (still deferred)
 
-### Section I: Testing & Verification (Developer Manual Checks)
-- [ ] I1. Manual test: completed past week generation (authenticated)
-- [ ] I2. Manual test: unauthorized state while logged out
-- [ ] I3. Manual test: forced edge failure (network disconnect)
-- [ ] I4. Manual test: attempt generation for in-progress current week (should be blocked)
-- [ ] I5. Manual test: generate summaries for multiple distinct past weeks (persist each separately)
-- [ ] I6. Manual test: duplicate generation same week (decide behavior: prevent duplicate vs overwrite)
-- [ ] I7. Manual test: unsupported persistence path (simulate missing handler) → `unsupported` state surfaced
+### Section I: Manual Verification (Pending)
+- [ ] I1 Completed past week generation
+- [ ] I2 Unauthorized
+- [ ] I3 Edge/network failure
+- [ ] I4 In-progress week blocked
+- [ ] I5 Multiple past weeks
+- [ ] I6 Duplicate generation (currently yields `alreadyExists` state)
+- [ ] I7 Unsupported persistence simulation
 
 ### Section J: Cleanup / Refactors
-- [ ] J1. Remove TEST-only logging in `SummaryCard` after integration
-- [ ] J2. Remove `defaultProps` injection hack for `weekPassed` in `WeekGroup.tsx` (verify then delete)
-- [ ] J3. Ensure no unused imports remain
-- [ ] J4. Remove temporary current-week guard logic in repository once arbitrary handler added
-- [ ] J5. Update docs referencing "current week only" limitation
+- [x] J1 Remove TEST-only logging (partial – verify WeekGroup console removal)
+- [x] J2 Remove `defaultProps` hack for `weekPassed`
+- [ ] J3 Final pass for unused imports
+- [ ] J4 Remove commentary referring to future current-week limitation
+- [ ] J5 Update any docs still claiming “current week only” limit
 
-## Rollout Considerations
-- Perform behind internal feature flag (`ENABLE_AI_SUMMARY=true`) if desired (optional)
-- Monitor edge function logs for validation errors to adjust payload construction
+## Open Follow-Ups / Next Steps
+1. Add DB unique index migration for `(iso_year, week_of_year)`.
+2. Replace pre-existence check + state with optimistic attempt + DB unique error mapping (optional improvement).
+3. Introduce weekday alignment assertion (dev-only) for start/end dates.
+4. Add AbortController support for future cancellation features.
+5. Add test suite covering success, unauthorized, limitReached, duplicate, unsupported, week-incomplete.
+6. Optional: unify edge function invocation behind shared client abstraction if more functions added.
+7. Final cleanup of any leftover console logs and unused imports once validated.
 
-## Risks & Mitigations
-- Risk: Repository lacks arbitrary iso-week create → Mitigation: implement IPC handler (A5) + unique index (A7)
-- Risk: Duplicate summaries for same week → Mitigation: DB unique constraint + pre-existence check
-- Risk: Large entry payload size → Mitigation: rely on edge validation; optional client truncation later
-- Risk: Multiple rapid clicks → Mitigation: UI `generating` state disables button
-- Risk: Timezone boundary misclassifies completion → Mitigation: normalize week end check to UTC
-- Risk: Unsupported handler leads to confusing failures → Mitigation: explicit `unsupported` error class & UI messaging
+## Risks & Mitigations (Updated)
+- Duplicate summaries: mitigated by pre-check; strengthen with DB unique index.
+- Week boundary timezone issues: current UTC comparison acceptable; add explicit normalization later.
+- Unsupported handler scenario: explicit `unsupported` state already present.
+- Rapid clicks: guarded by `generating` state disabling button.
 
-## Future Enhancements (Out of Scope Now)
-- Scheduled automatic generation (Sunday 23:00) via local process or server push
-- Multi-language user selection
-- Display quota usage and cycle reset countdown
-- Cancel generation mid-request; offline queue for retries
-- Improved formatting (markdown → rich list rendering) in SummaryCard
+## Future Enhancements (Unchanged)
+- Scheduling, multi-language, quota display, cancellation UI, improved formatting.
 
 ---
-Prepared for continued implementation. Updated with new tasks for arbitrary week persistence and refined error handling while retaining original plan context.
+Document updated to reflect current implementation and adjusted scope decisions.

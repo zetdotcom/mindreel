@@ -32,20 +32,11 @@ export function WeekGroup({
   className,
 }: WeekGroupProps) {
   const hasContent = week.totalEntries > 0 || week.summary;
-  console.log("🚀 ~ week:", week);
 
   // Determine if the current date is past the week's end_date and expose as weekPassed
   const now = new Date();
   const weekEndDate = week.end_date ? new Date(week.end_date) : null;
   const weekPassed = weekEndDate ? now > weekEndDate : false;
-
-  // Inject weekPassed into SummaryCard via defaultProps so it is available without changing the existing invocation.
-  // (Assumes SummaryCard has been updated to accept a weekPassed prop in its types.)
-  (SummaryCard as any).defaultProps = {
-    ...(SummaryCard as any).defaultProps,
-    weekPassed,
-  };
-  //
 
   if (!hasContent) {
     return null; // Don't render empty weeks
@@ -74,18 +65,14 @@ export function WeekGroup({
             {/* Week Title */}
             <div className="flex items-center space-x-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
-              <h2 className="font-semibold text-foreground">
-                {week.headerLabel}
-              </h2>
+              <h2 className="font-semibold text-foreground">{week.headerLabel}</h2>
             </div>
           </div>
 
           {/* Week Stats */}
           <div className="flex items-center space-x-4 text-sm text-muted-foreground">
             <span>{week.totalEntries} entries</span>
-            {week.summary && (
-              <span className="text-primary">Summary available</span>
-            )}
+            {week.summary && <span className="text-primary">Summary available</span>}
           </div>
         </div>
       </div>
@@ -125,7 +112,72 @@ export function WeekGroup({
             }}
             onLoginRequest={onLoginRequest}
             weekPassed={weekPassed}
-            onGenerate={(x) => console.log("generate", x, week.end_date) as any}
+            onGenerate={async (ident) => {
+              if (!onWeekUpdate) return;
+              onWeekUpdate({ summaryState: "generating" });
+              const result = await (
+                await import("../../summaries/model/aiGeneration")
+              ).generateWeeklySummary({
+                iso_year: ident.iso_year,
+                week_of_year: ident.week_of_year,
+                start_date: week.start_date,
+                end_date: week.end_date,
+              });
+              if (result.ok) {
+                onWeekUpdate({
+                  summary: {
+                    ...result.summary,
+                    isEditing: false,
+                    isSaving: false,
+                    draftContent: result.summary.content,
+                    state: "success",
+                    weekKey: week.weekKey,
+                  },
+                  summaryState: "success",
+                });
+              } else {
+                // result is the error union (ok: false)
+                const err = result as Extract<typeof result, { ok: false }>;
+                if (err.state === "alreadyExists") {
+                  try {
+                    const { summariesRepository } = await import(
+                      "../../summaries/model/repository"
+                    );
+                    const existing = await summariesRepository.getByIsoWeek(
+                      week.iso_year,
+                      week.week_of_year,
+                    );
+                    if (existing) {
+                      onWeekUpdate({
+                        summary: {
+                          ...existing,
+                          isEditing: false,
+                          isSaving: false,
+                          draftContent: existing.content,
+                          state: "success",
+                          weekKey: week.weekKey,
+                        } as any,
+                        summaryState: "success",
+                      });
+                    } else {
+                      onWeekUpdate({ summaryState: "success" });
+                    }
+                  } catch {
+                    onWeekUpdate({ summaryState: "success" });
+                  }
+                  return;
+                }
+                const stateMap: Record<string, typeof week.summaryState> = {
+                  unauthorized: "unauthorized",
+                  limitReached: "limitReached",
+                  failed: "failed",
+                  unsupported: "unsupported",
+                  alreadyExists: "success",
+                } as const;
+                const mapped = stateMap[err.state] || "failed";
+                onWeekUpdate({ summaryState: mapped });
+              }
+            }}
           />
         </div>
       )}

@@ -42,12 +42,6 @@ export type GenerateWeeklySummaryState =
       message?: string;
     };
 
-class UnauthorizedGenerationError extends Error {}
-class QuotaExceededError extends Error {}
-class SummaryGenerationError extends Error {}
-class UnsupportedIsoWeekPersistenceError extends Error {}
-class DuplicateSummaryError extends Error {}
-
 /* -------------------------------------------------------------------------- */
 /* Internal helpers                                                           */
 /* -------------------------------------------------------------------------- */

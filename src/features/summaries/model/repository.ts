@@ -26,13 +26,7 @@ export interface WeekInfo {
   week_of_year: number;
 }
 
-export interface CreateIsoWeekSummaryArgs {
-  iso_year: number;
-  week_of_year: number;
-  start_date: string;
-  end_date: string;
-  content: string;
-}
+import type { CreateIsoWeekSummaryArgs } from "./types";
 
 /**
  * The surface we expect from the preload DB API for summaries & supporting calls.
@@ -56,10 +50,7 @@ export interface SummariesDbApi {
   deleteSummary(id: number): Promise<boolean>;
   currentWeekSummaryExists(): Promise<boolean>;
   summaryExistsForWeek(weekOfYear: number): Promise<boolean>;
-  summaryExistsForIsoWeek?(
-    iso_year: number,
-    week_of_year: number,
-  ): Promise<boolean>;
+  summaryExistsForIsoWeek?(iso_year: number, week_of_year: number): Promise<boolean>;
   getLatestSummary(): Promise<Summary | null>;
 }
 
@@ -67,10 +58,7 @@ export interface SummariesDbApi {
  * Builder that converts week info + entries into summary content.
  * You can inject a more elaborate (AI) builder later without changing callers.
  */
-export type SummaryContentBuilder = (args: {
-  week: WeekInfo;
-  entries: Entry[];
-}) => string;
+export type SummaryContentBuilder = (args: { week: WeekInfo; entries: Entry[] }) => string;
 
 /* ---------- Default Content Builder ------------------------------------------- */
 
@@ -78,13 +66,9 @@ export type SummaryContentBuilder = (args: {
  * Simple bullet-list summary builder.
  * (Future: move to AI or improved natural language summarizer.)
  */
-export const defaultContentBuilder: SummaryContentBuilder = ({
-  week,
-  entries,
-}) => {
+export const defaultContentBuilder: SummaryContentBuilder = ({ week, entries }) => {
   const header = `Week ${week.week_of_year} (${week.start_date} → ${week.end_date}) Summary\n`;
-  const body =
-    entries.map((e) => `• ${e.content}`).join("\n") || "• (No entries)";
+  const body = entries.map((e) => `• ${e.content}`).join("\n") || "• (No entries)";
   return `${header}\n${body}`;
 };
 
@@ -109,9 +93,7 @@ export function createSummariesRepository(
       : undefined);
 
   if (!resolved) {
-    throw new Error(
-      "Summaries DB API not available. Ensure preload exposes window.appApi.db.",
-    );
+    throw new Error("Summaries DB API not available. Ensure preload exposes window.appApi.db.");
   }
 
   return {
@@ -214,17 +196,28 @@ export function createSummariesRepository(
     /**
      * Check existence for arbitrary ISO week (fallback when iso_year missing server-side).
      */
-    async existsForIsoWeek(
-      iso_year: number,
-      week_of_year: number,
-    ): Promise<boolean> {
+    async existsForIsoWeek(iso_year: number, week_of_year: number): Promise<boolean> {
       if (typeof resolved.summaryExistsForIsoWeek === "function") {
-        return (resolved as any).summaryExistsForIsoWeek(
-          iso_year,
-          week_of_year,
-        );
+        return (resolved as any).summaryExistsForIsoWeek(iso_year, week_of_year);
       }
       return resolved.summaryExistsForWeek(week_of_year);
+    },
+
+    /**
+     * Fetch summary for an ISO week (year + week). Falls back to week-only lookup
+     * when iso-specific API is unavailable. Returns null if mismatch.
+     */
+    async getByIsoWeek(iso_year: number, week_of_year: number): Promise<Summary | null> {
+      if (typeof (resolved as any).getSummaryByIsoWeek === "function") {
+        return (resolved as any).getSummaryByIsoWeek(iso_year, week_of_year);
+      }
+      // Fallback: week-only lookup then verify iso_year if available
+      const summary = await resolved.getSummaryByWeek(week_of_year);
+      if (!summary) return null;
+      if (typeof (summary as any).iso_year === "number" && summary.iso_year !== iso_year) {
+        return null; // Week collision across ISO years (edge case)
+      }
+      return summary;
     },
 
     /**
