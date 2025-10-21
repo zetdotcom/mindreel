@@ -20,6 +20,7 @@
 //   else { /* map result.state to SummaryCardState */ }
 //
 import { summariesRepository } from "./repository";
+import { supabaseRendererClient } from "../../../supabase/rendererClient";
 import type { Entry } from "../../../sqlite/types";
 
 /* -------------------------------------------------------------------------- */
@@ -38,7 +39,12 @@ export type GenerateWeeklySummaryState =
   | { ok: true; summary: import("../../../sqlite/types").Summary }
   | {
       ok: false;
-      state: "unauthorized" | "limitReached" | "failed" | "unsupported" | "alreadyExists";
+      state:
+        | "unauthorized"
+        | "limitReached"
+        | "failed"
+        | "unsupported"
+        | "alreadyExists";
       message?: string;
     };
 
@@ -55,27 +61,29 @@ function logDebug(...args: unknown[]) {
 
 async function getAuthAccessToken(): Promise<string | null> {
   try {
-    // Supabase auth client is created in renderer via useSupabase / rendererClient.
-    // Access global injected client (pattern used elsewhere in app).
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const supabase: any = (window as any)?.supabaseClient;
-    if (!supabase) return null;
-    const session = await supabase.auth.getSession();
-    return session.data.session?.access_token || null;
+    // Use the Supabase renderer client to retrieve the current session
+    const { data } = await supabaseRendererClient.auth.getSession();
+    return data.session?.access_token || null;
   } catch (e) {
     logDebug("Failed to get auth session", e);
     return null;
   }
 }
 
-async function fetchEntriesForIsoWeek(iso_year: number, week_of_year: number): Promise<Entry[]> {
+async function fetchEntriesForIsoWeek(
+  iso_year: number,
+  week_of_year: number,
+): Promise<Entry[]> {
   // Access entries via preload IPC (window.appApi.db.getEntriesForIsoWeek)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db: any = (window as any)?.appApi?.db;
   if (!db || typeof db.getEntriesForIsoWeek !== "function") {
     throw new Error("DB_API_UNAVAILABLE");
   }
-  const entries: Entry[] = await db.getEntriesForIsoWeek(iso_year, week_of_year);
+  const entries: Entry[] = await db.getEntriesForIsoWeek(
+    iso_year,
+    week_of_year,
+  );
   return entries;
 }
 
@@ -135,16 +143,26 @@ export async function generateWeeklySummary(
     }
 
     // 2. Fetch entries
-    const entries = await fetchEntriesForIsoWeek(args.iso_year, args.week_of_year);
+    const entries = await fetchEntriesForIsoWeek(
+      args.iso_year,
+      args.week_of_year,
+    );
     if (!entries.length) {
       return { ok: false, state: "failed", message: "No entries for week" };
     }
 
     // 2b. Duplicate check
     try {
-      const exists = await summariesRepository.existsForIsoWeek(args.iso_year, args.week_of_year);
+      const exists = await summariesRepository.existsForIsoWeek(
+        args.iso_year,
+        args.week_of_year,
+      );
       if (exists) {
-        return { ok: false, state: "alreadyExists", message: "Summary already exists" };
+        return {
+          ok: false,
+          state: "alreadyExists",
+          message: "Summary already exists",
+        };
       }
     } catch (dupErr) {
       logDebug("Duplicate check failed (non-fatal)", dupErr);
@@ -192,7 +210,10 @@ export async function generateWeeklySummary(
       });
       logDebug("Summary persisted", { id: persisted.id });
     } catch (persistError) {
-      if (persistError instanceof Error && persistError.message === "CREATE_ISO_WEEK_UNSUPPORTED") {
+      if (
+        persistError instanceof Error &&
+        persistError.message === "CREATE_ISO_WEEK_UNSUPPORTED"
+      ) {
         return {
           ok: false,
           state: "unsupported",

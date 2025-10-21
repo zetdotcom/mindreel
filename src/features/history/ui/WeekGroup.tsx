@@ -65,14 +65,18 @@ export function WeekGroup({
             {/* Week Title */}
             <div className="flex items-center space-x-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
-              <h2 className="font-semibold text-foreground">{week.headerLabel}</h2>
+              <h2 className="font-semibold text-foreground">
+                {week.headerLabel}
+              </h2>
             </div>
           </div>
 
           {/* Week Stats */}
           <div className="flex items-center space-x-4 text-sm text-muted-foreground">
             <span>{week.totalEntries} entries</span>
-            {week.summary && <span className="text-primary">Summary available</span>}
+            {week.summary && (
+              <span className="text-primary">Summary available</span>
+            )}
           </div>
         </div>
       </div>
@@ -123,6 +127,8 @@ export function WeekGroup({
                 start_date: week.start_date,
                 end_date: week.end_date,
               });
+              console.log("🚀 ~ result:", result);
+
               if (result.ok) {
                 onWeekUpdate({
                   summary: {
