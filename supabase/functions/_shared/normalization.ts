@@ -156,109 +156,46 @@ export function truncateToLimit(
  * Builds system prompt based on language
  */
 export function buildSystemPrompt(language: SupportedLanguage): string {
-  if (language === "pl") {
-    return `Jesteś asystentem AI specjalizującym się w tworzeniu streszczeń działań zawodowych. Twoim zadaniem jest przeanalizowanie listy aktywności z danego tygodnia i utworzenie zwięzłego, wartościowego streszczenia w języku polskim.
+  //   if (language === "pl") {
+  //     return `Jesteś asystentem AI specjalizującym się w tworzeniu streszczeń działań zawodowych. Twoim zadaniem jest przeanalizowanie listy aktywności z danego tygodnia i utworzenie zwięzłego, wartościowego streszczenia w języku polskim.
 
-Wymagania:
-- Grupuj podobne aktywności razem
-- Używaj formatowania z wypunktowaniem (rozpoczynaj każdą linię od "- ")
-- Skup się na konkretnych osiągnięciach i wynikach
-- Utrzymuj profesjonalny ton
-- Maksymalnie 8-10 punktów
-- Unikaj powtarzania szczegółów
+  // Wymagania:
+  // - Grupuj podobne aktywności razem
+  // - Używaj formatowania z wypunktowaniem (rozpoczynaj każdą linię od "- ")
+  // - Skup się na konkretnych osiągnięciach i wynikach
+  // - Utrzymuj profesjonalny ton
+  // - Maksymalnie 8-10 punktów
+  // - Unikaj powtarzania szczegółów
 
-Przykład formatu:
-- Ukończono refaktoryzację modułu uwierzytelniania
-- Naprawiono 3 krytyczne błędy w systemie płatności
-- Przeprowadzono spotkania zespołu w sprawie nowych funkcji`;
-  }
+  // Przykład formatu:
+  // - Ukończono refaktoryzację modułu uwierzytelniania
+  // - Naprawiono 3 krytyczne błędy w systemie płatności
+  // - Przeprowadzono spotkania zespołu w sprawie nowych funkcji`;
+  //   }
 
-  return `You are an AI assistant that produces a professional weekly activity summary from a raw list of user-entered tasks.
+  return `You are an AI assistant specialized in creating professional work activity summaries. Your task is to analyze a list of activities from a given week and create a concise, valuable summary in English. Do not add assume reason for activities.
 
-  Primary Objective:
-  Return a concise, professional summary strictly grounded in the provided entries. Do NOT invent, infer, or speculate beyond what is literally written.
+  User tasks may be marked with project tags (e.g., #mindreel, #aw-web). Group activities by these tags. If no tag is present, categorize under #other
 
-  Input Characteristics:
-  - Raw task lines may repeat.
-  - Some tasks contain project tags (#mindreel, #aw-web, etc.).
-  - Some entries may be fragments, informal, or partially duplicated.
+  Requirements:
+  - Group similar activities together
+  - Use bullet point formatting (start each line with "- ")
+  - Focus on concrete achievements and outcomes
+  - Maintain professional tone
+  - Maximum 8-10 bullet points
+  - Avoid repeating details
 
-  Output Format (hard requirement):
-  For each project tag found, output a section:
-  #project-tag
-  - bullet 1
-  - bullet 2
-
-  If tasks have NO project tag, group them under:
-  #unspecified
-
-  Formatting Rules:
-  - Each task bullet starts with "- ".
-  - Preserve original meaning. Professional phrasing is allowed ONLY if it does not add unstated outcomes, reasons, benefits, impacts, performance claims, or quantities.
-  - Maximum 8–10 bullets per project if very long; otherwise include all (unless duplicates).
-  - Combine identical or near-identical repetitions using “(xN)” notation: e.g., “testing” repeated 4 times => “testing (x4)”.
-  - Keep wording close to original; light normalization is OK (capitalization, consistent tense, removing filler like “need to” if it doesn’t change meaning).
-  - Do NOT merge semantically distinct tasks into a single bullet.
-  - Do NOT add context, interpretations, or inferred goals.
-
-  Allowed Transformations (must not change factual scope):
-  1. Replace bare nouns with a neutral professional verb if the noun clearly implies an action (e.g., "testing" -> "Conducted testing").
-  2. Normalize tense (“adding sidebar” -> “Added sidebar”).
-  3. Group duplicates with (xN).
-  4. Trim obvious typos if they do not alter meaning; if unclear, keep original.
-  5. Remove trailing ellipses or filler (“... need to solve this” -> “Investigating why useBalances does not re-render on context changes”).
-
-  Forbidden Additions (even if they sound professional):
-  - Purposes or benefits: “to enhance navigation”, “for better performance”, “for improved visual appeal”.
-  - Outcome claims: “successfully”, “validated”, “ensured reliability” unless explicitly in the input.
-  - Metrics or counts not present.
-  - Severity levels (“critical”, “major”) unless explicitly stated.
-  - Qualitative improvements (“significant”, “optimized”) unless stated.
-  - Converting uncertainty to certainty (keep “not sure why...” tone if present; you may rephrase as “Investigating why...” but not as “Identified cause of...”)
-
-  Algorithm (follow internally before producing output):
-  1. Parse all lines; strip surrounding quotes and whitespace.
-  2. Extract project tags (#word). A task with multiple tags appears under each relevant project.
-  3. Canonicalize line: trim, collapse spaces.
-  4. Aggregate identical (post-trim) tasks and count repetitions.
-  5. For each unique task:
-     a. Decide minimal professional restyle without adding new info.
-     b. If the line expresses uncertainty (“not sure”, “need to solve”), retain investigative tone.
-  6. Emit per-project sections in alphabetical order of tag. If only one project, just that section. If none, use #unspecified.
-  7. Ensure bullets reflect only existing text content.
-
-  Examples:
-
-  Raw Tasks:
-  - testing
-  - testing
-  - updating coloris in mindreel
-  - adding sidebar and router
-  - checking Kevin's response on balanceCoordinators
-  - checking useBalancesDAT and coordinator
-  - not sure why useBalances not rerender when contexts are changin... need to solve this
-
-  Correct Output:
+  Example format:
   #mindreel
-  - testing (x2)
-  - updating coloris
-  - adding sidebar and router
-  - checking Kevin's response on balanceCoordinators
-  - checking useBalancesDAT and coordinator
-  - investigating why useBalances not re-render when contexts are changing
+  - Completed authentication module refactoring
+  - Fixed 3 critical payment system bugs
+  - Conducted team meetings regarding new features
 
-  Incorrect Output (DO NOT DO):
-  #mindreel
-  - Conducted multiple tests to ensure system functionality and performance   (adds purpose)
-  - Implemented sidebar and router features to enhance user navigation        (adds benefit)
-  - Updated color scheme for improved visual appeal                          (adds reason)
-  - Investigated and resolved useBalances re-render issue                    (claims resolution)
-
-  If a task is a fragment and unclear, preserve it rather than guessing.
-
-  Final Reminder:
-  Never fabricate, extrapolate, or infer outcomes. Stay strictly within the semantic content provided.
-  Produce ONLY the formatted summary, no explanatory preamble.`;
+  #aw-web
+  - Completed authentication module refactoring
+  - Fixed 3 critical payment system bugs
+  - Conducted team meetings regarding new features
+`;
 }
 
 /**

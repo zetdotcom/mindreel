@@ -39,7 +39,7 @@ export function EntryRow({
       // Place cursor at end
       textareaRef.current.setSelectionRange(
         textareaRef.current.value.length,
-        textareaRef.current.value.length
+        textareaRef.current.value.length,
       );
     }
   }, [isEditing]);
@@ -70,7 +70,9 @@ export function EntryRow({
     }
 
     if (trimmedContent.length > MAX_ENTRY_LENGTH) {
-      setError(`Entry is too long (${trimmedContent.length}/${MAX_ENTRY_LENGTH} characters)`);
+      setError(
+        `Entry is too long (${trimmedContent.length}/${MAX_ENTRY_LENGTH} characters)`,
+      );
       return;
     }
 
@@ -84,7 +86,10 @@ export function EntryRow({
       setIsSaving(true);
       setError(null);
 
-      const updatedEntry = await historyRepository.updateEntry(entry.id, trimmedContent);
+      const updatedEntry = await historyRepository.updateEntry(
+        entry.id,
+        trimmedContent,
+      );
 
       if (updatedEntry) {
         setIsEditing(false);
@@ -109,10 +114,10 @@ export function EntryRow({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
       handleSaveEdit();
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       e.preventDefault();
       handleCancelEdit();
     }
@@ -121,9 +126,9 @@ export function EntryRow({
   const formatTimestamp = (timestamp: string) => {
     try {
       const date = parseISO(timestamp);
-      return format(date, 'h:mm a');
+      return format(date, "h:mm a");
     } catch {
-      return '';
+      return "";
     }
   };
 
@@ -131,11 +136,13 @@ export function EntryRow({
   const isOverLimit = characterCount > MAX_ENTRY_LENGTH;
 
   return (
-    <div className={cn(
-      "group relative border rounded-lg p-4 bg-card hover:bg-muted/50 transition-colors",
-      isEditing && "ring-2 ring-primary/50",
-      className
-    )}>
+    <div
+      className={cn(
+        "group relative border rounded-lg p-4 bg-card hover:bg-muted/50 transition-colors",
+        isEditing && "ring-2 ring-primary/50",
+        className,
+      )}
+    >
       {/* Edit Mode */}
       {isEditing ? (
         <div className="space-y-3">
@@ -147,17 +154,20 @@ export function EntryRow({
               onKeyDown={handleKeyDown}
               disabled={isSaving}
               className={cn(
-                "min-h-[80px] resize-none",
-                isOverLimit && "border-destructive focus-visible:ring-destructive"
+                "min-h-[80px] resize-none text-secondary",
+                isOverLimit &&
+                  "border-destructive focus-visible:ring-destructive",
               )}
               placeholder="Enter your work entry..."
             />
 
             {/* Character Count */}
-            <div className={cn(
-              "absolute bottom-2 right-2 text-xs",
-              isOverLimit ? "text-destructive" : "text-muted-foreground"
-            )}>
+            <div
+              className={cn(
+                "absolute bottom-2 right-2 text-xs",
+                isOverLimit ? "text-destructive" : "text-muted-foreground",
+              )}
+            >
               {characterCount}/{MAX_ENTRY_LENGTH}
             </div>
           </div>

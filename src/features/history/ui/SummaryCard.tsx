@@ -1,7 +1,22 @@
 import React, { useState, useRef, useEffect } from "react";
 import { format, parseISO } from "date-fns";
-import { Sparkles, Edit2, Check, X, AlertCircle, Loader2, Lock, Zap, Calendar } from "lucide-react";
-import { SummaryViewModel, SummaryCardState, IsoWeekIdentifier, WeekKey } from "../model/types";
+import {
+  Sparkles,
+  Edit2,
+  Check,
+  X,
+  AlertCircle,
+  Loader2,
+  Lock,
+  Zap,
+  Calendar,
+} from "lucide-react";
+import {
+  SummaryViewModel,
+  SummaryCardState,
+  IsoWeekIdentifier,
+  WeekKey,
+} from "../model/types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +34,7 @@ interface SummaryCardProps {
   weekPassed: boolean;
   onStateChange?: (newState: SummaryCardState) => void;
   onLoginRequest?: () => void; // Trigger auth modal from unauthorized state
+  onClearSummary?: (summaryId: number) => Promise<void>; // Delete summary and revert to pending state
   className?: string;
 }
 
@@ -216,7 +232,11 @@ export function SummaryCard({
                     : `Ready to generate summary for ${totalEntries} entries`}
                 </div>
                 {totalEntries > 0 && (
-                  <Button onClick={handleGenerate} disabled={!onGenerate} className="gap-2">
+                  <Button
+                    onClick={handleGenerate}
+                    disabled={!onGenerate}
+                    className="gap-2"
+                  >
                     <Sparkles className="h-4 w-4" />
                     Generate AI Summary
                   </Button>
@@ -224,7 +244,8 @@ export function SummaryCard({
               </>
             ) : (
               <div className="text-sm text-muted-foreground">
-                Week still in progress. Summary generation available after Sunday.
+                Week still in progress. Summary generation available after
+                Sunday.
               </div>
             )}
           </div>
@@ -237,7 +258,9 @@ export function SummaryCard({
               <Loader2 className="h-5 w-5 animate-spin" />
               <span className="text-sm">Generating your weekly summary...</span>
             </div>
-            <div className="text-xs text-muted-foreground">This may take a few moments</div>
+            <div className="text-xs text-muted-foreground">
+              This may take a few moments
+            </div>
           </div>
         );
 
@@ -298,10 +321,17 @@ export function SummaryCard({
 
             <div className="flex items-center justify-between border-t pt-3">
               <div className="text-xs text-muted-foreground">
-                {summary?.created_at && <>Generated {formatSummaryDate(summary.created_at)}</>}
+                {summary?.created_at && (
+                  <>Generated {formatSummaryDate(summary.created_at)}</>
+                )}
               </div>
               <div className="flex items-center space-x-2">
-                <Button variant="ghost" size="sm" onClick={handleStartEdit} className="gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleStartEdit}
+                  className="gap-2"
+                >
                   <Edit2 className="h-3 w-3" />
                   Edit
                 </Button>
@@ -329,8 +359,8 @@ export function SummaryCard({
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Failed to generate summary. Please try again or contact support if the problem
-                persists.
+                Failed to generate summary. Please try again or contact support
+                if the problem persists.
               </AlertDescription>
             </Alert>
             <Button
@@ -351,7 +381,11 @@ export function SummaryCard({
             <div className="text-sm text-muted-foreground">
               Sign in to generate AI-powered weekly summaries
             </div>
-            <Button variant="outline" className="gap-2" onClick={onLoginRequest}>
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={onLoginRequest}
+            >
               <Lock className="h-4 w-4" />
               Sign In to Generate
             </Button>
@@ -364,10 +398,13 @@ export function SummaryCard({
             <Alert>
               <Zap className="h-4 w-4" />
               <AlertDescription>
-                You've reached your monthly AI summary limit. Limit resets on the 1st of each month.
+                You've reached your monthly AI summary limit. Limit resets on
+                the 1st of each month.
               </AlertDescription>
             </Alert>
-            <div className="text-xs text-muted-foreground">Upgrade to increase your limit</div>
+            <div className="text-xs text-muted-foreground">
+              Upgrade to increase your limit
+            </div>
           </div>
         );
 
@@ -377,7 +414,8 @@ export function SummaryCard({
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Generating summaries for arbitrary past weeks is not yet supported in this build.
+                Generating summaries for arbitrary past weeks is not yet
+                supported in this build.
               </AlertDescription>
             </Alert>
           </div>

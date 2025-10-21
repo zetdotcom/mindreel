@@ -184,6 +184,15 @@ export function WeekGroup({
                 onWeekUpdate({ summaryState: mapped });
               }
             }}
+            onClearSummary={async (summaryId) => {
+              const { summariesRepository } = await import(
+                "../../summaries/model/repository"
+              );
+              await summariesRepository.delete(summaryId);
+              if (onWeekUpdate) {
+                onWeekUpdate({ summary: undefined, summaryState: "pending" });
+              }
+            }}
           />
         </div>
       )}
