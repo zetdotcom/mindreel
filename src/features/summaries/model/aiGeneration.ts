@@ -38,9 +38,15 @@ export type GenerateWeeklySummaryState =
   | { ok: true; summary: import("../../../sqlite/types").Summary }
   | {
       ok: false;
-      state: "unauthorized" | "limitReached" | "failed" | "unsupported";
+      state: "unauthorized" | "limitReached" | "failed" | "unsupported" | "alreadyExists";
       message?: string;
     };
+
+class UnauthorizedGenerationError extends Error {}
+class QuotaExceededError extends Error {}
+class SummaryGenerationError extends Error {}
+class UnsupportedIsoWeekPersistenceError extends Error {}
+class DuplicateSummaryError extends Error {}
 
 /* -------------------------------------------------------------------------- */
 /* Internal helpers                                                           */
@@ -138,6 +144,16 @@ export async function generateWeeklySummary(
     const entries = await fetchEntriesForIsoWeek(args.iso_year, args.week_of_year);
     if (!entries.length) {
       return { ok: false, state: "failed", message: "No entries for week" };
+    }
+
+    // 2b. Duplicate check
+    try {
+      const exists = await summariesRepository.existsForIsoWeek(args.iso_year, args.week_of_year);
+      if (exists) {
+        return { ok: false, state: "alreadyExists", message: "Summary already exists" };
+      }
+    } catch (dupErr) {
+      logDebug("Duplicate check failed (non-fatal)", dupErr);
     }
 
     // 3. Build payload & call edge function

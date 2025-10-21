@@ -26,6 +26,14 @@ export interface WeekInfo {
   week_of_year: number;
 }
 
+export interface CreateIsoWeekSummaryArgs {
+  iso_year: number;
+  week_of_year: number;
+  start_date: string;
+  end_date: string;
+  content: string;
+}
+
 /**
  * The surface we expect from the preload DB API for summaries & supporting calls.
  * (Matches handlers registered in ipc/databaseHandlers.ts)
@@ -48,7 +56,10 @@ export interface SummariesDbApi {
   deleteSummary(id: number): Promise<boolean>;
   currentWeekSummaryExists(): Promise<boolean>;
   summaryExistsForWeek(weekOfYear: number): Promise<boolean>;
-  summaryExistsForIsoWeek?(iso_year: number, week_of_year: number): Promise<boolean>;
+  summaryExistsForIsoWeek?(
+    iso_year: number,
+    week_of_year: number,
+  ): Promise<boolean>;
   getLatestSummary(): Promise<Summary | null>;
 }
 
@@ -56,7 +67,10 @@ export interface SummariesDbApi {
  * Builder that converts week info + entries into summary content.
  * You can inject a more elaborate (AI) builder later without changing callers.
  */
-export type SummaryContentBuilder = (args: { week: WeekInfo; entries: Entry[] }) => string;
+export type SummaryContentBuilder = (args: {
+  week: WeekInfo;
+  entries: Entry[];
+}) => string;
 
 /* ---------- Default Content Builder ------------------------------------------- */
 
@@ -64,9 +78,13 @@ export type SummaryContentBuilder = (args: { week: WeekInfo; entries: Entry[] })
  * Simple bullet-list summary builder.
  * (Future: move to AI or improved natural language summarizer.)
  */
-export const defaultContentBuilder: SummaryContentBuilder = ({ week, entries }) => {
+export const defaultContentBuilder: SummaryContentBuilder = ({
+  week,
+  entries,
+}) => {
   const header = `Week ${week.week_of_year} (${week.start_date} → ${week.end_date}) Summary\n`;
-  const body = entries.map((e) => `• ${e.content}`).join("\n") || "• (No entries)";
+  const body =
+    entries.map((e) => `• ${e.content}`).join("\n") || "• (No entries)";
   return `${header}\n${body}`;
 };
 
@@ -91,7 +109,9 @@ export function createSummariesRepository(
       : undefined);
 
   if (!resolved) {
-    throw new Error("Summaries DB API not available. Ensure preload exposes window.appApi.db.");
+    throw new Error(
+      "Summaries DB API not available. Ensure preload exposes window.appApi.db.",
+    );
   }
 
   return {
@@ -174,36 +194,35 @@ export function createSummariesRepository(
     },
 
     /**
-     * Create a summary for an arbitrary ISO week with externally supplied content.
-     * Requires caller to provide full week range meta (avoid recomputing here).
+     * Create summary for arbitrary ISO week (full support).
+     * Uses underlying createSummary API (requires IPC handler).
+     * Throws CREATE_ISO_WEEK_UNSUPPORTED if createSummary not exposed.
      */
-    async createForIsoWeek(args: {
-      iso_year: number;
-      week_of_year: number;
-      start_date: string;
-      end_date: string;
-      content: string;
-    }): Promise<Summary> {
-      // Underlying preload API currently exposes only createCurrentWeekSummary.
-      // For now: if target week is current week delegate; otherwise throw to signal
-      // missing backend capability (future IPC handler addition).
-      const current = await resolved.getCurrentWeekInfo();
-      const isCurrent =
-        current.week_of_year === args.week_of_year &&
-        // NOTE: iso_year may not be available on WeekInfo; assume current year if absent.
-        ("iso_year" in current ? (current as any).iso_year === args.iso_year : true);
-      if (!isCurrent) {
+    async createForIsoWeek(args: CreateIsoWeekSummaryArgs): Promise<Summary> {
+      if (typeof (resolved as any).createSummary !== "function") {
         throw new Error("CREATE_ISO_WEEK_UNSUPPORTED");
       }
-      return resolved.createCurrentWeekSummary(args.content);
+      return resolved.createSummary({
+        content: args.content,
+        start_date: args.start_date,
+        end_date: args.end_date,
+        week_of_year: args.week_of_year,
+        iso_year: args.iso_year,
+      });
     },
 
     /**
      * Check existence for arbitrary ISO week (fallback when iso_year missing server-side).
      */
-    async existsForIsoWeek(iso_year: number, week_of_year: number): Promise<boolean> {
+    async existsForIsoWeek(
+      iso_year: number,
+      week_of_year: number,
+    ): Promise<boolean> {
       if (typeof resolved.summaryExistsForIsoWeek === "function") {
-        return (resolved as any).summaryExistsForIsoWeek(iso_year, week_of_year);
+        return (resolved as any).summaryExistsForIsoWeek(
+          iso_year,
+          week_of_year,
+        );
       }
       return resolved.summaryExistsForWeek(week_of_year);
     },
