@@ -36,7 +36,11 @@ export interface GenerateWeeklySummaryArgs {
 
 export type GenerateWeeklySummaryState =
   | { ok: true; content: string }
-  | { ok: false; state: "unauthorized" | "limitReached" | "failed"; message?: string };
+  | {
+      ok: false;
+      state: "unauthorized" | "limitReached" | "failed";
+      message?: string;
+    };
 
 /* -------------------------------------------------------------------------- */
 /* Internal helpers                                                           */
@@ -64,14 +68,20 @@ async function getAuthAccessToken(): Promise<string | null> {
   }
 }
 
-async function fetchEntriesForIsoWeek(iso_year: number, week_of_year: number): Promise<Entry[]> {
+async function fetchEntriesForIsoWeek(
+  iso_year: number,
+  week_of_year: number,
+): Promise<Entry[]> {
   // Access entries via preload IPC (window.appApi.db.getEntriesForIsoWeek)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db: any = (window as any)?.appApi?.db;
   if (!db || typeof db.getEntriesForIsoWeek !== "function") {
     throw new Error("DB_API_UNAVAILABLE");
   }
-  const entries: Entry[] = await db.getEntriesForIsoWeek(iso_year, week_of_year);
+  const entries: Entry[] = await db.getEntriesForIsoWeek(
+    iso_year,
+    week_of_year,
+  );
   return entries;
 }
 
@@ -124,7 +134,10 @@ export async function generateWeeklySummary(
     }
 
     // 2. Fetch entries
-    const entries = await fetchEntriesForIsoWeek(args.iso_year, args.week_of_year);
+    const entries = await fetchEntriesForIsoWeek(
+      args.iso_year,
+      args.week_of_year,
+    );
     if (!entries.length) {
       return { ok: false, state: "failed", message: "No entries for week" };
     }
