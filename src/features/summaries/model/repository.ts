@@ -34,6 +34,13 @@ export interface SummariesDbApi {
   getCurrentWeekInfo(): Promise<WeekInfo>;
   getCurrentWeekEntries(): Promise<Entry[]>;
   createCurrentWeekSummary(content: string): Promise<Summary>;
+  createSummary(input: {
+    content: string;
+    start_date: string;
+    end_date: string;
+    week_of_year: number;
+    iso_year: number;
+  }): Promise<Summary>;
   getCurrentWeekSummary(): Promise<Summary | null>;
   getSummaryByWeek(weekOfYear: number): Promise<Summary | null>;
   getAllSummaries(): Promise<Summary[]>;
@@ -41,6 +48,7 @@ export interface SummariesDbApi {
   deleteSummary(id: number): Promise<boolean>;
   currentWeekSummaryExists(): Promise<boolean>;
   summaryExistsForWeek(weekOfYear: number): Promise<boolean>;
+  summaryExistsForIsoWeek?(iso_year: number, week_of_year: number): Promise<boolean>;
   getLatestSummary(): Promise<Summary | null>;
 }
 
@@ -194,19 +202,10 @@ export function createSummariesRepository(
      * Check existence for arbitrary ISO week (fallback when iso_year missing server-side).
      */
     async existsForIsoWeek(iso_year: number, week_of_year: number): Promise<boolean> {
-      // If only week-based check exists we cannot distinguish years without iso_year column.
-      // Use summaryExistsForWeek as coarse fallback and assume true only if current year matches.
-      if (typeof (resolved as any).summaryExistsForIsoWeek === "function") {
-        try {
-          // @ts-ignore runtime optional
-          return await (resolved as any).summaryExistsForIsoWeek(iso_year, week_of_year);
-        } catch {
-          // Fallback path below
-        }
+      if (typeof resolved.summaryExistsForIsoWeek === "function") {
+        return (resolved as any).summaryExistsForIsoWeek(iso_year, week_of_year);
       }
-      const exists = await resolved.summaryExistsForWeek(week_of_year);
-      // Cannot disambiguate year; return exists but caller may choose to ignore.
-      return exists;
+      return resolved.summaryExistsForWeek(week_of_year);
     },
 
     /**
