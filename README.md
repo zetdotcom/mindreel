@@ -41,6 +41,11 @@ Implemented / Declared:
 - Biome 2 (formatting, linting, static analysis)
 - Node.js 22 (enforced by `.nvmrc`)
 
+Testing:
+- Vitest (unit & component tests)
+- React Testing Library (component interaction tests)
+- Playwright (E2E tests for Electron)
+
 Planned / Described (not yet present in dependencies):
 - SQLite (local persistent storage layer)
 - Supabase (email/password authentication backend & consent gating)

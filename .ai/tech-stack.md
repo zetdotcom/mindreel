@@ -11,6 +11,9 @@
   Biome v2
   Supabase (Auth, Postgres, Edge Functions)
   OpenRouter.ai (LLM API)
+  Vitest (unit & component tests)
+  React Testing Library (component interaction tests)
+  Playwright (E2E tests)
 </tech_stack>
 
 <!-- Architecture Notes
