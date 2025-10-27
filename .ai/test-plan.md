@@ -13,14 +13,16 @@ Framework: Vitest
 **Lokalizacja**: `src/sqlite/repositories/`, `src/features/*/model/repository.ts`
 
 **Przypadki testowe**:
-- **entriesRepository.ts**
-  - Dodawanie nowego wpisu z poprawnymi danymi
-  - Aktualizacja istniejącego wpisu
-  - Usuwanie wpisu z bazy
-  - Pobieranie wpisów dla konkretnego zakresu dat
-  - Grupowanie powtarzających się wpisów bezpośrednio po sobie
-  - Obsługa pustej bazy danych
-  - Walidacja danych wejściowych (puste pole content)
+- **entriesRepository.ts** ✅ IMPLEMENTED (`src/sqlite/repositories/entriesRepository.test.ts`)
+  - ✅ Dodawanie nowego wpisu z poprawnymi danymi (createEntry)
+  - ✅ Aktualizacja istniejącego wpisu (updateEntry)
+  - ✅ Usuwanie wpisu z bazy (deleteEntry)
+  - ✅ Pobieranie wpisów dla konkretnego zakresu dat (getEntriesForDateRange)
+  - ✅ Pobieranie wpisów po ID, dacie, tygodniu, ISO week
+  - ✅ Obsługa pustej bazy danych
+  - ✅ Liczenie wpisów (getEntryCountForDate, getEntryCountForWeek)
+  - ✅ Pobieranie unikalnych dat i tygodni (getDatesWithEntries, getWeeksWithEntries, getIsoWeeksWithEntries)
+  - ✅ 31 testów - wszystkie przechodzą
 
 - **summariesRepository.ts**
   - Zapis nowego podsumowania z kluczem tygodnia (weekKey format: YYYY-Wnn)
@@ -344,11 +346,13 @@ Framework: Playwright (dla aplikacji Electron)
 ## Priorytetyzacja testów
 
 ### Krytyczne (P0) - Must have przed release
-- Testy jednostkowe repositories (entries, summaries, settings)
-- Testy komponentów Auth (login, register)
-- Testy komponentów Capture (popup, zapis)
-- E2E: Pierwsze uruchomienie, rejestracja, zapisywanie aktywności
-- Bezpieczeństwo: brak wycieków kluczy API
+- ✅ Testy jednostkowe repositories - **entriesRepository.ts** (31 tests)
+- ⏳ Testy jednostkowe repositories - summariesRepository.ts (TODO)
+- ⏳ Testy jednostkowe repositories - settingsRepository.ts (TODO)
+- ⏳ Testy komponentów Auth (login, register) (TODO)
+- ⏳ Testy komponentów Capture (popup, zapis) (TODO)
+- ⏳ E2E: Pierwsze uruchomienie, rejestracja, zapisywanie aktywności (TODO)
+- ⏳ Bezpieczeństwo: brak wycieków kluczy API (TODO)
 
 ### Wysokie (P1) - Ważne dla UX
 - Testy komponentów Entries (lista, edycja, usuwanie)
