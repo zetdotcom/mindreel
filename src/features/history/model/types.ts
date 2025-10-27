@@ -26,6 +26,7 @@ export interface DuplicateGroupViewModel {
   count: number;
   entryIds: number[];
   firstEntry: EntryViewModel;
+  entries: EntryViewModel[]; // all duplicate entry view models (including first)
   expanded: boolean;
 }
 

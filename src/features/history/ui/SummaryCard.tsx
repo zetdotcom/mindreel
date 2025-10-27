@@ -1,27 +1,19 @@
-import React, { useState, useRef, useEffect } from "react";
 import { format, parseISO } from "date-fns";
-import {
-  Sparkles,
-  Edit2,
-  Check,
-  X,
-  AlertCircle,
-  Loader2,
-  Lock,
-  Zap,
-  Calendar,
-} from "lucide-react";
-import {
-  SummaryViewModel,
-  SummaryCardState,
+import { AlertCircle, Calendar, Check, Edit2, Loader2, Lock, Sparkles, X, Zap } from "lucide-react";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import type {
   IsoWeekIdentifier,
+  SummaryCardState,
+  SummaryViewModel,
   WeekKey,
 } from "../model/types";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { cn } from "@/lib/utils";
 
 interface SummaryCardProps {
   summary?: SummaryViewModel;
@@ -177,6 +169,67 @@ export function SummaryCard({
     }
   };
 
+  const renderFormattedContent = (content: string) => {
+    const lines = content.split("\n");
+    const sections: { project: string; items: string[] }[] = [];
+    let currentProject = "";
+    let currentItems: string[] = [];
+
+    lines.forEach((line) => {
+      const trimmedLine = line.trim();
+
+      if (trimmedLine.startsWith("- #")) {
+        if (currentProject) {
+          sections.push({ project: currentProject, items: currentItems });
+        }
+        currentProject = trimmedLine.substring(2).trim();
+        currentItems = [];
+      } else if (trimmedLine.startsWith("-")) {
+        const taskText = trimmedLine.substring(1).trim();
+        if (taskText) {
+          currentItems.push(taskText);
+        }
+      } else if (trimmedLine) {
+        currentItems.push(trimmedLine);
+      }
+    });
+
+    if (currentProject) {
+      sections.push({ project: currentProject, items: currentItems });
+    }
+
+    if (sections.length === 0) {
+      return (
+        <div className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{content}</div>
+      );
+    }
+
+    return (
+      <div className="space-y-5">
+        {sections.map((section, idx) => (
+          <div
+            key={section.project}
+            className={cn("space-y-3", idx > 0 && "pt-4 border-t-2 border-border/30")}
+          >
+            <Badge variant="neon" size="default" className="font-black text-xs">
+              {section.project}
+            </Badge>
+            <div className="space-y-1.5 pl-1">
+              {section.items.map((item, itemIdx) => (
+                <div
+                  key={`${section.project}-${itemIdx}`}
+                  className="text-sm text-foreground leading-relaxed"
+                >
+                  • {item}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   const getStateIcon = () => {
     switch (summaryState) {
       case "generating":
@@ -232,11 +285,7 @@ export function SummaryCard({
                     : `Ready to generate summary for ${totalEntries} entries`}
                 </div>
                 {totalEntries > 0 && (
-                  <Button
-                    onClick={handleGenerate}
-                    disabled={!onGenerate}
-                    className="gap-2"
-                  >
+                  <Button onClick={handleGenerate} disabled={!onGenerate} className="gap-2">
                     <Sparkles className="h-4 w-4" />
                     Generate AI Summary
                   </Button>
@@ -244,8 +293,7 @@ export function SummaryCard({
               </>
             ) : (
               <div className="text-sm text-muted-foreground">
-                Week still in progress. Summary generation available after
-                Sunday.
+                Week still in progress. Summary generation available after Sunday.
               </div>
             )}
           </div>
@@ -258,9 +306,7 @@ export function SummaryCard({
               <Loader2 className="h-5 w-5 animate-spin" />
               <span className="text-sm">Generating your weekly summary...</span>
             </div>
-            <div className="text-xs text-muted-foreground">
-              This may take a few moments
-            </div>
+            <div className="text-xs text-muted-foreground">This may take a few moments</div>
           </div>
         );
 
@@ -312,26 +358,17 @@ export function SummaryCard({
             </div>
           );
         }
-
+        console.log("--- summary", summary);
         return (
           <div className="space-y-4">
-            <div className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-              {summary?.content}
-            </div>
+            {summary?.content && renderFormattedContent(summary.content)}
 
             <div className="flex items-center justify-between border-t pt-3">
               <div className="text-xs text-muted-foreground">
-                {summary?.created_at && (
-                  <>Generated {formatSummaryDate(summary.created_at)}</>
-                )}
+                {summary?.created_at && <>Generated {formatSummaryDate(summary.created_at)}</>}
               </div>
               <div className="flex items-center space-x-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleStartEdit}
-                  className="gap-2"
-                >
+                <Button variant="ghost" size="sm" onClick={handleStartEdit} className="gap-2">
                   <Edit2 className="h-3 w-3" />
                   Edit
                 </Button>
@@ -359,8 +396,8 @@ export function SummaryCard({
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Failed to generate summary. Please try again or contact support
-                if the problem persists.
+                Failed to generate summary. Please try again or contact support if the problem
+                persists.
               </AlertDescription>
             </Alert>
             <Button
@@ -381,11 +418,7 @@ export function SummaryCard({
             <div className="text-sm text-muted-foreground">
               Sign in to generate AI-powered weekly summaries
             </div>
-            <Button
-              variant="outline"
-              className="gap-2"
-              onClick={onLoginRequest}
-            >
+            <Button variant="outline" className="gap-2" onClick={onLoginRequest}>
               <Lock className="h-4 w-4" />
               Sign In to Generate
             </Button>
@@ -398,13 +431,10 @@ export function SummaryCard({
             <Alert>
               <Zap className="h-4 w-4" />
               <AlertDescription>
-                You've reached your monthly AI summary limit. Limit resets on
-                the 1st of each month.
+                You've reached your monthly AI summary limit. Limit resets on the 1st of each month.
               </AlertDescription>
             </Alert>
-            <div className="text-xs text-muted-foreground">
-              Upgrade to increase your limit
-            </div>
+            <div className="text-xs text-muted-foreground">Upgrade to increase your limit</div>
           </div>
         );
 
@@ -414,8 +444,7 @@ export function SummaryCard({
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Generating summaries for arbitrary past weeks is not yet
-                supported in this build.
+                Generating summaries for arbitrary past weeks is not yet supported in this build.
               </AlertDescription>
             </Alert>
           </div>
@@ -433,8 +462,8 @@ export function SummaryCard({
   return (
     <Card
       className={cn(
-        "border-2 border-dashed border-muted-foreground/20",
-        summaryState === "success" && "border-solid border-border",
+        "border-2 border-dashed border-muted-foreground/20 bg-primary/5",
+        summaryState === "success" && "border-solid border-border bg-accent/10",
         summaryState === "generating" && "border-primary/50",
         summaryState === "failed" && "border-destructive/50",
         className,

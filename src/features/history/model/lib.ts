@@ -170,6 +170,7 @@ function detectDuplicates(entries: EntryViewModel[], weekKey: WeekKey): Duplicat
         count: duplicates.length,
         entryIds: duplicates.map((e) => e.id!).filter(Boolean),
         firstEntry,
+        entries: duplicates,
         expanded: false, // Default to collapsed
       };
 
