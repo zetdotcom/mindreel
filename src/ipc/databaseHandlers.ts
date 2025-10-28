@@ -8,6 +8,7 @@ import {
 } from "../sqlite/types";
 import { IsoWeekIdentifier } from "../sqlite/dateUtils";
 import { syncShortcutFromDatabase } from "./globalShortcutManager";
+import { updateCaptureTimerInterval } from "./captureTimerManager";
 
 /**
  * Register all database-related IPC handlers
@@ -84,10 +85,7 @@ export function registerDatabaseHandlers(): void {
     "db:getEntriesForIsoWeek",
     async (_event, iso_year: number, week_of_year: number) => {
       try {
-        return await databaseService.getEntriesForIsoWeek(
-          iso_year,
-          week_of_year,
-        );
+        return await databaseService.getEntriesForIsoWeek(iso_year, week_of_year);
       } catch (error) {
         console.error("Error getting entries for ISO week:", error);
         throw error;
@@ -107,17 +105,14 @@ export function registerDatabaseHandlers(): void {
     },
   );
 
-  ipcMain.handle(
-    "db:updateEntry",
-    async (_event, id: number, content: string) => {
-      try {
-        return await databaseService.updateEntry(id, content);
-      } catch (error) {
-        console.error("Error updating entry:", error);
-        throw error;
-      }
-    },
-  );
+  ipcMain.handle("db:updateEntry", async (_event, id: number, content: string) => {
+    try {
+      return await databaseService.updateEntry(id, content);
+    } catch (error) {
+      console.error("Error updating entry:", error);
+      throw error;
+    }
+  });
 
   ipcMain.handle("db:deleteEntry", async (_event, id: number) => {
     try {
@@ -159,29 +154,23 @@ export function registerDatabaseHandlers(): void {
   // SUMMARIES HANDLERS
   // =============================================================================
 
-  ipcMain.handle(
-    "db:createSummary",
-    async (_event, input: CreateSummaryInput) => {
-      try {
-        return await databaseService.createSummary(input);
-      } catch (error) {
-        console.error("Error creating summary:", error);
-        throw error;
-      }
-    },
-  );
+  ipcMain.handle("db:createSummary", async (_event, input: CreateSummaryInput) => {
+    try {
+      return await databaseService.createSummary(input);
+    } catch (error) {
+      console.error("Error creating summary:", error);
+      throw error;
+    }
+  });
 
-  ipcMain.handle(
-    "db:createCurrentWeekSummary",
-    async (_event, content: string) => {
-      try {
-        return await databaseService.createCurrentWeekSummary(content);
-      } catch (error) {
-        console.error("Error creating current week summary:", error);
-        throw error;
-      }
-    },
-  );
+  ipcMain.handle("db:createCurrentWeekSummary", async (_event, content: string) => {
+    try {
+      return await databaseService.createCurrentWeekSummary(content);
+    } catch (error) {
+      console.error("Error creating current week summary:", error);
+      throw error;
+    }
+  });
 
   ipcMain.handle("db:getSummaryById", async (_event, id: number) => {
     try {
@@ -205,10 +194,7 @@ export function registerDatabaseHandlers(): void {
     "db:getSummaryForIsoWeek",
     async (_event, iso_year: number, week_of_year: number) => {
       try {
-        return await databaseService.getSummaryForIsoWeek(
-          iso_year,
-          week_of_year,
-        );
+        return await databaseService.getSummaryForIsoWeek(iso_year, week_of_year);
       } catch (error) {
         console.error("Error getting summary for ISO week:", error);
         throw error;
@@ -243,17 +229,14 @@ export function registerDatabaseHandlers(): void {
     }
   });
 
-  ipcMain.handle(
-    "db:updateSummary",
-    async (_event, id: number, content: string) => {
-      try {
-        return await databaseService.updateSummary(id, content);
-      } catch (error) {
-        console.error("Error updating summary:", error);
-        throw error;
-      }
-    },
-  );
+  ipcMain.handle("db:updateSummary", async (_event, id: number, content: string) => {
+    try {
+      return await databaseService.updateSummary(id, content);
+    } catch (error) {
+      console.error("Error updating summary:", error);
+      throw error;
+    }
+  });
 
   ipcMain.handle("db:deleteSummary", async (_event, id: number) => {
     try {
@@ -277,10 +260,7 @@ export function registerDatabaseHandlers(): void {
     "db:summaryExistsForIsoWeek",
     async (_event, iso_year: number, week_of_year: number) => {
       try {
-        return await databaseService.summaryExistsForIsoWeek(
-          iso_year,
-          week_of_year,
-        );
+        return await databaseService.summaryExistsForIsoWeek(iso_year, week_of_year);
       } catch (error) {
         console.error("Error checking if summary exists for ISO week:", error);
         throw error;
@@ -288,17 +268,14 @@ export function registerDatabaseHandlers(): void {
     },
   );
 
-  ipcMain.handle(
-    "db:summaryExistsForWeek",
-    async (_event, weekOfYear: number) => {
-      try {
-        return await databaseService.summaryExistsForWeek(weekOfYear);
-      } catch (error) {
-        console.error("Error checking if summary exists for week:", error);
-        throw error;
-      }
-    },
-  );
+  ipcMain.handle("db:summaryExistsForWeek", async (_event, weekOfYear: number) => {
+    try {
+      return await databaseService.summaryExistsForWeek(weekOfYear);
+    } catch (error) {
+      console.error("Error checking if summary exists for week:", error);
+      throw error;
+    }
+  });
 
   ipcMain.handle("db:getLatestSummary", async (_event) => {
     try {
@@ -322,41 +299,37 @@ export function registerDatabaseHandlers(): void {
     }
   });
 
-  ipcMain.handle(
-    "db:updateSettings",
-    async (_event, input: UpdateSettingsInput) => {
-      try {
-        return await databaseService.updateSettings(input);
-      } catch (error) {
-        console.error("Error updating settings:", error);
-        throw error;
-      }
-    },
-  );
+  ipcMain.handle("db:updateSettings", async (_event, input: UpdateSettingsInput) => {
+    try {
+      return await databaseService.updateSettings(input);
+    } catch (error) {
+      console.error("Error updating settings:", error);
+      throw error;
+    }
+  });
 
   ipcMain.handle("db:updatePopupInterval", async (_event, minutes: number) => {
     try {
-      return await databaseService.updatePopupInterval(minutes);
+      const result = await databaseService.updatePopupInterval(minutes);
+      updateCaptureTimerInterval(minutes);
+      return result;
     } catch (error) {
       console.error("Error updating popup interval:", error);
       throw error;
     }
   });
 
-  ipcMain.handle(
-    "db:updateGlobalShortcut",
-    async (_event, shortcut: string | null) => {
-      try {
-        const result = await databaseService.updateGlobalShortcut(shortcut);
-        // Sync the shortcut with Electron's globalShortcut API
-        syncShortcutFromDatabase(shortcut);
-        return result;
-      } catch (error) {
-        console.error("Error updating global shortcut:", error);
-        throw error;
-      }
-    },
-  );
+  ipcMain.handle("db:updateGlobalShortcut", async (_event, shortcut: string | null) => {
+    try {
+      const result = await databaseService.updateGlobalShortcut(shortcut);
+      // Sync the shortcut with Electron's globalShortcut API
+      syncShortcutFromDatabase(shortcut);
+      return result;
+    } catch (error) {
+      console.error("Error updating global shortcut:", error);
+      throw error;
+    }
+  });
 
   ipcMain.handle("db:resetSettings", async (_event) => {
     try {

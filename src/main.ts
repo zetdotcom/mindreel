@@ -19,6 +19,7 @@ import {
   registerGlobalShortcutHandlers,
   cleanupGlobalShortcuts,
 } from "./ipc/globalShortcutManager";
+import { initializeCaptureTimer, cleanupCaptureTimer } from "./ipc/captureTimerManager";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -37,10 +38,7 @@ const createWindow = () => {
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
-    const prodMainPath = path.join(
-      __dirname,
-      `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`,
-    );
+    const prodMainPath = path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`);
     mainWindow.loadFile(prodMainPath);
   }
 
@@ -79,10 +77,7 @@ app.on("ready", async () => {
         createCaptureWindow();
         console.log("[SHORTCUT PRESSED] Capture window opened successfully");
       } catch (error) {
-        console.error(
-          "[SHORTCUT PRESSED] Error opening capture window:",
-          error,
-        );
+        console.error("[SHORTCUT PRESSED] Error opening capture window:", error);
       }
     };
 
@@ -93,6 +88,12 @@ app.on("ready", async () => {
     // Create the main window
     console.log("Creating main window...");
     createWindow();
+
+    // Initialize capture timer (opens popup immediately, then at intervals)
+    console.log("Initializing capture timer...");
+    await initializeCaptureTimer();
+    console.log("Capture timer initialized");
+
     console.log("=== MindReel App Started Successfully ===");
   } catch (error) {
     console.error("Failed to initialize app:", error);
@@ -107,6 +108,7 @@ app.on("window-all-closed", async () => {
   if (process.platform !== "darwin") {
     try {
       cleanupGlobalShortcuts();
+      cleanupCaptureTimer();
       cleanupCaptureWindow();
       await closeDatabase();
     } catch (error) {
@@ -128,6 +130,7 @@ app.on("activate", () => {
 app.on("before-quit", async (event) => {
   try {
     cleanupGlobalShortcuts();
+    cleanupCaptureTimer();
     cleanupCaptureWindow();
     await closeDatabase();
   } catch (error) {
