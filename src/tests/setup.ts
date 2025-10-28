@@ -1,7 +1,13 @@
-import { vi } from 'vitest'
-import '@testing-library/jest-dom'
+import { vi } from "vitest";
+import "@testing-library/jest-dom";
 
-vi.mock('@/supabase/rendererClient', () => ({
+global.ResizeObserver = class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
+vi.mock("@/supabase/rendererClient", () => ({
   supabase: {
     auth: {
       signUp: vi.fn(),
@@ -23,7 +29,7 @@ vi.mock('@/supabase/rendererClient', () => ({
       delete: vi.fn(),
     })),
   },
-}))
+}));
 
 const mockElectron = {
   ipcRenderer: {
@@ -32,9 +38,9 @@ const mockElectron = {
     send: vi.fn(),
     removeListener: vi.fn(),
   },
-}
+};
 
-Object.defineProperty(globalThis, 'electron', {
+Object.defineProperty(globalThis, "electron", {
   value: mockElectron,
   writable: true,
-})
+});

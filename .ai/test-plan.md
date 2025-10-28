@@ -24,17 +24,29 @@ Framework: Vitest
   - ✅ Pobieranie unikalnych dat i tygodni (getDatesWithEntries, getWeeksWithEntries, getIsoWeeksWithEntries)
   - ✅ 31 testów - wszystkie przechodzą
 
-- **summariesRepository.ts**
-  - Zapis nowego podsumowania z kluczem tygodnia (weekKey format: YYYY-Wnn)
-  - Pobieranie podsumowania dla danego tygodnia
-  - Aktualizacja treści istniejącego podsumowania
-  - Sprawdzenie niemożności usunięcia podsumowania
-  - Prawidłowe obliczanie iso_year i week_of_year dla dat granicznych
+- **summariesRepository.ts** ✅ IMPLEMENTED (`src/sqlite/repositories/summariesRepository.test.ts`)
+  - ✅ Zapis nowego podsumowania z ISO year i week_of_year (createSummary)
+  - ✅ Pobieranie podsumowania po ID, tygodniu, ISO week (getSummaryById, getSummaryByWeek, getSummaryForIsoWeek)
+  - ✅ Aktualizacja treści istniejącego podsumowania (updateSummary)
+  - ✅ Usuwanie podsumowania po ID, tygodniu, ISO week (deleteSummary, deleteSummaryByWeek, deleteSummaryForIsoWeek)
+  - ✅ Sprawdzanie istnienia podsumowania (summaryExistsForWeek, summaryExistsForIsoWeek)
+  - ✅ Pobieranie wszystkich podsumowań i filtrowanie (getAllSummaries, getSummariesByYear, getSummariesInDateRange)
+  - ✅ Pobieranie najnowszego podsumowania i liczenie (getLatestSummary, getSummaryCount)
+  - ✅ Obsługa tygodni granicznych (tydzień 53, tydzień 1 między latami)
+  - ✅ Rozróżnianie różnych lat z tym samym numerem tygodnia
+  - ✅ 31 testów - wszystkie przechodzą
 
-- **settingsRepository.ts**
-  - Zapis i odczyt częstotliwości pop-upów (30min - 4h)
-  - Zapis i odczyt globalnego skrótu klawiszowego
-  - Walidacja zakresu wartości częstotliwości
+- **settingsRepository.ts** ✅ IMPLEMENTED (`src/sqlite/repositories/settingsRepository.test.ts`)
+  - ✅ Zapis i odczyt częstotliwości pop-upów (updatePopupInterval)
+  - ✅ Zapis i odczyt globalnego skrótu klawiszowego (updateGlobalShortcut)
+  - ✅ Walidacja zakresu wartości częstotliwości (30min - 240min/4h)
+  - ✅ Aktualizacja częściowa ustawień (updateSettings)
+  - ✅ Resetowanie ustawień do domyślnych (resetSettings)
+  - ✅ Inicjalizacja domyślnych ustawień (initializeDefaults)
+  - ✅ Sprawdzanie istnienia ustawień (settingsExist)
+  - ✅ Zachowanie singleton pattern (tylko jeden wiersz z id=1)
+  - ✅ Obsługa wartości null dla global_shortcut
+  - ✅ 22 testy - wszystkie przechodzą
 
 #### 1.2. Utility i pomocnicze funkcje
 **Lokalizacja**: `src/sqlite/dateUtils.ts`, `src/lib/utils.ts`
@@ -182,21 +194,36 @@ Framework: Vitest + React Testing Library
 **Lokalizacja**: `src/views/`
 
 **Przypadki testowe**:
-- **HistoryPageView.tsx**
-  - Wyświetlenie listy kart dni
-  - Sortowanie chronologiczne (od najnowszych)
-  - Tytuł karty: "Poniedziałek, DD/MM/YYYY"
-  - Podsumowanie wyświetlane po niedzieli
-  - Przycisk "+ Dodaj wpis"
+- **HistoryPageView.tsx** ✅ IMPLEMENTED (`src/views/History/HistoryPageView.test.tsx`)
+  - ✅ Wyświetlenie onboarding modal przy pierwszym uruchomieniu
+  - ✅ Brak wyświetlenia onboarding modal jeśli już widziano
+  - ✅ Zamknięcie onboarding modal i wywołanie capture popup
+  - ✅ Renderowanie HistoryView component
+  - ✅ Prawidłowe klasy CSS layout
+  - ✅ Obsługa błędów podczas otwierania capture window
+  - ✅ 7 testów - wszystkie przechodzą
+  - ⏳ TODO: Testowanie listy kart dni, sortowania chronologicznego, tytułów kart, przycisku "+ Dodaj wpis"
 
-- **CaptureWindowView.tsx**
-  - Renderowanie CapturePopup
-  - Obsługa global shortcut (test e2e)
+- **CaptureWindowView.tsx** ✅ IMPLEMENTED (`src/views/CaptureWindow/CaptureWindowView.test.tsx`)
+  - ✅ Renderowanie CapturePopup component
+  - ✅ Zapis wpisu przez database API
+  - ✅ Obsługa błędów podczas zapisu
+  - ✅ Logowanie przy zamykaniu okna
+  - ✅ 4 testy - wszystkie przechodzą
+  - ⏳ TODO: Obsługa global shortcut (test e2e)
 
-- **SettingsView.tsx**
-  - Wybór częstotliwości pop-upów (dropdown)
-  - Konfiguracja globalnego skrótu klawiszowego
-  - Zapis ustawień
+- **SettingsView.tsx** ✅ IMPLEMENTED (`src/views/Settings/SettingsView.test.tsx`)
+  - ✅ Renderowanie nagłówka i sekcji
+  - ✅ Wyświetlenie PopupIntervalControl
+  - ✅ Wyświetlenie aktualnej wartości popup interval
+  - ✅ Loading state podczas ładowania ustawień
+  - ✅ Wyświetlenie błędu w alert
+  - ✅ Aktualizacja popup interval
+  - ✅ Obsługa błędów podczas aktualizacji
+  - ✅ Wyświetlenie wersji w stopce
+  - ✅ Wyświetlenie placeholderów dla planowanych funkcji
+  - ✅ 11 testów - wszystkie przechodzą
+  - ⏳ TODO: Konfiguracja globalnego skrótu klawiszowego (nie zaimplementowane)
 
 ### 3. Testy integracyjne (Integration Tests)
 Framework: Vitest
@@ -347,8 +374,11 @@ Framework: Playwright (dla aplikacji Electron)
 
 ### Krytyczne (P0) - Must have przed release
 - ✅ Testy jednostkowe repositories - **entriesRepository.ts** (31 tests)
-- ⏳ Testy jednostkowe repositories - summariesRepository.ts (TODO)
-- ⏳ Testy jednostkowe repositories - settingsRepository.ts (TODO)
+- ✅ Testy jednostkowe repositories - **summariesRepository.ts** (31 tests)
+- ✅ Testy jednostkowe repositories - **settingsRepository.ts** (22 tests)
+- ✅ Testy widoków - **HistoryPageView.tsx** (7 tests)
+- ✅ Testy widoków - **CaptureWindowView.tsx** (4 tests)
+- ✅ Testy widoków - **SettingsView.tsx** (11 tests)
 - ⏳ Testy komponentów Auth (login, register) (TODO)
 - ⏳ Testy komponentów Capture (popup, zapis) (TODO)
 - ⏳ E2E: Pierwsze uruchomienie, rejestracja, zapisywanie aktywności (TODO)
