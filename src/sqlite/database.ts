@@ -1,6 +1,5 @@
 import sqlite3 from "sqlite3";
 import path from "node:path";
-import { app } from "electron";
 import fs from "node:fs";
 import { MigrationRunner } from "./migrations";
 
@@ -13,12 +12,15 @@ export class Database {
   private db: sqlite3.Database | null = null;
   private dbPath: string;
 
-  constructor() {
-    // Store database in user data directory
-    const userDataPath = app.getPath("userData");
-    this.dbPath = path.join(userDataPath, "mindreel.db");
+  constructor(customPath?: string) {
+    if (customPath) {
+      this.dbPath = customPath;
+    } else {
+      const { app } = require("electron");
+      const userDataPath = app.getPath("userData");
+      this.dbPath = path.join(userDataPath, "mindreel.db");
+    }
 
-    // Ensure the directory exists
     fs.mkdirSync(path.dirname(this.dbPath), { recursive: true });
   }
 
@@ -154,7 +156,6 @@ export class Database {
         return;
       }
 
-      // Try to insert default settings, ignore if already exists
       const insertSQL = `
         INSERT OR IGNORE INTO settings (id, popup_interval_minutes, global_shortcut)
         VALUES (1, 60, 'Option+Command+Space')
@@ -202,9 +203,6 @@ export class Database {
     return this.dbPath;
   }
 
-  /**
-   * Get database version information
-   */
   async getDatabaseVersion(): Promise<DatabaseVersion | null> {
     return new Promise((resolve, reject) => {
       if (!this.db) {
@@ -223,12 +221,8 @@ export class Database {
     });
   }
 
-  /**
-   * Check if database schema is compatible
-   */
   async checkSchemaCompatibility(): Promise<boolean> {
     try {
-      // Check if required columns exist
       const entriesColumns = await this.getTableColumns("entries");
       const summariesColumns = await this.getTableColumns("summaries");
 
@@ -250,9 +244,7 @@ export class Database {
         "created_at",
       ];
 
-      const entriesValid = requiredEntriesColumns.every((col) =>
-        entriesColumns.includes(col),
-      );
+      const entriesValid = requiredEntriesColumns.every((col) => entriesColumns.includes(col));
       const summariesValid = requiredSummariesColumns.every((col) =>
         summariesColumns.includes(col),
       );
@@ -283,5 +275,12 @@ export class Database {
   }
 }
 
-// Singleton instance
-export const database = new Database();
+let database: Database;
+
+try {
+  database = new Database();
+} catch (error) {
+  database = null as any;
+}
+
+export { database };

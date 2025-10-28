@@ -87,3 +87,5 @@ crashpad_reports/
 !*.config.*
 
 # End of .gitignore
+playwright-report/
+test-results/

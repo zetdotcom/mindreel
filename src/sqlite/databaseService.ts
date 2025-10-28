@@ -1,4 +1,4 @@
-import { database } from "./database";
+import { database, Database } from "./database";
 import { EntriesRepository } from "./repositories/entriesRepository";
 import { SummariesRepository } from "./repositories/summariesRepository";
 import { SettingsRepository } from "./repositories/settingsRepository";
@@ -21,21 +21,23 @@ import {
 } from "./dateUtils";
 
 export class DatabaseService {
+  private db: Database;
   private entriesRepo: EntriesRepository | null = null;
   private summariesRepo: SummariesRepository | null = null;
   private settingsRepo: SettingsRepository | null = null;
   private isInitialized = false;
 
-  /**
-   * Initialize the database and all repositories
-   */
+  constructor(customDatabase?: Database) {
+    this.db = customDatabase || database;
+  }
+
   async initialize(): Promise<void> {
     if (this.isInitialized) {
       return;
     }
 
-    await database.init();
-    const db = database.getDatabase();
+    await this.db.init();
+    const db = this.db.getDatabase();
 
     this.entriesRepo = new EntriesRepository(db);
     this.summariesRepo = new SummariesRepository(db);
@@ -52,7 +54,7 @@ export class DatabaseService {
    * Close the database connection
    */
   async close(): Promise<void> {
-    await database.close();
+    await this.db.close();
     this.entriesRepo = null;
     this.summariesRepo = null;
     this.settingsRepo = null;
@@ -63,15 +65,8 @@ export class DatabaseService {
    * Ensure the service is initialized
    */
   private ensureInitialized(): void {
-    if (
-      !this.isInitialized ||
-      !this.entriesRepo ||
-      !this.summariesRepo ||
-      !this.settingsRepo
-    ) {
-      throw new Error(
-        "Database service not initialized. Call initialize() first.",
-      );
+    if (!this.isInitialized || !this.entriesRepo || !this.summariesRepo || !this.settingsRepo) {
+      throw new Error("Database service not initialized. Call initialize() first.");
     }
   }
 
@@ -124,10 +119,7 @@ export class DatabaseService {
   /**
    * Get entries for a specific ISO week
    */
-  async getEntriesForIsoWeek(
-    iso_year: number,
-    week_of_year: number,
-  ): Promise<Entry[]> {
+  async getEntriesForIsoWeek(iso_year: number, week_of_year: number): Promise<Entry[]> {
     this.ensureInitialized();
     return this.entriesRepo!.getEntriesForIsoWeek(iso_year, week_of_year);
   }
@@ -151,10 +143,7 @@ export class DatabaseService {
   /**
    * Get entries for a date range
    */
-  async getEntriesForDateRange(
-    startDate: string,
-    endDate: string,
-  ): Promise<Entry[]> {
+  async getEntriesForDateRange(startDate: string, endDate: string): Promise<Entry[]> {
     this.ensureInitialized();
     return this.entriesRepo!.getEntriesForDateRange(startDate, endDate);
   }
@@ -216,8 +205,7 @@ export class DatabaseService {
    */
   async createCurrentWeekSummary(content: string): Promise<Summary> {
     this.ensureInitialized();
-    const { start_date, end_date, week_of_year, iso_year } =
-      getCurrentWeekRange();
+    const { start_date, end_date, week_of_year, iso_year } = getCurrentWeekRange();
 
     return this.summariesRepo!.createSummary({
       content,
@@ -256,10 +244,7 @@ export class DatabaseService {
   /**
    * Get summary for a specific ISO week
    */
-  async getSummaryForIsoWeek(
-    iso_year: number,
-    week_of_year: number,
-  ): Promise<Summary | null> {
+  async getSummaryForIsoWeek(iso_year: number, week_of_year: number): Promise<Summary | null> {
     this.ensureInitialized();
     return this.summariesRepo!.getSummaryForIsoWeek(iso_year, week_of_year);
   }
@@ -308,10 +293,7 @@ export class DatabaseService {
   /**
    * Check if summary exists for a specific ISO week
    */
-  async summaryExistsForIsoWeek(
-    iso_year: number,
-    week_of_year: number,
-  ): Promise<boolean> {
+  async summaryExistsForIsoWeek(iso_year: number, week_of_year: number): Promise<boolean> {
     this.ensureInitialized();
     return this.summariesRepo!.summaryExistsForIsoWeek(iso_year, week_of_year);
   }
@@ -384,7 +366,7 @@ export class DatabaseService {
    * Get database file path
    */
   getDatabasePath(): string {
-    return database.getDatabasePath();
+    return this.db.getDatabasePath();
   }
 
   /**
@@ -420,13 +402,12 @@ export class DatabaseService {
   }> {
     this.ensureInitialized();
 
-    const [todayEntries, currentWeekSummary, recentSummaries, settings] =
-      await Promise.all([
-        this.getTodayEntries(),
-        this.getCurrentWeekSummary(),
-        this.getAllSummaries().then((summaries) => summaries.slice(0, 5)), // Get last 5 summaries
-        this.getSettings(),
-      ]);
+    const [todayEntries, currentWeekSummary, recentSummaries, settings] = await Promise.all([
+      this.getTodayEntries(),
+      this.getCurrentWeekSummary(),
+      this.getAllSummaries().then((summaries) => summaries.slice(0, 5)), // Get last 5 summaries
+      this.getSettings(),
+    ]);
 
     return {
       todayEntries,
