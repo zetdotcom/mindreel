@@ -1,4 +1,4 @@
-import { ipcMain } from "electron";
+import { ipcMain, BrowserWindow } from "electron";
 import { databaseService } from "../sqlite/databaseService";
 import {
   CreateEntryInput,
@@ -18,9 +18,15 @@ export function registerDatabaseHandlers(): void {
   // ENTRIES HANDLERS
   // =============================================================================
 
-  ipcMain.handle("db:createEntry", async (_event, input: CreateEntryInput) => {
+  ipcMain.handle("db:createEntry", async (event, input: CreateEntryInput) => {
     try {
-      return await databaseService.createEntry(input);
+      const entry = await databaseService.createEntry(input);
+
+      BrowserWindow.getAllWindows().forEach((window) => {
+        window.webContents.send("entry:created", entry);
+      });
+
+      return entry;
     } catch (error) {
       console.error("Error creating entry:", error);
       throw error;

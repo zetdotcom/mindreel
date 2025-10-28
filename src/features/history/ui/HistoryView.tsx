@@ -1,5 +1,6 @@
 import React from "react";
 import { useHistoryState } from "../model/useHistoryState";
+import { useEntryOperations } from "../model/useEntryOperations";
 import { WeekGroup } from "./WeekGroup";
 import { HistoryHeader } from "./HistoryHeader";
 import { PaginationControl } from "./PaginationControl";
@@ -30,7 +31,16 @@ export function HistoryView() {
     removeToast,
   } = useHistoryState();
 
+  const { deleteEntry, loading: deletingEntry } = useEntryOperations();
   const { authenticated, openAuthModal } = useAuthContext();
+
+  React.useEffect(() => {
+    const unsubscribe = window.appApi.events.onEntryCreated(() => {
+      refreshWeeks();
+    });
+
+    return () => unsubscribe();
+  }, [refreshWeeks]);
 
   const displayWeeks = React.useMemo(() => {
     if (authenticated) return weeks;
@@ -157,14 +167,24 @@ export function HistoryView() {
       <DeleteConfirmationModal
         open={deleteModal.open}
         entryId={deleteModal.entryId}
+        loading={deletingEntry}
         onConfirm={async (entryId) => {
           try {
-            // This will be handled by the delete hook
-            hideDeleteModal();
-            addToast({
-              type: "success",
-              text: "Entry deleted successfully.",
-            });
+            const success = await deleteEntry(entryId);
+
+            if (success) {
+              hideDeleteModal();
+              addToast({
+                type: "success",
+                text: "Entry deleted successfully.",
+              });
+              await refreshWeeks();
+            } else {
+              addToast({
+                type: "error",
+                text: "Failed to delete entry. Please try again.",
+              });
+            }
           } catch (error) {
             addToast({
               type: "error",
