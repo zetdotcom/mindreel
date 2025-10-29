@@ -19,9 +19,10 @@
 //   if (result.ok) { /* summary persisted; caller may refresh week data */ }
 //   else { /* map result.state to SummaryCardState */ }
 //
-import { summariesRepository } from "./repository";
+
+import type { Entry, Summary } from "../../../sqlite/types";
 import { supabaseRendererClient } from "../../../supabase/rendererClient";
-import type { Entry } from "../../../sqlite/types";
+import { summariesRepository } from "./repository";
 
 /* -------------------------------------------------------------------------- */
 /* Types                                                                      */
@@ -199,7 +200,7 @@ export async function generateWeeklySummary(
     }
 
     // 4. Persist summary (arbitrary ISO week supported)
-    let persisted;
+    let persisted: undefined | null | Summary;
     try {
       persisted = await summariesRepository.createForIsoWeek({
         iso_year: args.iso_year,

@@ -1,15 +1,15 @@
-import { useState, useCallback } from "react";
-import { IsoWeekIdentifier, WeekKey } from "./types";
+import { useCallback, useState } from "react";
 import {
   getCurrentWeekRange,
-  getPreviousIsoWeek,
   getNextIsoWeek,
+  getPreviousIsoWeek,
+  getWeekRange,
+  getWeekRangeForDate,
+  getWeeksInISOYear,
   makeWeekKey,
   parseWeekKey,
-  getWeekRange,
-  getWeeksInISOYear,
-  getWeekRangeForDate,
 } from "../../../sqlite/dateUtils";
+import type { IsoWeekIdentifier, WeekKey } from "./types";
 
 /**
  * Hook for ISO week navigation utilities
@@ -62,7 +62,7 @@ export function useIsoWeekNavigation() {
    * Get week range for a given ISO week
    */
   const getWeekDates = useCallback((week: IsoWeekIdentifier) => {
-    return getWeekRange(week.week_of_year, week.iso_year);
+    return getWeekRange(week, week.iso_year);
   }, []);
 
   /**
@@ -209,7 +209,7 @@ export function useIsoWeekNavigation() {
   const getWeekForDate = useCallback(
     (date: Date | string): IsoWeekIdentifier => {
       const dateObj = typeof date === "string" ? new Date(date) : date;
-      const weekRange = getCurrentWeekRange(); // This will compute for the given date
+      // const weekRange = getCurrentWeekRange(); // This will compute for the given date
       // Note: We need to adjust this to work with any date, not just current
       const { week_of_year, iso_year } = getWeekRangeForDate(
         dateObj.toISOString().split("T")[0],

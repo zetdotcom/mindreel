@@ -131,6 +131,7 @@ export function OnboardingModal({
           >
             <div>
               {paragraphs.map((p, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
                 <p key={i}>{p}</p>
               ))}
             </div>
@@ -140,7 +141,7 @@ export function OnboardingModal({
         <Button
           onClick={onConfirm}
           variant="default"
-            // Provide generous target size
+          // Provide generous target size
           size="lg"
           className="w-full mt-4"
           aria-label="Acknowledge introduction and open first capture form"

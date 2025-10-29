@@ -57,7 +57,9 @@ export interface CurrentWeekSummarySectionProps {
   unstyled?: boolean;
 }
 
-export const CurrentWeekSummarySection: React.FC<CurrentWeekSummarySectionProps> = ({
+export const CurrentWeekSummarySection: React.FC<
+  CurrentWeekSummarySectionProps
+> = ({
   autoLoad = true,
   allowCreate = true,
   heading = "Current Week Summary",
@@ -66,25 +68,19 @@ export const CurrentWeekSummarySection: React.FC<CurrentWeekSummarySectionProps>
   onCreated,
   unstyled = false,
 }) => {
-  const {
-    summary,
-    loading,
-    creating,
-    error,
-    load,
-    create,
-    clearError,
-  } = useCurrentWeekSummary({
-    autoLoad,
-    onCreated: () => {
-      onCreated?.();
-    },
-  });
+  const { summary, loading, creating, error, load, create, clearError } =
+    useCurrentWeekSummary({
+      autoLoad,
+      onCreated: () => {
+        onCreated?.();
+      },
+    });
 
   const handleCreate = useCallback(async () => {
     try {
       await create();
-    } catch (e) {
+    } catch (err) {
+      console.error("[handleCreate]::", err);
       // Error state already managed by hook; optionally could surface toast here.
     }
   }, [create]);
@@ -128,24 +124,18 @@ export const CurrentWeekSummarySection: React.FC<CurrentWeekSummarySectionProps>
             variant="ghost"
             disabled={loading || creating}
             aria-label="Refresh summary"
-            onClick={() => load().catch(() => void 0)}
+            onClick={() => load().catch((): void => void 0)}
           >
-            <span className="material-symbols-rounded text-base">
-              refresh
-            </span>
+            <span className="material-symbols-rounded text-base">refresh</span>
           </Button>
         </div>
       </div>
 
       {/* Loading state */}
       {loading && !summary && (
-        <div
-          role="status"
-          aria-live="polite"
-          className="text-sm text-neutral-400"
-        >
+        <output aria-live="polite" className="text-sm text-neutral-400">
           Loading summary...
-        </div>
+        </output>
       )}
 
       {/* Error state */}
@@ -185,9 +175,7 @@ export const CurrentWeekSummarySection: React.FC<CurrentWeekSummarySectionProps>
         </div>
       ) : (
         !loading &&
-        !creating && (
-          <p className="text-neutral-400 text-sm">{emptyMessage}</p>
-        )
+        !creating && <p className="text-neutral-400 text-sm">{emptyMessage}</p>
       )}
     </section>
   );

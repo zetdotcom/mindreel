@@ -1,6 +1,10 @@
 import React from "react";
 import { Calendar, ChevronDown, ChevronRight } from "lucide-react";
-import { DayGroupViewModel, EntryViewModel, DuplicateGroupViewModel } from "../model/types";
+import {
+  DayGroupViewModel,
+  EntryViewModel,
+  DuplicateGroupViewModel,
+} from "../model/types";
 import { EntryRow } from "./EntryRow";
 import { DuplicateGroup } from "./DuplicateGroup";
 import { isDuplicateGroup, isEntry } from "../model/lib";
@@ -55,22 +59,20 @@ export function DayGroup({
 
           <div className="flex items-center space-x-2">
             <Calendar className="h-4 w-4 text-muted-foreground" />
-            <h3 className="font-medium text-foreground">
-              {day.headerLabel}
-            </h3>
+            <h3 className="font-medium text-foreground">{day.headerLabel}</h3>
           </div>
         </div>
 
         <div className="text-sm text-muted-foreground">
-          {day.totalEntries} {day.totalEntries === 1 ? 'entry' : 'entries'}
+          {day.totalEntries} {day.totalEntries === 1 ? "entry" : "entries"}
         </div>
       </div>
 
       {/* Day Content */}
       {!collapsed && (
         <div className="ml-6 space-y-2">
-          <ol className="space-y-2" role="list">
-            {day.items.map((item, index) => {
+          <ol className="space-y-2">
+            {day.items.map((item) => {
               if (isDuplicateGroup(item)) {
                 return (
                   <li key={item.id} className="list-none">

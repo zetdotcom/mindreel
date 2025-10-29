@@ -13,7 +13,6 @@ export { AuthFormPasswordSetNew } from "./ui/AuthFormPasswordSetNew";
 export { AuthFormPasswordChange } from "./ui/AuthFormPasswordChange";
 export { AuthErrorBanner } from "./ui/AuthErrorBanner";
 export { FormField } from "./ui/FormField";
-export { AuthModalExample } from "./ui/AuthModalExample";
 export { ProtectedFeatureGate } from "./ui/ProtectedFeatureGate";
 
 // Types
@@ -43,4 +42,8 @@ export {
 
 export { AuthProvider, useAuthContext } from "./model/AuthContext";
 
-export type { UseAuthReturn, UseAuthState, UseAuthActions } from "./model/useAuth";
+export type {
+  UseAuthReturn,
+  UseAuthState,
+  UseAuthActions,
+} from "./model/useAuth";
