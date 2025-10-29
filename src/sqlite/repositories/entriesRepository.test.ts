@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import sqlite3 from "sqlite3";
-import { EntriesRepository } from "./entriesRepository";
-import { CreateEntryInput } from "../types";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { formatDate, getISOWeekNumber, getISOYear } from "../dateUtils";
+import type { CreateEntryInput } from "../types";
+import { EntriesRepository } from "./entriesRepository";
 
 describe("EntriesRepository", () => {
   let db: sqlite3.Database;
@@ -27,7 +27,7 @@ describe("EntriesRepository", () => {
         (err) => {
           if (err) reject(err);
           else resolve();
-        }
+        },
       );
     });
   });
@@ -171,16 +171,11 @@ describe("EntriesRepository", () => {
       const currentYear = getISOYear(new Date());
       const currentWeek = getISOWeekNumber(new Date());
 
-      const entries = await repository.getEntriesForIsoWeek(
-        currentYear,
-        currentWeek
-      );
+      const entries = await repository.getEntriesForIsoWeek(currentYear, currentWeek);
 
       expect(entries.length).toBeGreaterThan(0);
       expect(
-        entries.every(
-          (e) => e.iso_year === currentYear && e.week_of_year === currentWeek
-        )
+        entries.every((e) => e.iso_year === currentYear && e.week_of_year === currentWeek),
       ).toBe(true);
     });
   });
@@ -192,10 +187,7 @@ describe("EntriesRepository", () => {
       const startDate = formatDate(new Date(today.getTime() - 86400000));
       const endDate = formatDate(new Date(today.getTime() + 86400000));
 
-      const entries = await repository.getEntriesForDateRange(
-        startDate,
-        endDate
-      );
+      const entries = await repository.getEntriesForDateRange(startDate, endDate);
 
       expect(entries.length).toBeGreaterThan(0);
     });
@@ -206,10 +198,7 @@ describe("EntriesRepository", () => {
       const created = await repository.createEntry({
         content: "Original content",
       });
-      const updated = await repository.updateEntry(
-        created.id,
-        "Updated content"
-      );
+      const updated = await repository.updateEntry(created.id, "Updated content");
 
       expect(updated).not.toBeNull();
       expect(updated?.content).toBe("Updated content");

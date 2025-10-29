@@ -1,7 +1,7 @@
 // OpenRouter API client for MindReel Edge Functions
 // Handles AI model calls with proper error handling and timeout management
 
-import type { OpenRouterResponse, PromptData } from './types.ts';
+import type { OpenRouterResponse, PromptData } from "./types.ts";
 
 export interface OpenRouterConfig {
   apiKey: string;
@@ -13,7 +13,7 @@ export interface OpenRouterConfig {
 export interface OpenRouterRequest {
   model: string;
   messages: Array<{
-    role: 'system' | 'user' | 'assistant';
+    role: "system" | "user" | "assistant";
     content: string;
   }>;
   temperature?: number;
@@ -54,20 +54,20 @@ function createTimeoutController(timeoutMs: number): AbortController {
 function mapHttpStatusToError(status: number): { retryable: boolean; message: string } {
   switch (status) {
     case 400:
-      return { retryable: false, message: 'Invalid request format' };
+      return { retryable: false, message: "Invalid request format" };
     case 401:
-      return { retryable: false, message: 'Invalid API key' };
+      return { retryable: false, message: "Invalid API key" };
     case 403:
-      return { retryable: false, message: 'API access forbidden' };
+      return { retryable: false, message: "API access forbidden" };
     case 408:
-      return { retryable: true, message: 'Request timeout' };
+      return { retryable: true, message: "Request timeout" };
     case 429:
-      return { retryable: true, message: 'Rate limit exceeded' };
+      return { retryable: true, message: "Rate limit exceeded" };
     case 500:
     case 502:
     case 503:
     case 504:
-      return { retryable: true, message: 'Server error' };
+      return { retryable: true, message: "Server error" };
     default:
       return { retryable: false, message: `HTTP ${status} error` };
   }
@@ -78,7 +78,7 @@ function mapHttpStatusToError(status: number): { retryable: boolean; message: st
  */
 export async function callOpenRouter(
   promptData: PromptData,
-  config: OpenRouterConfig
+  config: OpenRouterConfig,
 ): Promise<OpenRouterResponse> {
   const timeoutMs = config.timeout || 25000; // 25 second default timeout
   const controller = createTimeoutController(timeoutMs);
@@ -87,33 +87,33 @@ export async function callOpenRouter(
     model: config.model,
     messages: [
       {
-        role: 'system',
-        content: promptData.system
+        role: "system",
+        content: promptData.system,
       },
       {
-        role: 'user',
-        content: promptData.user
-      }
+        role: "user",
+        content: promptData.user,
+      },
     ],
     temperature: config.temperature || 0.5,
-    max_tokens: 1000 // Reasonable limit for summaries
+    max_tokens: 1000, // Reasonable limit for summaries
   };
 
   const headers: Record<string, string> = {
-    'Authorization': `Bearer ${config.apiKey}`,
-    'Content-Type': 'application/json',
-    'HTTP-Referer': 'https://mindreel.com',
-    'X-Title': 'MindReel Weekly Summary Generator'
+    Authorization: `Bearer ${config.apiKey}`,
+    "Content-Type": "application/json",
+    "HTTP-Referer": "https://mindreel.com",
+    "X-Title": "MindReel Weekly Summary Generator",
   };
 
   try {
     console.log(`Calling OpenRouter API - Model: ${config.model}, Chars: ${promptData.totalChars}`);
 
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
       headers,
       body: JSON.stringify(requestBody),
-      signal: controller.signal
+      signal: controller.signal,
     });
 
     // Handle non-2xx responses
@@ -135,7 +135,7 @@ export async function callOpenRouter(
       return {
         ok: false,
         error: errorMessage,
-        usage: undefined
+        usage: undefined,
       };
     }
 
@@ -144,22 +144,22 @@ export async function callOpenRouter(
 
     // Check for API-level errors
     if (data.error) {
-      console.error('OpenRouter API returned error:', data.error);
+      console.error("OpenRouter API returned error:", data.error);
       return {
         ok: false,
-        error: data.error.message || 'Unknown API error',
-        usage: data.usage
+        error: data.error.message || "Unknown API error",
+        usage: data.usage,
       };
     }
 
     // Extract summary from response
     const choice = data.choices?.[0];
     if (!choice?.message?.content) {
-      console.error('OpenRouter API returned empty or invalid response');
+      console.error("OpenRouter API returned empty or invalid response");
       return {
         ok: false,
-        error: 'Empty response from AI model',
-        usage: data.usage
+        error: "Empty response from AI model",
+        usage: data.usage,
       };
     }
 
@@ -167,31 +167,32 @@ export async function callOpenRouter(
 
     console.log(`OpenRouter API success - Generated ${summary.length} characters`);
     if (data.usage) {
-      console.log(`Token usage - Prompt: ${data.usage.prompt_tokens}, Completion: ${data.usage.completion_tokens}, Total: ${data.usage.total_tokens}`);
+      console.log(
+        `Token usage - Prompt: ${data.usage.prompt_tokens}, Completion: ${data.usage.completion_tokens}, Total: ${data.usage.total_tokens}`,
+      );
     }
 
     return {
       ok: true,
       summary,
-      usage: data.usage
+      usage: data.usage,
     };
-
   } catch (error) {
     // Handle fetch errors (network, timeout, etc.)
-    if (error instanceof Error && error.name === 'AbortError') {
-      console.error('OpenRouter API request timed out');
+    if (error instanceof Error && error.name === "AbortError") {
+      console.error("OpenRouter API request timed out");
       return {
         ok: false,
         error: `Request timed out after ${timeoutMs}ms`,
-        usage: undefined
+        usage: undefined,
       };
     }
 
-    console.error('OpenRouter API request failed:', error);
+    console.error("OpenRouter API request failed:", error);
     return {
       ok: false,
-      error: error instanceof Error ? error.message : 'Network error',
-      usage: undefined
+      error: error instanceof Error ? error.message : "Network error",
+      usage: undefined,
     };
   }
 }
@@ -201,23 +202,23 @@ export async function callOpenRouter(
  */
 export function validateOpenRouterConfig(config: Partial<OpenRouterConfig>): string | null {
   if (!config.apiKey) {
-    return 'OpenRouter API key is required';
+    return "OpenRouter API key is required";
   }
 
   if (!config.model) {
-    return 'OpenRouter model is required';
+    return "OpenRouter model is required";
   }
 
-  if (!config.model.includes('/')) {
+  if (!config.model.includes("/")) {
     return 'OpenRouter model should be in format "provider/model"';
   }
 
   if (config.timeout && (config.timeout < 1000 || config.timeout > 60000)) {
-    return 'Timeout should be between 1000ms and 60000ms';
+    return "Timeout should be between 1000ms and 60000ms";
   }
 
   if (config.temperature && (config.temperature < 0 || config.temperature > 2)) {
-    return 'Temperature should be between 0 and 2';
+    return "Temperature should be between 0 and 2";
   }
 
   return null; // Valid
@@ -231,7 +232,7 @@ export function createOpenRouterConfig(apiKey: string, model: string): OpenRoute
     apiKey,
     model,
     timeout: 25000,
-    temperature: 0.5
+    temperature: 0.5,
   };
 
   const validation = validateOpenRouterConfig(config);

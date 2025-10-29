@@ -1,14 +1,11 @@
 // Main database service and initialization
-export { database, Database } from './database';
-export { databaseService, DatabaseService } from './databaseService';
-
-// Type definitions
-export * from './types';
-
+export { Database, database } from "./database";
+export { DatabaseService, databaseService } from "./databaseService";
 // Utility functions
-export * from './dateUtils';
-
+export * from "./dateUtils";
 // Repository classes
-export { EntriesRepository } from './repositories/entriesRepository';
-export { SummariesRepository } from './repositories/summariesRepository';
-export { SettingsRepository } from './repositories/settingsRepository';
+export { EntriesRepository } from "./repositories/entriesRepository";
+export { SettingsRepository } from "./repositories/settingsRepository";
+export { SummariesRepository } from "./repositories/summariesRepository";
+// Type definitions
+export * from "./types";

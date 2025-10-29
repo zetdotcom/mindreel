@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import sqlite3 from "sqlite3";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { SettingsRepository } from "./settingsRepository";
 
 describe("SettingsRepository", () => {
@@ -22,7 +22,7 @@ describe("SettingsRepository", () => {
         (err) => {
           if (err) reject(err);
           else resolve();
-        }
+        },
       );
     });
   });

@@ -1,12 +1,27 @@
+import { Binary, Cpu, Rocket, Shield, Terminal, Zap } from "lucide-react";
 import * as React from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Zap, Rocket, Shield, Terminal, Cpu, Binary } from "lucide-react";
 
 export function NeubrutalistShowcase() {
   return (
@@ -28,9 +43,7 @@ export function NeubrutalistShowcase() {
             <Zap className="size-6" />
             Color System
           </CardTitle>
-          <CardDescription>
-            High-contrast cyberpunk palette with brutal styling
-          </CardDescription>
+          <CardDescription>High-contrast cyberpunk palette with brutal styling</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -61,9 +74,7 @@ export function NeubrutalistShowcase() {
             <Terminal className="size-6" />
             Button System
           </CardTitle>
-          <CardDescription>
-            Bold, interactive elements with brutal shadows
-          </CardDescription>
+          <CardDescription>Bold, interactive elements with brutal shadows</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex flex-wrap gap-4">
@@ -73,7 +84,9 @@ export function NeubrutalistShowcase() {
             <Button variant="destructive">Destructive</Button>
             <Button variant="ghost">Ghost</Button>
             <Button variant="cyber">Cyber Mode</Button>
-            <Button variant="neon" className="neon-glow">Neon Effect</Button>
+            <Button variant="neon" className="neon-glow">
+              Neon Effect
+            </Button>
           </div>
 
           <div className="flex flex-wrap gap-4">
@@ -103,33 +116,25 @@ export function NeubrutalistShowcase() {
         <Alert variant="default">
           <Terminal className="size-5" />
           <AlertTitle>System Status</AlertTitle>
-          <AlertDescription>
-            All systems operational. Neubrutalism theme active.
-          </AlertDescription>
+          <AlertDescription>All systems operational. Neubrutalism theme active.</AlertDescription>
         </Alert>
 
         <Alert variant="warning">
           <Zap className="size-5" />
           <AlertTitle>Warning Protocol</AlertTitle>
-          <AlertDescription>
-            High energy detected. Proceed with caution.
-          </AlertDescription>
+          <AlertDescription>High energy detected. Proceed with caution.</AlertDescription>
         </Alert>
 
         <Alert variant="destructive">
           <Shield className="size-5" />
           <AlertTitle>Critical Error</AlertTitle>
-          <AlertDescription>
-            System breach detected. Immediate action required.
-          </AlertDescription>
+          <AlertDescription>System breach detected. Immediate action required.</AlertDescription>
         </Alert>
 
         <Alert variant="cyber">
           <Binary className="size-5" />
           <AlertTitle>Cyber Mode Activated</AlertTitle>
-          <AlertDescription>
-            Enhanced cyberpunk styling is now active.
-          </AlertDescription>
+          <AlertDescription>Enhanced cyberpunk styling is now active.</AlertDescription>
         </Alert>
       </div>
 
@@ -140,43 +145,24 @@ export function NeubrutalistShowcase() {
             <Cpu className="size-6" />
             Input System
           </CardTitle>
-          <CardDescription>
-            Brutalist form elements with cyber aesthetics
-          </CardDescription>
+          <CardDescription>Brutalist form elements with cyber aesthetics</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-bold uppercase tracking-wide">
-                Username
-              </label>
-              <Input
-                placeholder="Enter your handle"
-                className="font-mono"
-              />
+              <label className="text-sm font-bold uppercase tracking-wide">Username</label>
+              <Input placeholder="Enter your handle" className="font-mono" />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold uppercase tracking-wide">
-                Access Code
-              </label>
-              <Input
-                type="password"
-                placeholder="••••••••"
-                className="font-mono"
-              />
+              <label className="text-sm font-bold uppercase tracking-wide">Access Code</label>
+              <Input type="password" placeholder="••••••••" className="font-mono" />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold uppercase tracking-wide">
-              Mission Brief
-            </label>
-            <Textarea
-              placeholder="Describe your cyber mission..."
-              className="font-mono"
-              rows={4}
-            />
+            <label className="text-sm font-bold uppercase tracking-wide">Mission Brief</label>
+            <Textarea placeholder="Describe your cyber mission..." className="font-mono" rows={4} />
           </div>
         </CardContent>
       </Card>
@@ -188,9 +174,7 @@ export function NeubrutalistShowcase() {
             <Shield className="size-6" />
             Avatar System
           </CardTitle>
-          <CardDescription>
-            Cyber warrior profile displays
-          </CardDescription>
+          <CardDescription>Cyber warrior profile displays</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-6">
@@ -200,15 +184,11 @@ export function NeubrutalistShowcase() {
             </Avatar>
 
             <Avatar className="size-16">
-              <AvatarFallback className="bg-secondary text-secondary-foreground">
-                NX
-              </AvatarFallback>
+              <AvatarFallback className="bg-secondary text-secondary-foreground">NX</AvatarFallback>
             </Avatar>
 
             <Avatar className="size-20">
-              <AvatarFallback className="bg-accent text-accent-foreground">
-                ZR
-              </AvatarFallback>
+              <AvatarFallback className="bg-accent text-accent-foreground">ZR</AvatarFallback>
             </Avatar>
 
             <Avatar className="size-24">
@@ -227,9 +207,7 @@ export function NeubrutalistShowcase() {
             <Binary className="size-6" />
             Dialog System
           </CardTitle>
-          <CardDescription>
-            Modal interfaces with brutal styling
-          </CardDescription>
+          <CardDescription>Modal interfaces with brutal styling</CardDescription>
         </CardHeader>
         <CardContent>
           <Dialog>
@@ -271,24 +249,16 @@ export function NeubrutalistShowcase() {
             <Rocket className="size-6" />
             Typography System
           </CardTitle>
-          <CardDescription>
-            Bold, angular text with cyber aesthetics
-          </CardDescription>
+          <CardDescription>Bold, angular text with cyber aesthetics</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4">
             <h1 className="text-5xl font-black uppercase tracking-brutal text-cyber">
               Cyber Heading 1
             </h1>
-            <h2 className="text-4xl font-black uppercase tracking-wide">
-              System Heading 2
-            </h2>
-            <h3 className="text-3xl font-bold uppercase tracking-wide">
-              Interface Heading 3
-            </h3>
-            <h4 className="text-2xl font-bold uppercase">
-              Module Heading 4
-            </h4>
+            <h2 className="text-4xl font-black uppercase tracking-wide">System Heading 2</h2>
+            <h3 className="text-3xl font-bold uppercase tracking-wide">Interface Heading 3</h3>
+            <h4 className="text-2xl font-bold uppercase">Module Heading 4</h4>
           </div>
 
           <div className="space-y-2">

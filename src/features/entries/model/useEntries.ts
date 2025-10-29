@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect, useRef } from "react";
-import { entriesRepository, type Entry } from "./repository";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { type Entry, entriesRepository } from "./repository";
 
 /**
  * useEntries
@@ -68,12 +68,7 @@ interface LastCriteria {
 }
 
 export function useEntries(config: UseEntriesConfig = {}): UseEntriesResult {
-  const {
-    initialMode = "today",
-    date,
-    weekOfYear,
-    autoLoad = initialMode !== "none",
-  } = config;
+  const { initialMode = "today", date, weekOfYear, autoLoad = initialMode !== "none" } = config;
 
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -82,10 +77,7 @@ export function useEntries(config: UseEntriesConfig = {}): UseEntriesResult {
   const lastCriteriaRef = useRef<LastCriteria>({ mode: null, key: null });
   const mountedRef = useRef(true);
 
-  const setLastCriteria = (
-    mode: LastCriteria["mode"],
-    key: LastCriteria["key"],
-  ) => {
+  const setLastCriteria = (mode: LastCriteria["mode"], key: LastCriteria["key"]) => {
     lastCriteriaRef.current = { mode, key };
   };
 
@@ -149,8 +141,7 @@ export function useEntries(config: UseEntriesConfig = {}): UseEntriesResult {
     const { mode } = lastCriteriaRef.current;
     const isTodayContext =
       mode === "today" ||
-      (mode === "date" &&
-        new Date().toISOString().slice(0, 10) === lastCriteriaRef.current.key);
+      (mode === "date" && new Date().toISOString().slice(0, 10) === lastCriteriaRef.current.key);
     if (isTodayContext) {
       setEntries((prev) => [...prev, created]);
     }
@@ -196,15 +187,7 @@ export function useEntries(config: UseEntriesConfig = {}): UseEntriesResult {
     return () => {
       cancelled = true;
     };
-  }, [
-    autoLoad,
-    initialMode,
-    date,
-    weekOfYear,
-    loadToday,
-    loadByDate,
-    loadByWeek,
-  ]);
+  }, [autoLoad, initialMode, date, weekOfYear, loadToday, loadByDate, loadByWeek]);
 
   // Track mount status to avoid state updates after unmount
   useEffect(() => {

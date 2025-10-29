@@ -1,6 +1,6 @@
-import sqlite3 from "sqlite3";
-import { Summary, CreateSummaryInput } from "../types";
+import type sqlite3 from "sqlite3";
 import { IsoWeekIdentifier } from "../dateUtils";
+import type { CreateSummaryInput, Summary } from "../types";
 
 export class SummariesRepository {
   constructor(private db: sqlite3.Database) {}
@@ -38,13 +38,7 @@ export class SummariesRepository {
 
             db.run(
               sqlLegacy,
-              [
-                input.content,
-                input.start_date,
-                input.end_date,
-                input.week_of_year,
-                created_at,
-              ],
+              [input.content, input.start_date, input.end_date, input.week_of_year, created_at],
               function (fallbackErr) {
                 if (fallbackErr) {
                   reject(fallbackErr);
@@ -124,10 +118,7 @@ export class SummariesRepository {
   /**
    * Get summary for a specific ISO week
    */
-  async getSummaryForIsoWeek(
-    isoYear: number,
-    weekOfYear: number,
-  ): Promise<Summary | null> {
+  async getSummaryForIsoWeek(isoYear: number, weekOfYear: number): Promise<Summary | null> {
     return new Promise((resolve, reject) => {
       // Check if iso_year column exists
       this.db.all("PRAGMA table_info(summaries)", [], (err, columns: any[]) => {
@@ -139,8 +130,7 @@ export class SummariesRepository {
         const hasIsoYear = columns.some((col) => col.name === "iso_year");
 
         if (hasIsoYear) {
-          const sql =
-            "SELECT * FROM summaries WHERE iso_year = ? AND week_of_year = ?";
+          const sql = "SELECT * FROM summaries WHERE iso_year = ? AND week_of_year = ?";
 
           this.db.get(sql, [isoYear, weekOfYear], (err, row: Summary) => {
             if (err) {
@@ -177,8 +167,7 @@ export class SummariesRepository {
    */
   async getAllSummaries(): Promise<Summary[]> {
     return new Promise((resolve, reject) => {
-      const sql =
-        "SELECT * FROM summaries ORDER BY iso_year DESC, week_of_year DESC";
+      const sql = "SELECT * FROM summaries ORDER BY iso_year DESC, week_of_year DESC";
 
       this.db.all(sql, [], (err, rows: Summary[]) => {
         if (err) {
@@ -286,13 +275,9 @@ export class SummariesRepository {
   /**
    * Delete summary for a specific ISO week
    */
-  async deleteSummaryForIsoWeek(
-    isoYear: number,
-    weekOfYear: number,
-  ): Promise<boolean> {
+  async deleteSummaryForIsoWeek(isoYear: number, weekOfYear: number): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      const sql =
-        "DELETE FROM summaries WHERE iso_year = ? AND week_of_year = ?";
+      const sql = "DELETE FROM summaries WHERE iso_year = ? AND week_of_year = ?";
 
       this.db.run(sql, [isoYear, weekOfYear], function (err) {
         if (err) {
@@ -310,8 +295,7 @@ export class SummariesRepository {
    */
   async summaryExistsForWeek(weekOfYear: number): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      const sql =
-        "SELECT COUNT(*) as count FROM summaries WHERE week_of_year = ?";
+      const sql = "SELECT COUNT(*) as count FROM summaries WHERE week_of_year = ?";
 
       this.db.get(sql, [weekOfYear], (err, row: { count: number }) => {
         if (err) {
@@ -327,10 +311,7 @@ export class SummariesRepository {
   /**
    * Check if summary exists for a specific ISO week
    */
-  async summaryExistsForIsoWeek(
-    isoYear: number,
-    weekOfYear: number,
-  ): Promise<boolean> {
+  async summaryExistsForIsoWeek(isoYear: number, weekOfYear: number): Promise<boolean> {
     return new Promise((resolve, reject) => {
       // Check if iso_year column exists
       this.db.all("PRAGMA table_info(summaries)", [], (err, columns: any[]) => {
@@ -345,22 +326,17 @@ export class SummariesRepository {
           const sql =
             "SELECT COUNT(*) as count FROM summaries WHERE iso_year = ? AND week_of_year = ?";
 
-          this.db.get(
-            sql,
-            [isoYear, weekOfYear],
-            (err, row: { count: number }) => {
-              if (err) {
-                reject(err);
-                return;
-              }
+          this.db.get(sql, [isoYear, weekOfYear], (err, row: { count: number }) => {
+            if (err) {
+              reject(err);
+              return;
+            }
 
-              resolve((row?.count || 0) > 0);
-            },
-          );
+            resolve((row?.count || 0) > 0);
+          });
         } else {
           // Fallback: check by week_of_year only
-          const sql =
-            "SELECT COUNT(*) as count FROM summaries WHERE week_of_year = ?";
+          const sql = "SELECT COUNT(*) as count FROM summaries WHERE week_of_year = ?";
 
           this.db.get(sql, [weekOfYear], (err, row: { count: number }) => {
             if (err) {
@@ -396,10 +372,7 @@ export class SummariesRepository {
   /**
    * Get summaries within a date range
    */
-  async getSummariesInDateRange(
-    startDate: string,
-    endDate: string,
-  ): Promise<Summary[]> {
+  async getSummariesInDateRange(startDate: string, endDate: string): Promise<Summary[]> {
     return new Promise((resolve, reject) => {
       const sql = `
         SELECT * FROM summaries

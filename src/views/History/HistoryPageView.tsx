@@ -1,11 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { HistoryView } from "@/features/history";
-import {
-  hasSeenOnboarding,
-  setOnboardingSeen,
-  OnboardingModal,
-} from "@/features/onboarding";
 import { openCaptureWindow } from "@/features/capture";
+import { HistoryView } from "@/features/history";
+import { hasSeenOnboarding, OnboardingModal, setOnboardingSeen } from "@/features/onboarding";
 
 /**
  * HistoryPageView - Route-level component for the History page
@@ -44,10 +40,7 @@ export function HistoryPageView() {
 
   return (
     <>
-      <OnboardingModal
-        open={showOnboarding}
-        onConfirm={handleOnboardingConfirm}
-      />
+      <OnboardingModal open={showOnboarding} onConfirm={handleOnboardingConfirm} />
 
       <div className="min-h-screen bg-background">
         <div className="container mx-auto py-6 px-4">

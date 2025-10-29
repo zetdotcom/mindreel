@@ -1,5 +1,5 @@
-import { test as base, _electron, type ElectronApplication, type Page } from "@playwright/test";
 import path from "node:path";
+import { _electron, test as base, type ElectronApplication, type Page } from "@playwright/test";
 import { TestDatabase } from "../../fixtures/testDatabase";
 
 type ElectronFixtures = {

@@ -22,12 +22,7 @@ export interface SuccessResponse {
 
 export interface ErrorResponse {
   ok: false;
-  reason:
-    | "auth_error"
-    | "validation_error"
-    | "quota_exceeded"
-    | "provider_error"
-    | "other_error";
+  reason: "auth_error" | "validation_error" | "quota_exceeded" | "provider_error" | "other_error";
   message?: string;
   remaining?: number;
   cycle_end?: string;
@@ -108,4 +103,4 @@ export const ERROR_CODES = {
 } as const;
 
 export const SUPPORTED_LANGUAGES = ["pl", "en"] as const;
-export type SupportedLanguage = typeof SUPPORTED_LANGUAGES[number];
+export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];

@@ -1,15 +1,15 @@
 // React hooks for MindReel Edge Function integration
 // Provides easy-to-use React hooks for weekly summary generation
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { EdgeFunctionClient } from "./client";
 import type {
+  QuotaInfo,
   WeeklySummaryRequest,
   WeeklySummarySuccessResponse,
-  QuotaInfo,
   WeekRange,
 } from "./types";
 import { EdgeFunctionError } from "./types";
-import { EdgeFunctionClient } from "./client";
 import { getCurrentWeekRange, getPreviousWeekRange } from "./validation";
 
 // Hook state types
@@ -27,8 +27,7 @@ export interface UseWeeklySummaryActions {
   reset: () => void;
 }
 
-export type UseWeeklySummaryReturn = UseWeeklySummaryState &
-  UseWeeklySummaryActions;
+export type UseWeeklySummaryReturn = UseWeeklySummaryState & UseWeeklySummaryActions;
 
 // Options for the hook
 export interface UseWeeklySummaryOptions {
@@ -41,9 +40,7 @@ export interface UseWeeklySummaryOptions {
 /**
  * Main hook for generating weekly summaries
  */
-export function useWeeklySummary(
-  options: UseWeeklySummaryOptions = {},
-): UseWeeklySummaryReturn {
+export function useWeeklySummary(options: UseWeeklySummaryOptions = {}): UseWeeklySummaryReturn {
   const [state, setState] = useState<UseWeeklySummaryState>({
     loading: false,
     error: null,
@@ -73,20 +70,14 @@ export function useWeeklySummary(
   const generateSummary = useCallback(
     async (request: WeeklySummaryRequest) => {
       if (!clientRef.current) {
-        const error = new EdgeFunctionError(
-          "other_error",
-          "EdgeFunctionClient not provided",
-        );
+        const error = new EdgeFunctionError("other_error", "EdgeFunctionClient not provided");
         setState((prev) => ({ ...prev, error }));
         options.onError?.(error);
         return;
       }
 
       if (!options.authToken) {
-        const error = new EdgeFunctionError(
-          "auth_error",
-          "Authentication token not provided",
-        );
+        const error = new EdgeFunctionError("auth_error", "Authentication token not provided");
         setState((prev) => ({ ...prev, error }));
         options.onError?.(error);
         return;
@@ -107,11 +98,9 @@ export function useWeeklySummary(
       }));
 
       try {
-        const result = await clientRef.current.generateWeeklySummary(
-          request,
-          options.authToken,
-          { signal: abortControllerRef.current.signal },
-        );
+        const result = await clientRef.current.generateWeeklySummary(request, options.authToken, {
+          signal: abortControllerRef.current.signal,
+        });
 
         // Update quota info from client
         const quota = clientRef.current.getQuotaInfo();
@@ -217,9 +206,7 @@ export function useQuotaInfo(client?: EdgeFunctionClient) {
  * Hook for managing week ranges
  */
 export function useWeekRange(initialWeek?: WeekRange) {
-  const [currentWeek, setCurrentWeek] = useState<WeekRange>(
-    initialWeek || getCurrentWeekRange(),
-  );
+  const [currentWeek, setCurrentWeek] = useState<WeekRange>(initialWeek || getCurrentWeekRange());
 
   const goToCurrentWeek = useCallback(() => {
     setCurrentWeek(getCurrentWeekRange());
@@ -253,14 +240,11 @@ export function useWeekRange(initialWeek?: WeekRange) {
 export function useValidation() {
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
-  const validate = useCallback(
-    (client: EdgeFunctionClient, request: WeeklySummaryRequest) => {
-      const result = client.validateRequest(request);
-      setValidationErrors(result.errors);
-      return result.valid;
-    },
-    [],
-  );
+  const validate = useCallback((client: EdgeFunctionClient, request: WeeklySummaryRequest) => {
+    const result = client.validateRequest(request);
+    setValidationErrors(result.errors);
+    return result.valid;
+  }, []);
 
   const clearValidation = useCallback(() => {
     setValidationErrors([]);
@@ -279,10 +263,7 @@ export function useValidation() {
 /**
  * Combined hook that provides all functionality
  */
-export function useWeeklySummaryComplete(
-  client: EdgeFunctionClient,
-  authToken?: string,
-) {
+export function useWeeklySummaryComplete(client: EdgeFunctionClient, authToken?: string) {
   const summary = useWeeklySummary({ client, authToken });
   const quota = useQuotaInfo(client);
   const weekRange = useWeekRange();

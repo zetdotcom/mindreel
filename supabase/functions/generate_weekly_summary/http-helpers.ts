@@ -1,14 +1,11 @@
 // HTTP response helper functions for the weekly summary edge function
 
-import type { SuccessResponse, ErrorResponse } from "../_shared/types.ts";
+import type { ErrorResponse, SuccessResponse } from "../_shared/types.ts";
 
 /**
  * Creates a standardized JSON response with proper headers
  */
-export function jsonResponse(
-  data: SuccessResponse | ErrorResponse,
-  status = 200,
-): Response {
+export function jsonResponse(data: SuccessResponse | ErrorResponse, status = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
     headers: {

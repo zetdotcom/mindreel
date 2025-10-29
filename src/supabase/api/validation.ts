@@ -3,12 +3,12 @@
 
 import type {
   Entry,
-  WeeklySummaryRequest,
-  ValidationResult,
-  WeekRange,
   SupportedLanguage,
-} from './types';
-import { VALIDATION_RULES, SUPPORTED_LANGUAGES } from './types';
+  ValidationResult,
+  WeeklySummaryRequest,
+  WeekRange,
+} from "./types";
+import { SUPPORTED_LANGUAGES, VALIDATION_RULES } from "./types";
 
 /**
  * Validates a date string in YYYY-MM-DD format
@@ -18,8 +18,8 @@ export function isValidDateString(dateStr: string): boolean {
     return false;
   }
 
-  const date = new Date(dateStr + 'T00:00:00.000Z');
-  return !isNaN(date.getTime()) && dateStr === date.toISOString().split('T')[0];
+  const date = new Date(dateStr + "T00:00:00.000Z");
+  return !isNaN(date.getTime()) && dateStr === date.toISOString().split("T")[0];
 }
 
 /**
@@ -27,7 +27,7 @@ export function isValidDateString(dateStr: string): boolean {
  */
 export function isMonday(dateStr: string): boolean {
   if (!isValidDateString(dateStr)) return false;
-  const date = new Date(dateStr + 'T00:00:00.000Z');
+  const date = new Date(dateStr + "T00:00:00.000Z");
   return date.getUTCDay() === 1; // Monday = 1
 }
 
@@ -36,7 +36,7 @@ export function isMonday(dateStr: string): boolean {
  */
 export function isSunday(dateStr: string): boolean {
   if (!isValidDateString(dateStr)) return false;
-  const date = new Date(dateStr + 'T00:00:00.000Z');
+  const date = new Date(dateStr + "T00:00:00.000Z");
   return date.getUTCDay() === 0; // Sunday = 0
 }
 
@@ -48,10 +48,10 @@ export function validateWeekRange(weekStart: string, weekEnd: string): Validatio
 
   // Validate date format
   if (!isValidDateString(weekStart)) {
-    errors.push('week_start must be in YYYY-MM-DD format');
+    errors.push("week_start must be in YYYY-MM-DD format");
   }
   if (!isValidDateString(weekEnd)) {
-    errors.push('week_end must be in YYYY-MM-DD format');
+    errors.push("week_end must be in YYYY-MM-DD format");
   }
 
   if (errors.length > 0) {
@@ -60,27 +60,31 @@ export function validateWeekRange(weekStart: string, weekEnd: string): Validatio
 
   // Check day of week
   if (!isMonday(weekStart)) {
-    errors.push('week_start must be a Monday');
+    errors.push("week_start must be a Monday");
   }
   if (!isSunday(weekEnd)) {
-    errors.push('week_end must be a Sunday');
+    errors.push("week_end must be a Sunday");
   }
 
   // Check that it's exactly one week
-  const startDate = new Date(weekStart + 'T00:00:00.000Z');
-  const endDate = new Date(weekEnd + 'T00:00:00.000Z');
+  const startDate = new Date(weekStart + "T00:00:00.000Z");
+  const endDate = new Date(weekEnd + "T00:00:00.000Z");
   const daysDiff = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
 
   if (daysDiff !== 6) {
-    errors.push('Week range must be exactly 7 days (Monday to Sunday)');
+    errors.push("Week range must be exactly 7 days (Monday to Sunday)");
   }
 
   // Check if week_start is not too far in the future
   const now = new Date();
-  const maxFutureDate = new Date(now.getTime() + VALIDATION_RULES.FUTURE_DATE_LIMIT_DAYS * 24 * 60 * 60 * 1000);
+  const maxFutureDate = new Date(
+    now.getTime() + VALIDATION_RULES.FUTURE_DATE_LIMIT_DAYS * 24 * 60 * 60 * 1000,
+  );
 
   if (startDate > maxFutureDate) {
-    errors.push(`week_start cannot be more than ${VALIDATION_RULES.FUTURE_DATE_LIMIT_DAYS} day(s) in the future`);
+    errors.push(
+      `week_start cannot be more than ${VALIDATION_RULES.FUTURE_DATE_LIMIT_DAYS} day(s) in the future`,
+    );
   }
 
   return { valid: errors.length === 0, errors };
@@ -89,15 +93,20 @@ export function validateWeekRange(weekStart: string, weekEnd: string): Validatio
 /**
  * Validates an individual entry
  */
-export function validateEntry(entry: Entry, index: number, weekStart: string, weekEnd: string): string[] {
+export function validateEntry(
+  entry: Entry,
+  index: number,
+  weekStart: string,
+  weekEnd: string,
+): string[] {
   const errors: string[] = [];
   const prefix = `Entry ${index + 1}`;
 
   // Check required fields
-  if (!entry.timestamp || typeof entry.timestamp !== 'string') {
+  if (!entry.timestamp || typeof entry.timestamp !== "string") {
     errors.push(`${prefix}: timestamp is required and must be a string`);
   }
-  if (!entry.text || typeof entry.text !== 'string') {
+  if (!entry.text || typeof entry.text !== "string") {
     errors.push(`${prefix}: text is required and must be a string`);
   }
 
@@ -111,8 +120,8 @@ export function validateEntry(entry: Entry, index: number, weekStart: string, we
   }
 
   // Check if timestamp is within week range
-  const weekStartTime = new Date(weekStart + 'T00:00:00.000Z').getTime();
-  const weekEndTime = new Date(weekEnd + 'T23:59:59.999Z').getTime();
+  const weekStartTime = new Date(weekStart + "T00:00:00.000Z").getTime();
+  const weekEndTime = new Date(weekEnd + "T23:59:59.999Z").getTime();
   const entryTime = entryDate.getTime();
 
   if (entryTime < weekStartTime || entryTime > weekEndTime) {
@@ -121,7 +130,9 @@ export function validateEntry(entry: Entry, index: number, weekStart: string, we
 
   // Check text length
   if (entry.text.length > VALIDATION_RULES.MAX_ENTRY_TEXT_LENGTH) {
-    errors.push(`${prefix}: text too long (max ${VALIDATION_RULES.MAX_ENTRY_TEXT_LENGTH} characters)`);
+    errors.push(
+      `${prefix}: text too long (max ${VALIDATION_RULES.MAX_ENTRY_TEXT_LENGTH} characters)`,
+    );
   }
 
   // Check for empty text after trimming
@@ -135,17 +146,21 @@ export function validateEntry(entry: Entry, index: number, weekStart: string, we
 /**
  * Validates an array of entries
  */
-export function validateEntries(entries: Entry[], weekStart: string, weekEnd: string): ValidationResult {
+export function validateEntries(
+  entries: Entry[],
+  weekStart: string,
+  weekEnd: string,
+): ValidationResult {
   const errors: string[] = [];
 
   // Check if entries array exists and is not empty
   if (!Array.isArray(entries)) {
-    errors.push('entries must be an array');
+    errors.push("entries must be an array");
     return { valid: false, errors };
   }
 
   if (entries.length === 0) {
-    errors.push('entries array cannot be empty');
+    errors.push("entries array cannot be empty");
     return { valid: false, errors };
   }
 
@@ -163,7 +178,9 @@ export function validateEntries(entries: Entry[], weekStart: string, weekEnd: st
   // Check total text length
   const totalTextLength = entries.reduce((sum, entry) => sum + (entry.text?.length || 0), 0);
   if (totalTextLength > VALIDATION_RULES.MAX_TOTAL_TEXT_LENGTH) {
-    errors.push(`Total text content too large (max ${VALIDATION_RULES.MAX_TOTAL_TEXT_LENGTH} characters)`);
+    errors.push(
+      `Total text content too large (max ${VALIDATION_RULES.MAX_TOTAL_TEXT_LENGTH} characters)`,
+    );
   }
 
   return { valid: errors.length === 0, errors };
@@ -176,10 +193,10 @@ export function validateLanguage(language?: string): ValidationResult {
   const errors: string[] = [];
 
   if (language !== undefined) {
-    if (typeof language !== 'string') {
-      errors.push('language must be a string');
+    if (typeof language !== "string") {
+      errors.push("language must be a string");
     } else if (!SUPPORTED_LANGUAGES.includes(language as SupportedLanguage)) {
-      errors.push(`language must be one of: ${SUPPORTED_LANGUAGES.join(', ')}`);
+      errors.push(`language must be one of: ${SUPPORTED_LANGUAGES.join(", ")}`);
     }
   }
 
@@ -193,14 +210,14 @@ export function validateWeeklySummaryRequest(request: WeeklySummaryRequest): Val
   const errors: string[] = [];
 
   // Validate required fields
-  if (!request.week_start || typeof request.week_start !== 'string') {
-    errors.push('week_start is required and must be a string');
+  if (!request.week_start || typeof request.week_start !== "string") {
+    errors.push("week_start is required and must be a string");
   }
-  if (!request.week_end || typeof request.week_end !== 'string') {
-    errors.push('week_end is required and must be a string');
+  if (!request.week_end || typeof request.week_end !== "string") {
+    errors.push("week_end is required and must be a string");
   }
   if (!request.entries) {
-    errors.push('entries is required');
+    errors.push("entries is required");
   }
 
   // If basic validation fails, return early
@@ -237,8 +254,8 @@ export function createWeekRange(mondayDate: Date): WeekRange {
   return {
     start,
     end,
-    startString: start.toISOString().split('T')[0],
-    endString: end.toISOString().split('T')[0]
+    startString: start.toISOString().split("T")[0],
+    endString: end.toISOString().split("T")[0],
   };
 }
 
@@ -284,8 +301,8 @@ export function getPreviousWeekRange(): WeekRange {
 export function sanitizeEntryText(text: string): string {
   return text
     .trim()
-    .replace(/\s+/g, ' ') // Replace multiple whitespace with single space
-    .replace(/\n{3,}/g, '\n\n'); // Limit consecutive newlines to 2
+    .replace(/\s+/g, " ") // Replace multiple whitespace with single space
+    .replace(/\n{3,}/g, "\n\n"); // Limit consecutive newlines to 2
 }
 
 /**
@@ -293,11 +310,11 @@ export function sanitizeEntryText(text: string): string {
  */
 export function sanitizeEntries(entries: Entry[]): Entry[] {
   return entries
-    .map(entry => ({
+    .map((entry) => ({
       ...entry,
-      text: sanitizeEntryText(entry.text)
+      text: sanitizeEntryText(entry.text),
     }))
-    .filter(entry => entry.text.length > 0) // Remove empty entries
+    .filter((entry) => entry.text.length > 0) // Remove empty entries
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()); // Sort chronologically
 }
 
@@ -310,13 +327,13 @@ export function preprocessRequest(request: WeeklySummaryRequest): {
 } {
   const sanitizedRequest: WeeklySummaryRequest = {
     ...request,
-    entries: sanitizeEntries(request.entries)
+    entries: sanitizeEntries(request.entries),
   };
 
   const validation = validateWeeklySummaryRequest(sanitizedRequest);
 
   return {
     request: sanitizedRequest,
-    validation
+    validation,
   };
 }

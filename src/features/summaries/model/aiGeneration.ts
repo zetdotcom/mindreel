@@ -40,12 +40,7 @@ export type GenerateWeeklySummaryState =
   | { ok: true; summary: import("../../../sqlite/types").Summary }
   | {
       ok: false;
-      state:
-        | "unauthorized"
-        | "limitReached"
-        | "failed"
-        | "unsupported"
-        | "alreadyExists";
+      state: "unauthorized" | "limitReached" | "failed" | "unsupported" | "alreadyExists";
       message?: string;
     };
 
@@ -71,20 +66,14 @@ async function getAuthAccessToken(): Promise<string | null> {
   }
 }
 
-async function fetchEntriesForIsoWeek(
-  iso_year: number,
-  week_of_year: number,
-): Promise<Entry[]> {
+async function fetchEntriesForIsoWeek(iso_year: number, week_of_year: number): Promise<Entry[]> {
   // Access entries via preload IPC (window.appApi.db.getEntriesForIsoWeek)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db: any = (window as any)?.appApi?.db;
   if (!db || typeof db.getEntriesForIsoWeek !== "function") {
     throw new Error("DB_API_UNAVAILABLE");
   }
-  const entries: Entry[] = await db.getEntriesForIsoWeek(
-    iso_year,
-    week_of_year,
-  );
+  const entries: Entry[] = await db.getEntriesForIsoWeek(iso_year, week_of_year);
   return entries;
 }
 
@@ -144,20 +133,14 @@ export async function generateWeeklySummary(
     }
 
     // 2. Fetch entries
-    const entries = await fetchEntriesForIsoWeek(
-      args.iso_year,
-      args.week_of_year,
-    );
+    const entries = await fetchEntriesForIsoWeek(args.iso_year, args.week_of_year);
     if (!entries.length) {
       return { ok: false, state: "failed", message: "No entries for week" };
     }
 
     // 2b. Duplicate check
     try {
-      const exists = await summariesRepository.existsForIsoWeek(
-        args.iso_year,
-        args.week_of_year,
-      );
+      const exists = await summariesRepository.existsForIsoWeek(args.iso_year, args.week_of_year);
       if (exists) {
         return {
           ok: false,
@@ -211,10 +194,7 @@ export async function generateWeeklySummary(
       });
       logDebug("Summary persisted", { id: persisted.id });
     } catch (persistError) {
-      if (
-        persistError instanceof Error &&
-        persistError.message === "CREATE_ISO_WEEK_UNSUPPORTED"
-      ) {
+      if (persistError instanceof Error && persistError.message === "CREATE_ISO_WEEK_UNSUPPORTED") {
         return {
           ok: false,
           state: "unsupported",

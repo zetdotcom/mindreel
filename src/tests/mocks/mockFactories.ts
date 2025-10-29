@@ -1,4 +1,4 @@
-import { vi } from 'vitest'
+import { vi } from "vitest";
 
 export const createMockDatabase = () => ({
   prepare: vi.fn(() => ({
@@ -8,14 +8,14 @@ export const createMockDatabase = () => ({
   })),
   exec: vi.fn(),
   close: vi.fn(),
-})
+});
 
 export const createMockIpcRenderer = () => ({
   invoke: vi.fn(),
   on: vi.fn(),
   send: vi.fn(),
   removeListener: vi.fn(),
-})
+});
 
 export const createMockSupabaseClient = () => ({
   auth: {
@@ -39,4 +39,4 @@ export const createMockSupabaseClient = () => ({
     update: vi.fn(),
     delete: vi.fn(),
   })),
-})
+});

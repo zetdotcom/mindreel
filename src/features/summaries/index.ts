@@ -23,18 +23,15 @@
  *  - Avoid exporting volatile internal utilities to preserve refactor freedom.
  */
 
-export { useCurrentWeekSummary } from "./model/useCurrentWeekSummary";
+// Domain types (re-exported for convenience; consider moving to entities later)
+export type { Summary } from "../../sqlite/types";
+export { summariesRepository } from "./model/repository";
 export type {
   UseCurrentWeekSummaryOptions,
   UseCurrentWeekSummaryResult,
 } from "./model/useCurrentWeekSummary";
-
-export { summariesRepository } from "./model/repository";
-
+export { useCurrentWeekSummary } from "./model/useCurrentWeekSummary";
 export { CurrentWeekSummarySection } from "./ui/CurrentWeekSummarySection";
-
-// Domain types (re-exported for convenience; consider moving to entities later)
-export type { Summary } from "../../sqlite/types";
 
 /**
  * NOTE:

@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 
 /**
  * ErrorDisplay
@@ -48,10 +48,7 @@ export interface ErrorDisplayProps {
   ignoreEmpty?: boolean;
 }
 
-function normalizeMessages(
-  input: ErrorDisplayProps["error"],
-  ignoreEmpty: boolean,
-): string[] {
+function normalizeMessages(input: ErrorDisplayProps["error"], ignoreEmpty: boolean): string[] {
   if (!input) return [];
   const arr = Array.isArray(input) ? input : [input];
   const cleaned = arr
@@ -72,8 +69,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
 
   if (messages.length === 0) return null;
 
-  const base =
-    "rounded-lg border text-sm leading-snug flex flex-col gap-2 px-4 py-3 relative";
+  const base = "rounded-lg border text-sm leading-snug flex flex-col gap-2 px-4 py-3 relative";
   const variantClasses =
     variant === "solid"
       ? "bg-red-900/60 border-red-600/60 text-red-100"
@@ -96,7 +92,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
       {onDismiss && (
         <button
           type="button"
-            // Using absolute positioning to keep layout consistent
+          // Using absolute positioning to keep layout consistent
           className="absolute top-2 right-2 text-red-300 hover:text-red-100 transition text-xs font-medium focus:outline-none focus-visible:ring-1 focus-visible:ring-red-300 rounded"
           onClick={onDismiss}
           aria-label={dismissAriaLabel}

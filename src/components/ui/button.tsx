@@ -1,6 +1,6 @@
-import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
+import type * as React from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -19,8 +19,7 @@ const buttonVariants = cva(
         warm: "bg-button-accent-gradient text-accent-foreground",
         accent: "bg-button-accent-gradient text-accent-foreground",
         spice: "bg-button-spice-gradient text-destructive-foreground",
-        cyber:
-          "bg-button-spice-gradient text-destructive-foreground shadow-glow",
+        cyber: "bg-button-spice-gradient text-destructive-foreground shadow-glow",
         neon: "bg-button-accent-gradient text-accent-foreground shadow-glow",
       },
       size: {

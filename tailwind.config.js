@@ -35,13 +35,11 @@ export default {
         },
         "neon-pulse": {
           "0%": {
-            boxShadow:
-              "0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor",
+            boxShadow: "0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor",
             textShadow: "0 0 5px currentColor",
           },
           "100%": {
-            boxShadow:
-              "0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor",
+            boxShadow: "0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor",
             textShadow: "0 0 10px currentColor",
           },
         },
@@ -51,15 +49,11 @@ export default {
         "brutal-lg": "0 0 0 2px #41657b, 0 0 10px 3px rgba(65,101,123,0.45)",
         "brutal-xl": "0 0 0 2px #41657b, 0 0 14px 4px rgba(62,75,84,0.5)",
         "brutal-2xl": "0 0 0 2px #41657b, 0 0 18px 6px rgba(62,75,84,0.55)",
-        "brutal-primary":
-          "0 0 0 2px #c78226, 0 0 10px 2px rgba(199,130,38,0.45)",
-        "brutal-primary-lg":
-          "0 0 0 2px #c78226, 0 0 14px 3px rgba(199,130,38,0.5)",
-        "brutal-secondary":
-          "0 0 0 2px #41657b, 0 0 8px 2px rgba(65,101,123,0.4)",
+        "brutal-primary": "0 0 0 2px #c78226, 0 0 10px 2px rgba(199,130,38,0.45)",
+        "brutal-primary-lg": "0 0 0 2px #c78226, 0 0 14px 3px rgba(199,130,38,0.5)",
+        "brutal-secondary": "0 0 0 2px #41657b, 0 0 8px 2px rgba(65,101,123,0.4)",
         "brutal-accent": "0 0 0 2px #b9486d, 0 0 12px 3px rgba(185,72,109,0.5)",
-        "brutal-destructive":
-          "0 0 0 2px #b9486d, 0 0 12px 3px rgba(149,51,86,0.55)",
+        "brutal-destructive": "0 0 0 2px #b9486d, 0 0 12px 3px rgba(149,51,86,0.55)",
         glow: "0 0 4px 1px rgba(65,101,123,0.4), 0 0 10px 4px rgba(199,130,38,0.25)",
         "glow-subtle": "0 0 3px 1px rgba(62,75,84,0.35)",
       },
@@ -89,14 +83,10 @@ export default {
         "2xl": "1.25rem",
       },
       backgroundImage: {
-        "card-gradient":
-          "linear-gradient(135deg, #c2d0db 0%, #ffffff 45%, #e3e9ed 100%)",
-        "button-primary":
-          "linear-gradient(135deg, #41657b 0%, #3e4b54 60%, #41657b 100%)",
-        "button-warm":
-          "linear-gradient(135deg, #c78226 0%, #d69745 55%, #e3a857 100%)",
-        "button-accent":
-          "linear-gradient(135deg, #b9486d 0%, #953356 70%, #b9486d 100%)",
+        "card-gradient": "linear-gradient(135deg, #c2d0db 0%, #ffffff 45%, #e3e9ed 100%)",
+        "button-primary": "linear-gradient(135deg, #41657b 0%, #3e4b54 60%, #41657b 100%)",
+        "button-warm": "linear-gradient(135deg, #c78226 0%, #d69745 55%, #e3a857 100%)",
+        "button-accent": "linear-gradient(135deg, #b9486d 0%, #953356 70%, #b9486d 100%)",
       },
       borderWidth: {
         3: "3px",
@@ -129,7 +119,7 @@ export default {
     },
   },
   plugins: [
-    function ({ addUtilities, theme }) {
+    ({ addUtilities, theme }) => {
       addUtilities({
         ".text-shadow-brutal": {
           textShadow: "0 1px 2px rgba(62,75,84,0.4)",

@@ -1,5 +1,5 @@
-import { supabaseRendererClient } from "@/supabase/rendererClient";
 import type { User } from "@supabase/supabase-js";
+import { supabaseRendererClient } from "@/supabase/rendererClient";
 
 /**
  * AuthRepository - typed wrapper around Supabase auth methods.

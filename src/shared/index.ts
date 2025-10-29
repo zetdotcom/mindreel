@@ -20,14 +20,13 @@
  *    but keep this root minimal.
  */
 
+// Generic utilities
+export { cn } from "../lib/utils";
 // UI primitives (only re-export those you actually want consumers to use)
 // Note: shadcn components live under src/components/ui and are *not* re-exported here
 // to keep an explicit boundary. If you decide to expose a design system barrel later,
 // create `shared/ui/index.ts` and selectively re-export there.
 export { ErrorDisplay } from "./ui/ErrorDisplay";
-
-// Generic utilities
-export { cn } from "../lib/utils";
 
 // (Future) Example pattern:
 // export { ipcClient } from "./api/ipcClient";

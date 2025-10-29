@@ -29,12 +29,7 @@ export function CaptureWindowView() {
     console.log("Capture window closing");
   }, []);
 
-  return (
-    <CapturePopup
-      onSave={handleSave}
-      onClose={handleClose}
-    />
-  );
+  return <CapturePopup onSave={handleSave} onClose={handleClose} />;
 }
 
 export default CaptureWindowView;

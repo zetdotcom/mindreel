@@ -54,13 +54,10 @@ export function createEntriesRepository(dbApi?: EntriesDbApi) {
   // Resolve runtime API from global if not provided
   // (Guard for SSR / tests without window)
   const resolved: EntriesDbApi | undefined =
-    dbApi ||
-    (typeof window !== "undefined" ? (window as any)?.appApi?.db : undefined);
+    dbApi || (typeof window !== "undefined" ? (window as any)?.appApi?.db : undefined);
 
   if (!resolved) {
-    throw new Error(
-      "Entries DB API not available. Ensure preload exposes window.appApi.db.",
-    );
+    throw new Error("Entries DB API not available. Ensure preload exposes window.appApi.db.");
   }
 
   return {

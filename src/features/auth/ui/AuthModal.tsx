@@ -1,27 +1,27 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
-import { AuthFormLogin } from "./AuthFormLogin";
-import { AuthFormRegister } from "./AuthFormRegister";
-import { AuthEmailVerificationNotice } from "./AuthEmailVerificationNotice";
-import { AuthFormPasswordResetRequest } from "./AuthFormPasswordResetRequest";
-import { AuthFormPasswordSetNew } from "./AuthFormPasswordSetNew";
-import { AuthFormPasswordChange } from "./AuthFormPasswordChange";
-import {
-  AuthState,
-  LoginFormData,
-  RegisterFormData,
-  PasswordResetRequestFormData,
-  PasswordSetNewFormData,
-  PasswordChangeFormData,
-} from "../model/types";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "../model/AuthContext";
+import type {
+  AuthState,
+  LoginFormData,
+  PasswordChangeFormData,
+  PasswordResetRequestFormData,
+  PasswordSetNewFormData,
+  RegisterFormData,
+} from "../model/types";
+import { AuthEmailVerificationNotice } from "./AuthEmailVerificationNotice";
+import { AuthFormLogin } from "./AuthFormLogin";
+import { AuthFormPasswordChange } from "./AuthFormPasswordChange";
+import { AuthFormPasswordResetRequest } from "./AuthFormPasswordResetRequest";
+import { AuthFormPasswordSetNew } from "./AuthFormPasswordSetNew";
+import { AuthFormRegister } from "./AuthFormRegister";
 
 interface AuthModalProps {
   className?: string;

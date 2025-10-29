@@ -1,9 +1,9 @@
 import { contextBridge, ipcRenderer } from "electron";
-import {
+import type {
   CreateEntryInput,
   CreateSummaryInput,
-  UpdateSettingsInput,
   EntryFilters,
+  UpdateSettingsInput,
 } from "./sqlite/types";
 
 // Database API for renderer process

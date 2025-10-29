@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Settings } from "@/sqlite/types";
+import { useEffect, useState } from "react";
+import type { Settings } from "@/sqlite/types";
 import * as settingsRepository from "./repository";
 
 export function useSettings() {

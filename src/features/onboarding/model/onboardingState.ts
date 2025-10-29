@@ -30,7 +30,7 @@ function resolveStorage(): StorageLike {
   // Minimal in-memory fallback (non-persistent)
   const memory: Record<string, string | null> = {};
   return {
-    getItem: (k: string) => (Object.prototype.hasOwnProperty.call(memory, k) ? memory[k] : null),
+    getItem: (k: string) => (Object.hasOwn(memory, k) ? memory[k] : null),
     setItem: (k: string, v: string) => {
       memory[k] = v;
     },

@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import { format, parseISO } from "date-fns";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { DuplicateGroupViewModel } from "../model/types";
-import { EntryRow } from "./EntryRow";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { format, parseISO } from "date-fns";
+import type { DuplicateGroupViewModel } from "../model/types";
+import { EntryRow } from "./EntryRow";
 
 interface DuplicateGroupProps {
   group: DuplicateGroupViewModel;

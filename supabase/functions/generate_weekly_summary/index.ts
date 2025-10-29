@@ -1,22 +1,22 @@
 // Edge Function for generating weekly AI summaries with quota management
 // Based on MindReel MVP edge function plan
 
-// Import shared utilities
-import type { RequestPayload, SupportedLanguage, QuotaState } from "../_shared/types.ts";
-import { validateEnvironment, getNumericConfig } from "../_shared/env.ts";
+import { getNumericConfig, validateEnvironment } from "../_shared/env.ts";
 import { buildPromptData, formatSummary } from "../_shared/normalization.ts";
 import { callOpenRouter, createOpenRouterConfig } from "../_shared/openrouter.ts";
+// Import shared utilities
+import type { QuotaState, RequestPayload, SupportedLanguage } from "../_shared/types.ts";
 
 // Import local helper functions
-import { jsonResponse, errorResponse } from "./http-helpers.ts";
+import { errorResponse, jsonResponse } from "./http-helpers.ts";
 import {
-  getOrInitUserQuota,
-  resetQuotaIfExpired,
   calculateQuotaInfo,
   conditionalIncrementQuota,
   fetchCurrentQuota,
+  getOrInitUserQuota,
+  resetQuotaIfExpired,
 } from "./quota.ts";
-import { validateWeekRange, validateEntries, validateLanguage } from "./validation.ts";
+import { validateEntries, validateLanguage, validateWeekRange } from "./validation.ts";
 
 // Main edge function
 (globalThis as any).Deno.serve(async (req: Request) => {
@@ -35,7 +35,7 @@ import { validateWeekRange, validateEntries, validateLanguage } from "./validati
       return errorResponse("other_error", "Server configuration error", 500);
     }
 
-    //@ts-ignore
+    //@ts-expect-error
     const { createClient } = await import("npm:@supabase/supabase-js@2");
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 

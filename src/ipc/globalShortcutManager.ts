@@ -22,21 +22,15 @@ let shortcutCallback: (() => void) | null = null;
  */
 function registerShortcut(accelerator: string, callback: () => void): boolean {
   try {
-    console.log(
-      `[GlobalShortcut] Attempting to register shortcut: ${accelerator}`,
-    );
+    console.log(`[GlobalShortcut] Attempting to register shortcut: ${accelerator}`);
     console.log(
       `[GlobalShortcut] Callback type: ${typeof callback}, is function: ${typeof callback === "function"}`,
     );
-    console.log(
-      `[GlobalShortcut] globalShortcut API available: ${globalShortcut !== undefined}`,
-    );
+    console.log(`[GlobalShortcut] globalShortcut API available: ${globalShortcut !== undefined}`);
 
     // Unregister existing shortcut if any
     if (currentShortcut) {
-      console.log(
-        `[GlobalShortcut] Unregistering current shortcut: ${currentShortcut}`,
-      );
+      console.log(`[GlobalShortcut] Unregistering current shortcut: ${currentShortcut}`);
       globalShortcut.unregister(currentShortcut);
       currentShortcut = null;
     }
@@ -63,17 +57,12 @@ function registerShortcut(accelerator: string, callback: () => void): boolean {
       console.log(`[GlobalShortcut] Press ${accelerator} to test the shortcut`);
     } else {
       console.error(`[GlobalShortcut] ✗ Failed to register: ${accelerator}`);
-      console.error(
-        `[GlobalShortcut] Shortcut may be already taken by another application`,
-      );
+      console.error(`[GlobalShortcut] Shortcut may be already taken by another application`);
     }
 
     return success;
   } catch (error) {
-    console.error(
-      `[GlobalShortcut] Exception while registering: ${accelerator}`,
-      error,
-    );
+    console.error(`[GlobalShortcut] Exception while registering: ${accelerator}`, error);
     return false;
   }
 }
@@ -97,9 +86,7 @@ function unregisterShortcut(): void {
  * Initialize global shortcuts from database settings.
  * Should be called after database is initialized.
  */
-export async function initializeGlobalShortcut(
-  onShortcutPressed: () => void,
-): Promise<void> {
+export async function initializeGlobalShortcut(onShortcutPressed: () => void): Promise<void> {
   try {
     console.log("[GlobalShortcut] Initializing global shortcuts...");
 
@@ -112,13 +99,8 @@ export async function initializeGlobalShortcut(
     console.log("[GlobalShortcut] Settings loaded:", settings);
 
     if (settings?.global_shortcut) {
-      console.log(
-        `[GlobalShortcut] Found shortcut in settings: ${settings.global_shortcut}`,
-      );
-      const success = registerShortcut(
-        settings.global_shortcut,
-        onShortcutPressed,
-      );
+      console.log(`[GlobalShortcut] Found shortcut in settings: ${settings.global_shortcut}`);
+      const success = registerShortcut(settings.global_shortcut, onShortcutPressed);
       if (!success) {
         console.warn(
           `[GlobalShortcut] ⚠ Failed to register shortcut from settings: ${settings.global_shortcut}`,
@@ -128,10 +110,7 @@ export async function initializeGlobalShortcut(
       console.log("[GlobalShortcut] No global shortcut configured in settings");
     }
   } catch (error) {
-    console.error(
-      "[GlobalShortcut] Error initializing global shortcut:",
-      error,
-    );
+    console.error("[GlobalShortcut] Error initializing global shortcut:", error);
   }
 }
 
@@ -155,24 +134,19 @@ export function updateGlobalShortcut(
  * Register IPC handlers for global shortcut management.
  * This allows the renderer process to update shortcuts and receive feedback.
  */
-export function registerGlobalShortcutHandlers(
-  onShortcutPressed: () => void,
-): void {
+export function registerGlobalShortcutHandlers(onShortcutPressed: () => void): void {
   // Store the callback for later use
   shortcutCallback = onShortcutPressed;
 
-  ipcMain.handle(
-    "shortcut:register",
-    async (_event, accelerator: string | null) => {
-      try {
-        const success = updateGlobalShortcut(accelerator, onShortcutPressed);
-        return { success };
-      } catch (error) {
-        console.error("Error in shortcut:register handler:", error);
-        return { success: false, error: String(error) };
-      }
-    },
-  );
+  ipcMain.handle("shortcut:register", async (_event, accelerator: string | null) => {
+    try {
+      const success = updateGlobalShortcut(accelerator, onShortcutPressed);
+      return { success };
+    } catch (error) {
+      console.error("Error in shortcut:register handler:", error);
+      return { success: false, error: String(error) };
+    }
+  });
 
   ipcMain.handle("shortcut:isRegistered", () => {
     return {
@@ -187,9 +161,7 @@ export function registerGlobalShortcutHandlers(
  * Called by database handler when shortcut is updated in DB.
  */
 export function syncShortcutFromDatabase(accelerator: string | null): boolean {
-  console.log(
-    `[GlobalShortcut] Syncing shortcut from database: ${accelerator}`,
-  );
+  console.log(`[GlobalShortcut] Syncing shortcut from database: ${accelerator}`);
   if (!shortcutCallback) {
     console.error("[GlobalShortcut] Shortcut callback not initialized");
     return false;

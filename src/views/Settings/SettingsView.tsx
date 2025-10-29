@@ -1,5 +1,5 @@
-import { useSettings, PopupIntervalControl } from "@/features/settings";
 import { Alert } from "@/components/ui/alert";
+import { PopupIntervalControl, useSettings } from "@/features/settings";
 
 export function SettingsView() {
   const { settings, loading, error, updatePopupInterval } = useSettings();

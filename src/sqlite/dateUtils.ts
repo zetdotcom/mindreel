@@ -165,9 +165,7 @@ export function getWeekRangeForDate(date: Date | string): {
  * @param current Current ISO week identifier
  * @returns Previous ISO week identifier
  */
-export function getPreviousIsoWeek(
-  current: IsoWeekIdentifier,
-): IsoWeekIdentifier {
+export function getPreviousIsoWeek(current: IsoWeekIdentifier): IsoWeekIdentifier {
   if (current.week_of_year > 1) {
     return {
       iso_year: current.iso_year,

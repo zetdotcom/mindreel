@@ -32,9 +32,7 @@ export function validateWeekRange(
   }
 
   // Check if the range is exactly 6 days (Monday to Sunday)
-  const daysDiff = Math.floor(
-    (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
-  );
+  const daysDiff = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
   if (daysDiff !== 6) {
     return "Week range must be exactly 7 days (Monday to Sunday)";
   }

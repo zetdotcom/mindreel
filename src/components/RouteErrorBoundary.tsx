@@ -1,10 +1,5 @@
-import React, {
-  Component,
-  ReactNode,
-  ErrorInfo,
-  useCallback,
-  useState,
-} from "react";
+import type React from "react";
+import { Component, type ErrorInfo, type ReactNode, useCallback, useState } from "react";
 
 /**
  * RouteErrorBoundary
@@ -52,9 +47,7 @@ export interface RouteErrorBoundaryProps {
    * Fallback UI. If a ReactNode, it is rendered as-is.
    * If a function, it receives (error, reset) and should return ReactNode.
    */
-  fallback?:
-    | ReactNode
-    | ((error: Error, reset: () => void) => ReactNode);
+  fallback?: ReactNode | ((error: Error, reset: () => void) => ReactNode);
   /**
    * Hook for side-effect reporting (telemetry, logging, etc.).
    */
@@ -111,9 +104,7 @@ export class RouteErrorBoundary extends Component<
       if (fallback) {
         return fallback;
       }
-      return (
-        <DefaultFallback error={error} onRetry={this.reset} className={className} />
-      );
+      return <DefaultFallback error={error} onRetry={this.reset} className={className} />;
     }
 
     return children;
@@ -141,9 +132,7 @@ function DefaultFallback({
       }
     >
       <div>
-        <h2 className="text-lg font-semibold text-destructive mb-1">
-          Something went wrong
-        </h2>
+        <h2 className="text-lg font-semibold text-destructive mb-1">Something went wrong</h2>
         <p className="text-sm text-destructive/80 leading-relaxed">
           {error.message || "Unexpected render failure."}
         </p>
@@ -156,9 +145,7 @@ function DefaultFallback({
           Try Again
         </button>
         <details className="text-xs text-muted-foreground">
-          <summary className="cursor-pointer select-none">
-            Technical details
-          </summary>
+          <summary className="cursor-pointer select-none">Technical details</summary>
           <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap text-[11px] leading-snug">
             {error.stack}
           </pre>
@@ -174,7 +161,7 @@ function DefaultFallback({
  */
 export function withRouteErrorBoundary<P extends object>(
   Wrapped: React.ComponentType<P>,
-  boundaryProps?: Omit<RouteErrorBoundaryProps, "children">
+  boundaryProps?: Omit<RouteErrorBoundaryProps, "children">,
 ) {
   const ComponentWithBoundary = (props: P) => (
     <RouteErrorBoundary {...boundaryProps}>
@@ -205,11 +192,7 @@ export function useLocalRenderBoundary() {
   const reset = useCallback(() => setError(null), []);
   const Wrapper = useCallback(
     ({ children }: { children: ReactNode }) =>
-      error ? (
-        <DefaultFallback error={error} onRetry={reset} />
-      ) : (
-        <>{children}</>
-      ),
+      error ? <DefaultFallback error={error} onRetry={reset} /> : <>{children}</>,
     [error, reset],
   );
   return { error, setError, reset, Wrapper };

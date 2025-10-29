@@ -16,7 +16,7 @@
  *  - SUMMARY_NO_ENTRIES_CURRENT_WEEK: Attempted to create a summary when there are no entries
  *  - SUMMARY_NOT_FOUND: Update/delete target not found
  */
-import type { Summary, Entry } from "../../../sqlite/types";
+import type { Entry, Summary } from "../../../sqlite/types";
 
 /* ---------- Types & Interfaces ------------------------------------------------ */
 

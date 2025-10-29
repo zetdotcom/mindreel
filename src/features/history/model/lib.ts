@@ -1,18 +1,18 @@
 import { format, parseISO } from "date-fns";
-import {
-  WeekKey,
-  IsoWeekIdentifier,
-  EntryViewModel,
-  DuplicateGroupViewModel,
-  DayGroupViewModel,
-  WeekGroupViewModel,
-  SummaryViewModel,
-  RawWeekData,
-  DuplicateDetectionResult,
-  SummaryCardState,
-} from "./types";
-import { makeWeekKey, getWeekRange, parseWeekKey } from "../../../sqlite/dateUtils";
+import { getWeekRange, makeWeekKey, parseWeekKey } from "../../../sqlite/dateUtils";
 import type { Entry, Summary } from "../../../sqlite/types";
+import {
+  type DayGroupViewModel,
+  type DuplicateDetectionResult,
+  type DuplicateGroupViewModel,
+  type EntryViewModel,
+  IsoWeekIdentifier,
+  type RawWeekData,
+  type SummaryCardState,
+  type SummaryViewModel,
+  type WeekGroupViewModel,
+  type WeekKey,
+} from "./types";
 
 /**
  * Transform raw week data into WeekGroupViewModel

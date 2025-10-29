@@ -4,82 +4,78 @@
 import EdgeFunctionClient from "./client";
 
 // Core client and types
-export { EdgeFunctionClient, createClient } from "./client";
+export { createClient, EdgeFunctionClient } from "./client";
+// Hook types
 export type {
+  UseWeeklySummaryActions,
+  UseWeeklySummaryOptions,
+  UseWeeklySummaryReturn,
+  UseWeeklySummaryState,
+} from "./hooks";
+// React hooks
+export {
+  useOfflineQueue,
+  useQuotaInfo,
+  useValidation,
+  useWeeklySummary,
+  useWeeklySummaryComplete,
+  useWeekRange,
+} from "./hooks";
+// Retry utilities
+export {
+  calculateRetryDelay,
+  createAggressiveRetryManager,
+  createNetworkRetryManager,
+  createQuickRetryManager,
+  defaultRetryManager,
+  isRetryableError,
+  RetryManager,
+  withRetry,
+} from "./retry";
+export type {
+  ClientStatus,
+  EdgeFunctionClientConfig,
+  Entry,
+  QuotaInfo,
+  RequestOptions,
+  RetryConfig,
+  SupportedLanguage,
+  ValidationResult,
+  WeeklySummaryErrorResponse,
   WeeklySummaryRequest,
   WeeklySummaryResponse,
   WeeklySummarySuccessResponse,
-  WeeklySummaryErrorResponse,
-  Entry,
-  EdgeFunctionClientConfig,
-  RequestOptions,
-  QuotaInfo,
-  ClientStatus,
   WeekRange,
-  SupportedLanguage,
-  ValidationResult,
-  RetryConfig,
 } from "./types";
-
 // Error classes
-export { EdgeFunctionError, NetworkError, TimeoutError } from "./types";
-
 // Constants
 export {
+  DEFAULT_RETRY_CONFIG,
+  EdgeFunctionError,
+  NetworkError,
   QUOTA_LIMITS,
   SUPPORTED_LANGUAGES,
+  TimeoutError,
   VALIDATION_RULES,
-  DEFAULT_RETRY_CONFIG,
 } from "./types";
-
 // Validation utilities
 export {
-  validateWeeklySummaryRequest,
-  validateWeekRange,
-  validateEntries,
-  validateLanguage,
-  isValidDateString,
+  createWeekRange,
+  getCurrentWeekRange,
+  getMondayOfWeek,
+  getPreviousWeekRange,
+  getWeekRangeForDate,
   isMonday,
   isSunday,
-  createWeekRange,
-  getMondayOfWeek,
-  getWeekRangeForDate,
-  getCurrentWeekRange,
-  getPreviousWeekRange,
-  sanitizeEntryText,
-  sanitizeEntries,
+  isValidDateString,
   preprocessRequest,
+  sanitizeEntries,
+  sanitizeEntryText,
+  validateEntries,
+  validateLanguage,
+  validateWeeklySummaryRequest,
+  validateWeekRange,
 } from "./validation";
-
-// Retry utilities
-export {
-  RetryManager,
-  defaultRetryManager,
-  withRetry,
-  createNetworkRetryManager,
-  createQuickRetryManager,
-  createAggressiveRetryManager,
-  isRetryableError,
-  calculateRetryDelay,
-} from "./retry";
-
-// React hooks
-export {
-  useWeeklySummary,
-  useQuotaInfo,
-  useWeekRange,
-  useValidation,
-  useWeeklySummaryComplete,
-  useOfflineQueue,
-} from "./hooks";
-
-// Hook types
-export type {
-  UseWeeklySummaryState,
-  UseWeeklySummaryActions,
-  UseWeeklySummaryReturn,
-  UseWeeklySummaryOptions,
-} from "./hooks";
 
 // Test data (for development/testing)
 // export {

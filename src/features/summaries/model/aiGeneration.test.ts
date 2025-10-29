@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { generateWeeklySummary } from "./aiGeneration";
-import type { GenerateWeeklySummaryArgs } from "./aiGeneration";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Entry, Summary } from "../../../sqlite/types";
+import type { GenerateWeeklySummaryArgs } from "./aiGeneration";
+import { generateWeeklySummary } from "./aiGeneration";
 
 // Mock Supabase client
 vi.mock("../../../supabase/rendererClient", () => ({
@@ -116,16 +116,12 @@ describe("generateWeeklySummary", () => {
         data: { session: { access_token: "test-token" } },
       } as any);
 
-      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(
-        mockEntries,
-      );
+      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(mockEntries);
       vi.mocked(summariesRepository.existsForIsoWeek).mockResolvedValue(false);
       (global.fetch as any).mockResolvedValue({
         json: async () => ({ ok: true, summary: "Test summary" }),
       });
-      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(
-        mockSummary,
-      );
+      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(mockSummary);
 
       const result = await generateWeeklySummary({
         ...validArgs,
@@ -166,9 +162,7 @@ describe("generateWeeklySummary", () => {
     });
 
     it("should return unauthorized when getSession throws", async () => {
-      vi.mocked(supabaseRendererClient.auth.getSession).mockRejectedValue(
-        new Error("Auth error"),
-      );
+      vi.mocked(supabaseRendererClient.auth.getSession).mockRejectedValue(new Error("Auth error"));
 
       const result = await generateWeeklySummary(validArgs);
 
@@ -183,16 +177,12 @@ describe("generateWeeklySummary", () => {
       vi.mocked(supabaseRendererClient.auth.getSession).mockResolvedValue({
         data: { session: { access_token: "valid-token" } },
       } as any);
-      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(
-        mockEntries,
-      );
+      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(mockEntries);
       vi.mocked(summariesRepository.existsForIsoWeek).mockResolvedValue(false);
       (global.fetch as any).mockResolvedValue({
         json: async () => ({ ok: true, summary: "Test summary" }),
       });
-      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(
-        mockSummary,
-      );
+      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(mockSummary);
 
       const result = await generateWeeklySummary(validArgs);
 
@@ -208,28 +198,20 @@ describe("generateWeeklySummary", () => {
     });
 
     it("should fetch entries for correct ISO week", async () => {
-      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(
-        mockEntries,
-      );
+      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(mockEntries);
       vi.mocked(summariesRepository.existsForIsoWeek).mockResolvedValue(false);
       (global.fetch as any).mockResolvedValue({
         json: async () => ({ ok: true, summary: "Test" }),
       });
-      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(
-        mockSummary,
-      );
+      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(mockSummary);
 
       await generateWeeklySummary(validArgs);
 
-      expect(
-        (global.window as any).appApi.db.getEntriesForIsoWeek,
-      ).toHaveBeenCalledWith(2025, 1);
+      expect((global.window as any).appApi.db.getEntriesForIsoWeek).toHaveBeenCalledWith(2025, 1);
     });
 
     it("should return failed when no entries found", async () => {
-      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(
-        [],
-      );
+      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue([]);
 
       const result = await generateWeeklySummary(validArgs);
 
@@ -270,9 +252,7 @@ describe("generateWeeklySummary", () => {
       vi.mocked(supabaseRendererClient.auth.getSession).mockResolvedValue({
         data: { session: { access_token: "test-token" } },
       } as any);
-      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(
-        mockEntries,
-      );
+      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(mockEntries);
     });
 
     it("should return alreadyExists when summary exists", async () => {
@@ -292,9 +272,7 @@ describe("generateWeeklySummary", () => {
       (global.fetch as any).mockResolvedValue({
         json: async () => ({ ok: true, summary: "Test" }),
       });
-      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(
-        mockSummary,
-      );
+      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(mockSummary);
 
       const result = await generateWeeklySummary(validArgs);
 
@@ -302,15 +280,11 @@ describe("generateWeeklySummary", () => {
     });
 
     it("should continue on duplicate check error (non-fatal)", async () => {
-      vi.mocked(summariesRepository.existsForIsoWeek).mockRejectedValue(
-        new Error("DB error"),
-      );
+      vi.mocked(summariesRepository.existsForIsoWeek).mockRejectedValue(new Error("DB error"));
       (global.fetch as any).mockResolvedValue({
         json: async () => ({ ok: true, summary: "Test" }),
       });
-      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(
-        mockSummary,
-      );
+      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(mockSummary);
 
       const result = await generateWeeklySummary(validArgs);
 
@@ -323,9 +297,7 @@ describe("generateWeeklySummary", () => {
       vi.mocked(supabaseRendererClient.auth.getSession).mockResolvedValue({
         data: { session: { access_token: "test-token" } },
       } as any);
-      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(
-        mockEntries,
-      );
+      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(mockEntries);
       vi.mocked(summariesRepository.existsForIsoWeek).mockResolvedValue(false);
     });
 
@@ -333,9 +305,7 @@ describe("generateWeeklySummary", () => {
       (global.fetch as any).mockResolvedValue({
         json: async () => ({ ok: true, summary: "Test" }),
       });
-      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(
-        mockSummary,
-      );
+      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(mockSummary);
 
       await generateWeeklySummary(validArgs);
 
@@ -349,9 +319,7 @@ describe("generateWeeklySummary", () => {
       (global.fetch as any).mockResolvedValue({
         json: async () => ({ ok: true, summary: "Test" }),
       });
-      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(
-        mockSummary,
-      );
+      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(mockSummary);
 
       await generateWeeklySummary(validArgs);
 
@@ -369,9 +337,7 @@ describe("generateWeeklySummary", () => {
       (global.fetch as any).mockResolvedValue({
         json: async () => ({ ok: true, summary: "Test" }),
       });
-      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(
-        mockSummary,
-      );
+      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(mockSummary);
 
       await generateWeeklySummary(validArgs);
 
@@ -399,9 +365,7 @@ describe("generateWeeklySummary", () => {
       (global.fetch as any).mockResolvedValue({
         json: async () => ({ ok: true, summary: "Test" }),
       });
-      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(
-        mockSummary,
-      );
+      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(mockSummary);
 
       await generateWeeklySummary({
         ...validArgs,
@@ -420,9 +384,7 @@ describe("generateWeeklySummary", () => {
       vi.mocked(supabaseRendererClient.auth.getSession).mockResolvedValue({
         data: { session: { access_token: "test-token" } },
       } as any);
-      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(
-        mockEntries,
-      );
+      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(mockEntries);
       vi.mocked(summariesRepository.existsForIsoWeek).mockResolvedValue(false);
     });
 
@@ -534,9 +496,7 @@ describe("generateWeeklySummary", () => {
       vi.mocked(supabaseRendererClient.auth.getSession).mockResolvedValue({
         data: { session: { access_token: "test-token" } },
       } as any);
-      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(
-        mockEntries,
-      );
+      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(mockEntries);
       vi.mocked(summariesRepository.existsForIsoWeek).mockResolvedValue(false);
       (global.fetch as any).mockResolvedValue({
         json: async () => ({ ok: true, summary: "Test summary content" }),
@@ -544,9 +504,7 @@ describe("generateWeeklySummary", () => {
     });
 
     it("should persist summary with correct data", async () => {
-      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(
-        mockSummary,
-      );
+      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(mockSummary);
 
       await generateWeeklySummary(validArgs);
 
@@ -560,9 +518,7 @@ describe("generateWeeklySummary", () => {
     });
 
     it("should return persisted summary on success", async () => {
-      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(
-        mockSummary,
-      );
+      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(mockSummary);
 
       const result = await generateWeeklySummary(validArgs);
 
@@ -581,16 +537,12 @@ describe("generateWeeklySummary", () => {
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.state).toBe("unsupported");
-        expect(result.message).toBe(
-          "Arbitrary ISO week persistence unsupported",
-        );
+        expect(result.message).toBe("Arbitrary ISO week persistence unsupported");
       }
     });
 
     it("should handle generic persistence error", async () => {
-      vi.mocked(summariesRepository.createForIsoWeek).mockRejectedValue(
-        new Error("DB error"),
-      );
+      vi.mocked(summariesRepository.createForIsoWeek).mockRejectedValue(new Error("DB error"));
 
       const result = await generateWeeklySummary(validArgs);
 
@@ -621,9 +573,7 @@ describe("generateWeeklySummary", () => {
       vi.mocked(supabaseRendererClient.auth.getSession).mockResolvedValue({
         data: { session: { access_token: "test-token" } },
       } as any);
-      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(
-        mockEntries,
-      );
+      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(mockEntries);
       vi.mocked(summariesRepository.existsForIsoWeek).mockResolvedValue(false);
       (global.fetch as any).mockRejectedValue(new Error("Network error"));
 
@@ -641,16 +591,12 @@ describe("generateWeeklySummary", () => {
       vi.mocked(supabaseRendererClient.auth.getSession).mockResolvedValue({
         data: { session: { access_token: "test-token" } },
       } as any);
-      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(
-        mockEntries,
-      );
+      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(mockEntries);
       vi.mocked(summariesRepository.existsForIsoWeek).mockResolvedValue(false);
       (global.fetch as any).mockResolvedValue({
         json: async () => ({ ok: true, summary: "Test" }),
       });
-      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(
-        mockSummary,
-      );
+      vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(mockSummary);
     });
 
     it("should support Polish language", async () => {

@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -6,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 
 /**
  * OnboardingModal (Feature: onboarding)
@@ -117,10 +117,7 @@ export function OnboardingModal({
         onInteractOutside={preventClose}
       >
         <DialogHeader className="space-y-6">
-          <DialogTitle
-            id={headingId}
-            className="text-xl font-semibold tracking-tight"
-          >
+          <DialogTitle id={headingId} className="text-xl font-semibold tracking-tight">
             {heading}
           </DialogTitle>
 

@@ -1,4 +1,5 @@
-import React, { useCallback } from "react";
+import type React from "react";
+import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { useCurrentWeekSummary } from "../model/useCurrentWeekSummary";
 
@@ -57,9 +58,7 @@ export interface CurrentWeekSummarySectionProps {
   unstyled?: boolean;
 }
 
-export const CurrentWeekSummarySection: React.FC<
-  CurrentWeekSummarySectionProps
-> = ({
+export const CurrentWeekSummarySection: React.FC<CurrentWeekSummarySectionProps> = ({
   autoLoad = true,
   allowCreate = true,
   heading = "Current Week Summary",
@@ -68,13 +67,12 @@ export const CurrentWeekSummarySection: React.FC<
   onCreated,
   unstyled = false,
 }) => {
-  const { summary, loading, creating, error, load, create, clearError } =
-    useCurrentWeekSummary({
-      autoLoad,
-      onCreated: () => {
-        onCreated?.();
-      },
-    });
+  const { summary, loading, creating, error, load, create, clearError } = useCurrentWeekSummary({
+    autoLoad,
+    onCreated: () => {
+      onCreated?.();
+    },
+  });
 
   const handleCreate = useCallback(async () => {
     try {
@@ -85,9 +83,7 @@ export const CurrentWeekSummarySection: React.FC<
     }
   }, [create]);
 
-  const wrapperClass = unstyled
-    ? ""
-    : "bg-neutral-900 rounded-lg p-6 border border-neutral-800";
+  const wrapperClass = unstyled ? "" : "bg-neutral-900 rounded-lg p-6 border border-neutral-800";
 
   return (
     <section
@@ -102,10 +98,7 @@ export const CurrentWeekSummarySection: React.FC<
             : "flex items-center justify-between mb-4"
         }
       >
-        <h2
-          id="current-week-summary-heading"
-          className="text-xl font-semibold tracking-tight"
-        >
+        <h2 id="current-week-summary-heading" className="text-xl font-semibold tracking-tight">
           {heading}
         </h2>
         <div className="flex items-center gap-2">
@@ -174,8 +167,7 @@ export const CurrentWeekSummarySection: React.FC<
           </p>
         </div>
       ) : (
-        !loading &&
-        !creating && <p className="text-neutral-400 text-sm">{emptyMessage}</p>
+        !loading && !creating && <p className="text-neutral-400 text-sm">{emptyMessage}</p>
       )}
     </section>
   );

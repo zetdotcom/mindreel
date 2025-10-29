@@ -9,10 +9,7 @@ const CYCLE_DAYS = 28;
 /**
  * Gets or initializes user quota from the database
  */
-export async function getOrInitUserQuota(
-  supabase: any,
-  userId: string,
-): Promise<QuotaState> {
+export async function getOrInitUserQuota(supabase: any, userId: string): Promise<QuotaState> {
   const { data, error } = await supabase.rpc("get_or_init_user_quota", {
     p_user_id: userId,
   });
@@ -28,10 +25,7 @@ export async function getOrInitUserQuota(
 /**
  * Resets user quota if the cycle has expired
  */
-export async function resetQuotaIfExpired(
-  supabase: any,
-  userId: string,
-): Promise<QuotaState> {
+export async function resetQuotaIfExpired(supabase: any, userId: string): Promise<QuotaState> {
   const { data, error } = await supabase.rpc("reset_quota_if_expired", {
     p_user_id: userId,
   });
@@ -54,9 +48,7 @@ export function calculateQuotaInfo(quota: QuotaState): {
 } {
   const remaining = Math.max(0, QUOTA_LIMIT - quota.ai_summaries_count);
   const cycleStartDate = new Date(quota.cycle_start_at);
-  const cycleEndDate = new Date(
-    cycleStartDate.getTime() + CYCLE_DAYS * 24 * 60 * 60 * 1000,
-  );
+  const cycleEndDate = new Date(cycleStartDate.getTime() + CYCLE_DAYS * 24 * 60 * 60 * 1000);
 
   return {
     remaining,
@@ -89,10 +81,7 @@ export async function conditionalIncrementQuota(
 /**
  * Fetches current user quota from the database
  */
-export async function fetchCurrentQuota(
-  supabase: any,
-  userId: string,
-): Promise<QuotaState> {
+export async function fetchCurrentQuota(supabase: any, userId: string): Promise<QuotaState> {
   const { data, error } = await supabase.rpc("get_or_init_user_quota", {
     p_user_id: userId,
   });

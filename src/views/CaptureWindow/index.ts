@@ -4,5 +4,4 @@
  * Barrel export for the capture window view.
  */
 
-export { CaptureWindowView } from "./CaptureWindowView";
-export { CaptureWindowView as default } from "./CaptureWindowView";
+export { CaptureWindowView, CaptureWindowView as default } from "./CaptureWindowView";

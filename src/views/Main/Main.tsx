@@ -1,10 +1,11 @@
-import React, { Suspense } from "react";
-import { NavLink } from "react-router";
-import { AppRoutes } from "@/routes";
 import { History, Settings, User } from "lucide-react";
-import { cn } from "@/lib/utils";
+import type React from "react";
+import { Suspense } from "react";
+import { NavLink } from "react-router";
 import { RouteErrorBoundary } from "@/components/RouteErrorBoundary";
 import { AuthModal } from "@/features/auth";
+import { cn } from "@/lib/utils";
+import { AppRoutes } from "@/routes";
 
 type NavItem = {
   to: string;

@@ -1,7 +1,7 @@
-import React from "react";
 import { Mail, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import React from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface AuthEmailVerificationNoticeProps {
@@ -35,16 +35,14 @@ export function AuthEmailVerificationNotice({
         <AlertTitle>Verify your email</AlertTitle>
         <AlertDescription>
           We sent a verification link to{" "}
-          <span className="font-black text-accent-foreground">{email}</span>.
-          Please check your inbox and click the link to verify your account.
+          <span className="font-black text-accent-foreground">{email}</span>. Please check your
+          inbox and click the link to verify your account.
         </AlertDescription>
       </Alert>
 
       {/* Instructions */}
       <div className="space-y-3 text-sm">
-        <p className="font-bold text-muted-foreground uppercase tracking-wide">
-          What to do next:
-        </p>
+        <p className="font-bold text-muted-foreground uppercase tracking-wide">What to do next:</p>
         <ol className="space-y-2 list-decimal list-inside font-semibold text-muted-foreground">
           <li>Open your email inbox</li>
           <li>Find the verification email from MindReel</li>
@@ -61,9 +59,7 @@ export function AuthEmailVerificationNotice({
           className="w-full"
           size="lg"
         >
-          <RefreshCw
-            className={cn("mr-2 h-4 w-4", isChecking && "animate-spin")}
-          />
+          <RefreshCw className={cn("mr-2 h-4 w-4", isChecking && "animate-spin")} />
           {isChecking ? "Checking..." : "I verified my email"}
         </Button>
 
@@ -94,8 +90,7 @@ export function AuthEmailVerificationNotice({
 
       {/* Note about spam */}
       <p className="text-xs text-muted-foreground font-semibold text-center">
-        Can't find the email? Check your spam folder or wait a few minutes and
-        try resending.
+        Can't find the email? Check your spam folder or wait a few minutes and try resending.
       </p>
     </div>
   );

@@ -1,6 +1,7 @@
-import React, { useState, useCallback, useMemo } from "react";
-import type { Entry } from "../../../sqlite/types";
+import type React from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import type { Entry } from "../../../sqlite/types";
 
 /**
  * EntryList
@@ -94,7 +95,7 @@ export const EntryList: React.FC<EntryListProps> = ({
       } finally {
         setDeleting((prev) => {
           const clone = { ...prev };
-            // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+          // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
           delete clone[id];
           return clone;
         });
@@ -103,10 +104,7 @@ export const EntryList: React.FC<EntryListProps> = ({
     [onDelete],
   );
 
-  const isDeleting = useCallback(
-    (id: number) => !!deleting[id],
-    [deleting],
-  );
+  const isDeleting = useCallback((id: number) => !!deleting[id], [deleting]);
 
   const content = useMemo(() => {
     if (loading) {
@@ -121,10 +119,7 @@ export const EntryList: React.FC<EntryListProps> = ({
 
     if (!entries.length) {
       return (
-        <p
-          className="text-neutral-400 text-sm"
-          data-testid="entry-empty-state"
-        >
+        <p className="text-neutral-400 text-sm" data-testid="entry-empty-state">
           {emptyMessage}
         </p>
       );
@@ -144,9 +139,7 @@ export const EntryList: React.FC<EntryListProps> = ({
               <div className="flex-1 pr-4">
                 <p className="text-white break-words">{entry.content}</p>
                 {showTimestamp && (
-                  <p className="text-xs text-neutral-400 mt-1">
-                    {formatTime(entry.created_at)}
-                  </p>
+                  <p className="text-xs text-neutral-400 mt-1">{formatTime(entry.created_at)}</p>
                 )}
               </div>
               {onDelete && (
@@ -187,15 +180,10 @@ export const EntryList: React.FC<EntryListProps> = ({
       className={`bg-neutral-900 rounded-lg p-6 border border-neutral-800 ${className}`}
       aria-labelledby="entry-list-heading"
     >
-      <h2
-        id="entry-list-heading"
-        className="text-xl font-semibold mb-4 flex items-center gap-2"
-      >
+      <h2 id="entry-list-heading" className="text-xl font-semibold mb-4 flex items-center gap-2">
         Today's Entries
         {!loading && entries.length > 0 && (
-          <span className="text-sm text-neutral-400 font-normal">
-            ({entries.length})
-          </span>
+          <span className="text-sm text-neutral-400 font-normal">({entries.length})</span>
         )}
       </h2>
       {content}

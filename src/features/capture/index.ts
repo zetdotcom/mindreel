@@ -4,6 +4,6 @@
  * Exports stable interfaces for the capture popup functionality.
  */
 
-export { CapturePopup } from "./ui/CapturePopup";
+export { closeCaptureWindow, getRecentUniqueEntries, openCaptureWindow } from "./model/repository";
 export { useCapture } from "./model/useCapture";
-export { openCaptureWindow, closeCaptureWindow, getRecentUniqueEntries } from "./model/repository";
+export { CapturePopup } from "./ui/CapturePopup";

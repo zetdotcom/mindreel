@@ -1,15 +1,11 @@
-import React from "react";
 import { Calendar, ChevronDown, ChevronRight } from "lucide-react";
-import {
-  DayGroupViewModel,
-  EntryViewModel,
-  DuplicateGroupViewModel,
-} from "../model/types";
-import { EntryRow } from "./EntryRow";
-import { DuplicateGroup } from "./DuplicateGroup";
-import { isDuplicateGroup, isEntry } from "../model/lib";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { isDuplicateGroup, isEntry } from "../model/lib";
+import { type DayGroupViewModel, DuplicateGroupViewModel, EntryViewModel } from "../model/types";
+import { DuplicateGroup } from "./DuplicateGroup";
+import { EntryRow } from "./EntryRow";
 
 interface DayGroupProps {
   day: DayGroupViewModel;
@@ -43,12 +39,7 @@ export function DayGroup({
         <div className="flex items-center space-x-2">
           {/* Optional collapse button for individual days */}
           {onToggleCollapsed && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onToggleCollapsed}
-              className="h-6 w-6 p-0"
-            >
+            <Button variant="ghost" size="sm" onClick={onToggleCollapsed} className="h-6 w-6 p-0">
               {collapsed ? (
                 <ChevronRight className="h-3 w-3" />
               ) : (

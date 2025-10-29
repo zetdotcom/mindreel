@@ -1,20 +1,16 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from "react";
+import { getCurrentWeekRange, getPreviousIsoWeek } from "../../../sqlite/dateUtils";
+import { filterWeeksWithContent, sortWeeksDescending, transformWeekData } from "./lib";
+import { historyRepository } from "./repository";
 import {
-  HistoryState,
-  WeekGroupViewModel,
-  PaginationState,
-  ToastMessage,
-  IsoWeekIdentifier,
-  RawWeekData,
+  type HistoryState,
+  type IsoWeekIdentifier,
   PAGE_WEEK_COUNT,
-} from './types';
-import { historyRepository } from './repository';
-import {
-  transformWeekData,
-  sortWeeksDescending,
-  filterWeeksWithContent
-} from './lib';
-import { getCurrentWeekRange, getPreviousIsoWeek } from '../../../sqlite/dateUtils';
+  type PaginationState,
+  type RawWeekData,
+  type ToastMessage,
+  type WeekGroupViewModel,
+} from "./types";
 
 /**
  * Core state management hook for the History View
@@ -36,11 +32,11 @@ export function useHistoryState() {
   /**
    * Add a toast message
    */
-  const addToast = useCallback((toast: Omit<ToastMessage, 'id'>) => {
+  const addToast = useCallback((toast: Omit<ToastMessage, "id">) => {
     const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const newToast: ToastMessage = { ...toast, id };
 
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       toasts: [...prev.toasts, newToast],
     }));
@@ -55,9 +51,9 @@ export function useHistoryState() {
    * Remove a toast message
    */
   const removeToast = useCallback((id: string) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
-      toasts: prev.toasts.filter(toast => toast.id !== id),
+      toasts: prev.toasts.filter((toast) => toast.id !== id),
     }));
   }, []);
 
@@ -65,7 +61,7 @@ export function useHistoryState() {
    * Update pagination state
    */
   const updatePagination = useCallback((updates: Partial<PaginationState>) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       pagination: {
         ...prev.pagination,
@@ -88,31 +84,31 @@ export function useHistoryState() {
    */
   const loadInitialWeeks = useCallback(async () => {
     try {
-      setState(prev => ({ ...prev, loadingInitial: true, error: undefined }));
+      setState((prev) => ({ ...prev, loadingInitial: true, error: undefined }));
 
       const result = await historyRepository.loadWeeks();
       const processedWeeks = processWeeksData(result.rawWeeks);
 
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         weeks: processedWeeks,
         loadingInitial: false,
         pagination: {
           ...prev.pagination,
-          loadedWeekKeys: result.rawWeeks.map(w => w.weekKey),
+          loadedWeekKeys: result.rawWeeks.map((w) => w.weekKey),
           hasMore: result.hasMore,
         },
       }));
     } catch (error) {
-      console.error('Error loading initial weeks:', error);
-      setState(prev => ({
+      console.error("Error loading initial weeks:", error);
+      setState((prev) => ({
         ...prev,
         loadingInitial: false,
-        error: error instanceof Error ? error.message : 'Failed to load weeks',
+        error: error instanceof Error ? error.message : "Failed to load weeks",
       }));
       addToast({
-        type: 'error',
-        text: 'Failed to load history. Please try again.',
+        type: "error",
+        text: "Failed to load history. Please try again.",
       });
     }
   }, [processWeeksData, addToast]);
@@ -146,7 +142,7 @@ export function useHistoryState() {
       const result = await historyRepository.loadWeeks(startingFrom, PAGE_WEEK_COUNT);
       const newWeeks = processWeeksData(result.rawWeeks);
 
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         weeks: [...prev.weeks, ...newWeeks],
         pagination: {
@@ -154,20 +150,21 @@ export function useHistoryState() {
           loading: false,
           loadedWeekKeys: [
             ...prev.pagination.loadedWeekKeys,
-            ...result.rawWeeks.map(w => w.weekKey),
+            ...result.rawWeeks.map((w) => w.weekKey),
           ],
           hasMore: result.hasMore,
-          earliestLoaded: result.rawWeeks.length > 0
-            ? result.rawWeeks[result.rawWeeks.length - 1]
-            : prev.pagination.earliestLoaded,
+          earliestLoaded:
+            result.rawWeeks.length > 0
+              ? result.rawWeeks[result.rawWeeks.length - 1]
+              : prev.pagination.earliestLoaded,
         },
       }));
     } catch (error) {
-      console.error('Error loading more weeks:', error);
+      console.error("Error loading more weeks:", error);
       updatePagination({ loading: false });
       addToast({
-        type: 'error',
-        text: 'Failed to load more weeks. Please try again.',
+        type: "error",
+        text: "Failed to load more weeks. Please try again.",
       });
     }
   }, [state.pagination, state.weeks, processWeeksData, updatePagination, addToast]);
@@ -177,35 +174,34 @@ export function useHistoryState() {
    */
   const refreshWeeks = useCallback(async () => {
     try {
-      setState(prev => ({ ...prev, error: undefined }));
+      setState((prev) => ({ ...prev, error: undefined }));
 
       // Reload from the beginning with the same count as currently loaded
       const weekCount = Math.max(state.weeks.length, PAGE_WEEK_COUNT);
       const result = await historyRepository.loadWeeks(undefined, weekCount);
       const processedWeeks = processWeeksData(result.rawWeeks);
 
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         weeks: processedWeeks,
         pagination: {
           ...prev.pagination,
-          loadedWeekKeys: result.rawWeeks.map(w => w.weekKey),
+          loadedWeekKeys: result.rawWeeks.map((w) => w.weekKey),
           hasMore: result.hasMore,
-          earliestLoaded: result.rawWeeks.length > 0
-            ? result.rawWeeks[result.rawWeeks.length - 1]
-            : undefined,
+          earliestLoaded:
+            result.rawWeeks.length > 0 ? result.rawWeeks[result.rawWeeks.length - 1] : undefined,
         },
       }));
 
       addToast({
-        type: 'success',
-        text: 'History refreshed successfully.',
+        type: "success",
+        text: "History refreshed successfully.",
       });
     } catch (error) {
-      console.error('Error refreshing weeks:', error);
+      console.error("Error refreshing weeks:", error);
       addToast({
-        type: 'error',
-        text: 'Failed to refresh history. Please try again.',
+        type: "error",
+        text: "Failed to refresh history. Please try again.",
       });
     }
   }, [state.weeks.length, processWeeksData, addToast]);
@@ -214,12 +210,10 @@ export function useHistoryState() {
    * Toggle week collapsed state
    */
   const toggleWeekCollapsed = useCallback((weekKey: string) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
-      weeks: prev.weeks.map(week =>
-        week.weekKey === weekKey
-          ? { ...week, collapsed: !week.collapsed }
-          : week
+      weeks: prev.weeks.map((week) =>
+        week.weekKey === weekKey ? { ...week, collapsed: !week.collapsed } : week,
       ),
     }));
   }, []);
@@ -228,7 +222,7 @@ export function useHistoryState() {
    * Show delete confirmation modal
    */
   const showDeleteModal = useCallback((entryId: number) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       deleteModal: { open: true, entryId },
     }));
@@ -238,7 +232,7 @@ export function useHistoryState() {
    * Hide delete confirmation modal
    */
   const hideDeleteModal = useCallback(() => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       deleteModal: { open: false, entryId: undefined },
     }));
@@ -248,13 +242,9 @@ export function useHistoryState() {
    * Update a specific week in state
    */
   const updateWeek = useCallback((weekKey: string, updates: Partial<WeekGroupViewModel>) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
-      weeks: prev.weeks.map(week =>
-        week.weekKey === weekKey
-          ? { ...week, ...updates }
-          : week
-      ),
+      weeks: prev.weeks.map((week) => (week.weekKey === weekKey ? { ...week, ...updates } : week)),
     }));
   }, []);
 
@@ -262,12 +252,12 @@ export function useHistoryState() {
    * Remove a week from state
    */
   const removeWeek = useCallback((weekKey: string) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
-      weeks: prev.weeks.filter(week => week.weekKey !== weekKey),
+      weeks: prev.weeks.filter((week) => week.weekKey !== weekKey),
       pagination: {
         ...prev.pagination,
-        loadedWeekKeys: prev.pagination.loadedWeekKeys.filter(key => key !== weekKey),
+        loadedWeekKeys: prev.pagination.loadedWeekKeys.filter((key) => key !== weekKey),
       },
     }));
   }, []);

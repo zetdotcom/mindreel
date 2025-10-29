@@ -1,4 +1,4 @@
-import * as React from "react";
+import type * as React from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -32,10 +32,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-title"
-      className={cn(
-        "leading-tight font-black text-lg uppercase tracking-wide",
-        className,
-      )}
+      className={cn("leading-tight font-black text-lg uppercase tracking-wide", className)}
       {...props}
     />
   );
@@ -45,10 +42,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-description"
-      className={cn(
-        "text-muted-foreground text-sm font-bold uppercase tracking-wide",
-        className,
-      )}
+      className={cn("text-muted-foreground text-sm font-bold uppercase tracking-wide", className)}
       {...props}
     />
   );
@@ -58,10 +52,7 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-action"
-      className={cn(
-        "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
-        className,
-      )}
+      className={cn("col-start-2 row-span-2 row-start-1 self-start justify-self-end", className)}
       {...props}
     />
   );
@@ -81,21 +72,10 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-footer"
-      className={cn(
-        "flex items-center px-6 [.border-t]:pt-6 font-bold rounded-b-lg",
-        className,
-      )}
+      className={cn("flex items-center px-6 [.border-t]:pt-6 font-bold rounded-b-lg", className)}
       {...props}
     />
   );
 }
 
-export {
-  Card,
-  CardHeader,
-  CardFooter,
-  CardTitle,
-  CardAction,
-  CardDescription,
-  CardContent,
-};
+export { Card, CardHeader, CardFooter, CardTitle, CardAction, CardDescription, CardContent };

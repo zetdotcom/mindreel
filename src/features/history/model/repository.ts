@@ -1,17 +1,17 @@
 import {
-  WeekKey,
-  IsoWeekIdentifier,
-  RawWeekData,
-  LoadWeeksResult,
-  PAGE_WEEK_COUNT,
-} from "./types";
-import {
-  makeWeekKey,
-  getWeekRange,
-  getPreviousIsoWeek,
   getCurrentWeekRange,
+  getPreviousIsoWeek,
+  getWeekRange,
+  makeWeekKey,
 } from "../../../sqlite/dateUtils";
 import type { Entry, Summary } from "../../../sqlite/types";
+import {
+  type IsoWeekIdentifier,
+  type LoadWeeksResult,
+  PAGE_WEEK_COUNT,
+  type RawWeekData,
+  WeekKey,
+} from "./types";
 
 /**
  * Repository for history feature ISO week operations
@@ -73,15 +73,10 @@ export class HistoryRepository {
    * @param week ISO week identifier
    * @returns Promise<RawWeekData | null>
    */
-  private async loadSingleWeek(
-    week: IsoWeekIdentifier,
-  ): Promise<RawWeekData | null> {
+  private async loadSingleWeek(week: IsoWeekIdentifier): Promise<RawWeekData | null> {
     try {
       const weekKey = makeWeekKey(week.iso_year, week.week_of_year);
-      const { start_date, end_date } = getWeekRange(
-        week.week_of_year,
-        week.iso_year,
-      );
+      const { start_date, end_date } = getWeekRange(week.week_of_year, week.iso_year);
 
       // Load entries and summary in parallel
       const [entries, summary] = await Promise.all([
@@ -99,10 +94,7 @@ export class HistoryRepository {
         summary: summary || undefined,
       };
     } catch (error) {
-      console.error(
-        `Error loading week ${week.iso_year}-W${week.week_of_year}:`,
-        error,
-      );
+      console.error(`Error loading week ${week.iso_year}-W${week.week_of_year}:`, error);
       return null;
     }
   }
@@ -114,10 +106,7 @@ export class HistoryRepository {
    */
   private async hasEntriesInWeek(week: IsoWeekIdentifier): Promise<boolean> {
     try {
-      const entries = await window.appApi.db.getEntriesForIsoWeek(
-        week.iso_year,
-        week.week_of_year,
-      );
+      const entries = await window.appApi.db.getEntriesForIsoWeek(week.iso_year, week.week_of_year);
       return entries && entries.length > 0;
     } catch (error) {
       console.error("Error checking entries in week:", error);
@@ -203,10 +192,7 @@ export class HistoryRepository {
    */
   async summaryExistsForWeek(week: IsoWeekIdentifier): Promise<boolean> {
     try {
-      return await window.appApi.db.summaryExistsForIsoWeek(
-        week.iso_year,
-        week.week_of_year,
-      );
+      return await window.appApi.db.summaryExistsForIsoWeek(week.iso_year, week.week_of_year);
     } catch (error) {
       console.error("Error checking summary existence:", error);
       return false;

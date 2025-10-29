@@ -11,11 +11,7 @@ interface AuthErrorBannerProps {
  * AuthErrorBanner displays authentication errors in a prominent alert
  * Styled consistently with the app's brutalist design
  */
-export function AuthErrorBanner({
-  error,
-  onDismiss,
-  className,
-}: AuthErrorBannerProps) {
+export function AuthErrorBanner({ error, onDismiss, className }: AuthErrorBannerProps) {
   if (!error) {
     return null;
   }

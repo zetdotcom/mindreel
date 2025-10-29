@@ -1,5 +1,5 @@
-import React from "react";
 import { ChevronDown, Loader2 } from "lucide-react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -27,10 +27,7 @@ export function PaginationControl({
   }
 
   return (
-    <div className={cn(
-      "flex flex-col items-center justify-center space-y-4 py-8",
-      className
-    )}>
+    <div className={cn("flex flex-col items-center justify-center space-y-4 py-8", className)}>
       {hasMore ? (
         <>
           <Button
@@ -53,26 +50,20 @@ export function PaginationControl({
           </Button>
 
           <div className="text-sm text-muted-foreground text-center">
-            {loading ? (
-              "Loading older weeks..."
-            ) : (
-              `Showing ${loadedCount} weeks • Click to load more`
-            )}
+            {loading
+              ? "Loading older weeks..."
+              : `Showing ${loadedCount} weeks • Click to load more`}
           </div>
         </>
       ) : (
         <div className="text-center space-y-2">
           <div className="text-sm text-muted-foreground">
-            {loadedCount === 0 ? (
-              "No history to display"
-            ) : (
-              "You've reached the beginning of your history"
-            )}
+            {loadedCount === 0
+              ? "No history to display"
+              : "You've reached the beginning of your history"}
           </div>
           {loadedCount > 0 && (
-            <div className="text-xs text-muted-foreground">
-              Total: {loadedCount} weeks loaded
-            </div>
+            <div className="text-xs text-muted-foreground">Total: {loadedCount} weeks loaded</div>
           )}
         </div>
       )}

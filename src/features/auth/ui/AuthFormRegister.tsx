@@ -1,16 +1,12 @@
-import React, { useState, FormEvent, useId } from "react";
 import { UserPlus } from "lucide-react";
+import React, { type FormEvent, useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { FormField } from "./FormField";
-import { AuthErrorBanner } from "./AuthErrorBanner";
-import {
-  RegisterFormData,
-  validateRegisterForm,
-  ValidationError,
-} from "../model/types";
 import { cn } from "@/lib/utils";
+import { type RegisterFormData, type ValidationError, validateRegisterForm } from "../model/types";
+import { AuthErrorBanner } from "./AuthErrorBanner";
+import { FormField } from "./FormField";
 
 interface AuthFormRegisterProps {
   onSubmit: (data: RegisterFormData) => Promise<void>;
@@ -43,9 +39,7 @@ export function AuthFormRegister({
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [tosAccepted, setTosAccepted] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<
-    Record<string, string>
-  >({});
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -126,15 +120,10 @@ export function AuthFormRegister({
               onCheckedChange={(checked) => setTosAccepted(checked === true)}
               disabled={isLoading}
               aria-invalid={!!validationErrors.tosAccepted}
-              aria-describedby={
-                validationErrors.tosAccepted ? "tos-error" : undefined
-              }
+              aria-describedby={validationErrors.tosAccepted ? "tos-error" : undefined}
             />
             <div className="flex-1 space-y-1">
-              <Label
-                htmlFor={tosId}
-                className="text-sm font-bold leading-tight cursor-pointer"
-              >
+              <Label htmlFor={tosId} className="text-sm font-bold leading-tight cursor-pointer">
                 I accept the{" "}
                 <button
                   type="button"

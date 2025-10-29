@@ -1,6 +1,6 @@
+import type { Session, User } from "@supabase/supabase-js";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabaseRendererClient } from "@/supabase/rendererClient";
-import type { Session, User } from "@supabase/supabase-js";
 import * as repository from "./repository";
 
 export interface UseAuthState {

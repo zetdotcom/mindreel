@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useMemo, useState, useCallback } from "react";
-import { useAuth, type UseAuthReturn } from "./useAuth";
+import type React from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import type { AuthState } from "./types";
+import { type UseAuthReturn, useAuth } from "./useAuth";
 
 interface AuthModalControl {
   isAuthModalOpen: boolean;

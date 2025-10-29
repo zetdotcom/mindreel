@@ -1,23 +1,19 @@
 // Main EdgeFunctionClient class for MindReel Edge Function integration
 // Provides high-level API for generating weekly summaries with built-in retry logic
 
+import { createNetworkRetryManager, type RetryManager } from "./retry";
 import type {
+  ClientStatus,
+  EdgeFunctionClientConfig,
+  QuotaInfo,
+  RequestOptions,
+  WeeklySummaryErrorResponse,
   WeeklySummaryRequest,
   WeeklySummaryResponse,
   WeeklySummarySuccessResponse,
-  WeeklySummaryErrorResponse,
-  EdgeFunctionClientConfig,
-  RequestOptions,
-  QuotaInfo,
-  ClientStatus,
-} from './types';
-import {
-  EdgeFunctionError,
-  NetworkError,
-  TimeoutError,
-} from './types';
-import { validateWeeklySummaryRequest, preprocessRequest } from './validation';
-import { RetryManager, createNetworkRetryManager } from './retry';
+} from "./types";
+import { EdgeFunctionError, NetworkError, TimeoutError } from "./types";
+import { preprocessRequest, validateWeeklySummaryRequest } from "./validation";
 
 /**
  * Main client class for interacting with MindReel Edge Functions
@@ -32,12 +28,12 @@ export class EdgeFunctionClient {
       timeout: 30000, // 30 seconds default
       retryAttempts: 3,
       retryDelay: 1000,
-      ...config
+      ...config,
     };
 
     this.retryManager = createNetworkRetryManager(this.config.retryDelay);
     this._status = {
-      authenticated: false
+      authenticated: false,
     };
 
     this.validateConfig();
@@ -45,13 +41,13 @@ export class EdgeFunctionClient {
 
   private validateConfig(): void {
     if (!this.config.supabaseUrl) {
-      throw new Error('supabaseUrl is required');
+      throw new Error("supabaseUrl is required");
     }
     if (!this.config.supabaseAnonKey) {
-      throw new Error('supabaseAnonKey is required');
+      throw new Error("supabaseAnonKey is required");
     }
-    if (!this.config.supabaseUrl.startsWith('https://')) {
-      throw new Error('supabaseUrl must be a valid HTTPS URL');
+    if (!this.config.supabaseUrl.startsWith("https://")) {
+      throw new Error("supabaseUrl must be a valid HTTPS URL");
     }
   }
 
@@ -85,7 +81,7 @@ export class EdgeFunctionClient {
    * Creates the function URL for the given function name
    */
   private getFunctionUrl(functionName: string): string {
-    const baseUrl = this.config.supabaseUrl.replace(/\/$/, '');
+    const baseUrl = this.config.supabaseUrl.replace(/\/$/, "");
     return `${baseUrl}/functions/v1/${functionName}`;
   }
 
@@ -105,7 +101,7 @@ export class EdgeFunctionClient {
     functionName: string,
     payload: any,
     authToken: string,
-    options: RequestOptions = {}
+    options: RequestOptions = {},
   ): Promise<Response> {
     const url = this.getFunctionUrl(functionName);
     const timeout = options.timeout || this.config.timeout!;
@@ -119,33 +115,33 @@ export class EdgeFunctionClient {
       const combinedController = new AbortController();
 
       const abortHandler = () => combinedController.abort();
-      options.signal.addEventListener('abort', abortHandler);
-      timeoutController.signal.addEventListener('abort', abortHandler);
+      options.signal.addEventListener("abort", abortHandler);
+      timeoutController.signal.addEventListener("abort", abortHandler);
 
       effectiveSignal = combinedController.signal;
     }
 
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${authToken}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${authToken}`,
     };
 
     try {
       const response = await fetch(url, {
-        method: 'POST',
+        method: "POST",
         headers,
         body: JSON.stringify(payload),
-        signal: effectiveSignal
+        signal: effectiveSignal,
       });
 
       return response;
     } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
+      if (error instanceof Error && error.name === "AbortError") {
         throw new TimeoutError(`Request timed out after ${timeout}ms`);
       }
 
       throw new NetworkError(
-        `Network request failed: ${error instanceof Error ? error.message : String(error)}`
+        `Network request failed: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
@@ -159,7 +155,9 @@ export class EdgeFunctionClient {
     try {
       data = await response.json();
     } catch (error) {
-      throw new NetworkError(`Failed to parse response as JSON: ${error instanceof Error ? error.message : String(error)}`);
+      throw new NetworkError(
+        `Failed to parse response as JSON: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
 
     // Handle successful responses
@@ -180,12 +178,15 @@ export class EdgeFunctionClient {
         errorResponse.reason,
         errorResponse.message || `Request failed: ${errorResponse.reason}`,
         errorResponse,
-        errorResponse.retryable || false
+        errorResponse.retryable || false,
       );
     }
 
     // Handle HTTP errors without structured response
-    throw new NetworkError(`HTTP ${response.status}: ${response.statusText}`, response.status >= 500);
+    throw new NetworkError(
+      `HTTP ${response.status}: ${response.statusText}`,
+      response.status >= 500,
+    );
   }
 
   /**
@@ -198,7 +199,7 @@ export class EdgeFunctionClient {
         remaining: response.remaining,
         limit: 5,
         cycleEnd: new Date(response.cycle_end),
-        cycleEndString: response.cycle_end
+        cycleEndString: response.cycle_end,
       };
     }
   }
@@ -209,30 +210,31 @@ export class EdgeFunctionClient {
   async generateWeeklySummary(
     request: WeeklySummaryRequest,
     authToken: string,
-    options: RequestOptions = {}
+    options: RequestOptions = {},
   ): Promise<WeeklySummarySuccessResponse> {
     // Pre-process and validate the request
     const { request: processedRequest, validation } = preprocessRequest(request);
 
     if (!validation.valid) {
-      const errorMessage = `Validation failed: ${validation.errors.join(', ')}`;
-      const error = new EdgeFunctionError('validation_error', errorMessage);
+      const errorMessage = `Validation failed: ${validation.errors.join(", ")}`;
+      const error = new EdgeFunctionError("validation_error", errorMessage);
       this._status.lastError = error;
       throw error;
     }
 
     // Use custom retry manager if specified, otherwise use default
-    const retryManager = options.retryAttempts !== undefined
-      ? this.retryManager.with({ attempts: options.retryAttempts })
-      : this.retryManager;
+    const retryManager =
+      options.retryAttempts !== undefined
+        ? this.retryManager.with({ attempts: options.retryAttempts })
+        : this.retryManager;
 
     try {
       const response = await retryManager.execute(async () => {
         const httpResponse = await this.makeRequest(
-          'generate_weekly_summary',
+          "generate_weekly_summary",
           processedRequest,
           authToken,
-          options
+          options,
         );
 
         return this.parseResponse(httpResponse);
@@ -246,12 +248,13 @@ export class EdgeFunctionClient {
       this._status.lastError = undefined;
       return response as WeeklySummarySuccessResponse;
     } catch (error) {
-      const edgeError = error instanceof EdgeFunctionError
-        ? error
-        : new EdgeFunctionError(
-            'other_error',
-            error instanceof Error ? error.message : String(error)
-          );
+      const edgeError =
+        error instanceof EdgeFunctionError
+          ? error
+          : new EdgeFunctionError(
+              "other_error",
+              error instanceof Error ? error.message : String(error),
+            );
 
       this._status.lastError = edgeError;
       throw edgeError;
@@ -265,7 +268,7 @@ export class EdgeFunctionClient {
     const validation = validateWeeklySummaryRequest(request);
     return {
       valid: validation.valid,
-      errors: validation.errors
+      errors: validation.errors,
     };
   }
 
@@ -318,7 +321,7 @@ export class EdgeFunctionClient {
     if (retryConfig.attempts !== undefined || retryConfig.delay !== undefined) {
       newClient.retryManager = this.retryManager.with({
         attempts: retryConfig.attempts,
-        delay: retryConfig.delay
+        delay: retryConfig.delay,
       });
     }
 
@@ -335,10 +338,13 @@ export class EdgeFunctionClient {
   /**
    * Static factory method to create a client from environment variables
    */
-  static fromEnv(env: { VITE_SUPABASE_URL: string; VITE_SUPABASE_ANON_KEY: string }): EdgeFunctionClient {
+  static fromEnv(env: {
+    VITE_SUPABASE_URL: string;
+    VITE_SUPABASE_ANON_KEY: string;
+  }): EdgeFunctionClient {
     return new EdgeFunctionClient({
       supabaseUrl: env.VITE_SUPABASE_URL,
-      supabaseAnonKey: env.VITE_SUPABASE_ANON_KEY
+      supabaseAnonKey: env.VITE_SUPABASE_ANON_KEY,
     });
   }
 
@@ -347,11 +353,11 @@ export class EdgeFunctionClient {
    */
   static createMock(overrides: Partial<EdgeFunctionClientConfig> = {}): EdgeFunctionClient {
     return new EdgeFunctionClient({
-      supabaseUrl: 'https://test-project.supabase.co',
-      supabaseAnonKey: 'test-anon-key',
+      supabaseUrl: "https://test-project.supabase.co",
+      supabaseAnonKey: "test-anon-key",
       timeout: 5000,
       retryAttempts: 1,
-      ...overrides
+      ...overrides,
     });
   }
 }

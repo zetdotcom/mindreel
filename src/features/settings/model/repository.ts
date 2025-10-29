@@ -1,4 +1,4 @@
-import { Settings, UpdateSettingsInput } from "@/sqlite/types";
+import type { Settings, UpdateSettingsInput } from "@/sqlite/types";
 
 export async function getSettings(): Promise<Settings | null> {
   return window.appApi.db.getSettings();

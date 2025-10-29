@@ -1,8 +1,8 @@
 import React, { lazy, Suspense } from "react";
-import { useRoutes, Navigate } from "react-router";
 import type { RouteObject } from "react-router";
-import SettingsView from "./views/Settings/SettingsView";
+import { Navigate, useRoutes } from "react-router";
 import ProfileView from "./views/Profile/ProfileView";
+import SettingsView from "./views/Settings/SettingsView";
 
 /**
  * Application route definitions (declarative mode).
@@ -39,9 +39,7 @@ function NotFoundView() {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-semibold mb-4">Not Found</h1>
-      <p className="text-sm text-muted-foreground">
-        The page you requested does not exist.
-      </p>
+      <p className="text-sm text-muted-foreground">The page you requested does not exist.</p>
     </div>
   );
 }
@@ -55,11 +53,7 @@ export const routes: RouteObject[] = [
   {
     path: "/history",
     element: (
-      <Suspense
-        fallback={
-          <div className="p-6 text-sm text-muted-foreground">Loading…</div>
-        }
-      >
+      <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Loading…</div>}>
         <HistoryPageView />
       </Suspense>
     ),

@@ -1,11 +1,12 @@
-import React, { useState, useRef, useEffect } from "react";
 import { format, parseISO } from "date-fns";
-import { Edit2, Trash2, Check, X, Clock } from "lucide-react";
-import { EntryViewModel, MAX_ENTRY_LENGTH } from "../model/types";
-import { historyRepository } from "../model/repository";
+import { Check, Clock, Edit2, Trash2, X } from "lucide-react";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { historyRepository } from "../model/repository";
+import { type EntryViewModel, MAX_ENTRY_LENGTH } from "../model/types";
 
 interface EntryRowProps {
   entry: EntryViewModel;
@@ -70,9 +71,7 @@ export function EntryRow({
     }
 
     if (trimmedContent.length > MAX_ENTRY_LENGTH) {
-      setError(
-        `Entry is too long (${trimmedContent.length}/${MAX_ENTRY_LENGTH} characters)`,
-      );
+      setError(`Entry is too long (${trimmedContent.length}/${MAX_ENTRY_LENGTH} characters)`);
       return;
     }
 
@@ -86,10 +85,7 @@ export function EntryRow({
       setIsSaving(true);
       setError(null);
 
-      const updatedEntry = await historyRepository.updateEntry(
-        entry.id,
-        trimmedContent,
-      );
+      const updatedEntry = await historyRepository.updateEntry(entry.id, trimmedContent);
 
       if (updatedEntry) {
         setIsEditing(false);
@@ -155,8 +151,7 @@ export function EntryRow({
               disabled={isSaving}
               className={cn(
                 "min-h-[80px] resize-none text-secondary",
-                isOverLimit &&
-                  "border-destructive focus-visible:ring-destructive",
+                isOverLimit && "border-destructive focus-visible:ring-destructive",
               )}
               placeholder="Enter your work entry..."
             />
@@ -185,12 +180,7 @@ export function EntryRow({
               Cmd/Ctrl + Enter to save, Esc to cancel
             </div>
             <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCancelEdit}
-                disabled={isSaving}
-              >
+              <Button variant="outline" size="sm" onClick={handleCancelEdit} disabled={isSaving}>
                 <X className="h-3 w-3 mr-1" />
                 Cancel
               </Button>
@@ -223,20 +213,13 @@ export function EntryRow({
                 </>
               )}
               {entry.duplicateGroupId && (
-                <span className="bg-muted px-2 py-0.5 rounded text-xs">
-                  Duplicate
-                </span>
+                <span className="bg-muted px-2 py-0.5 rounded text-xs">Duplicate</span>
               )}
             </div>
 
             {/* Action Buttons */}
             <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleStartEdit}
-                className="h-7 w-7 p-0"
-              >
+              <Button variant="ghost" size="sm" onClick={handleStartEdit} className="h-7 w-7 p-0">
                 <Edit2 className="h-3 w-3" />
                 <span className="sr-only">Edit entry</span>
               </Button>

@@ -15,18 +15,16 @@
  *    can continue to re-export new domain-level utilities without breaking imports.
  */
 
-// Hooks (stateful logic)
-export { useEntries } from "./model/useEntries";
+// Domain types (re-exported for convenience; prefer importing from a future entities module once it exists)
+export type { Entry } from "../../sqlite/types";
 
 // Repository (low-level data access abstraction)
 export { entriesRepository } from "./model/repository";
-
+// Hooks (stateful logic)
+export { useEntries } from "./model/useEntries";
 // UI components
 export { EntryForm } from "./ui/EntryForm";
 export { EntryList } from "./ui/EntryList";
-
-// Domain types (re-exported for convenience; prefer importing from a future entities module once it exists)
-export type { Entry } from "../../sqlite/types";
 
 /**
  * NOTE:

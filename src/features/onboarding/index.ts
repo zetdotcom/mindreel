@@ -22,11 +22,11 @@
  */
 
 export {
-  hasSeenOnboarding,
-  setOnboardingSeen,
   clearOnboardingFlag,
   ensureOnboardingSeen,
+  hasSeenOnboarding,
   ONBOARDING_STORAGE_KEY,
+  setOnboardingSeen,
 } from "./model/onboardingState";
 
 export { OnboardingModal } from "./ui/OnboardingModal";

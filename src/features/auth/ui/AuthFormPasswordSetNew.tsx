@@ -1,16 +1,16 @@
-import React, { useState, FormEvent, useId } from "react";
 import { Lock } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { FormField } from "./FormField";
-import { AuthErrorBanner } from "./AuthErrorBanner";
+import React, { type FormEvent, useId, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  PasswordSetNewFormData,
-  validatePasswordSetNewForm,
-  ValidationError,
-  ValidationMessages,
-} from "../model/types";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import {
+  type PasswordSetNewFormData,
+  type ValidationError,
+  ValidationMessages,
+  validatePasswordSetNewForm,
+} from "../model/types";
+import { AuthErrorBanner } from "./AuthErrorBanner";
+import { FormField } from "./FormField";
 
 interface AuthFormPasswordSetNewProps {
   onSubmit: (data: PasswordSetNewFormData) => Promise<void>;
@@ -37,9 +37,7 @@ export function AuthFormPasswordSetNew({
   const confirmPasswordId = useId();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [validationErrors, setValidationErrors] = useState<
-    Record<string, string>
-  >({});
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -67,9 +65,7 @@ export function AuthFormPasswordSetNew({
     <div className={cn("space-y-6", className)}>
       {/* Header */}
       <div className="space-y-2 text-center">
-        <h2 className="text-2xl font-black uppercase tracking-wide">
-          Set New Password
-        </h2>
+        <h2 className="text-2xl font-black uppercase tracking-wide">Set New Password</h2>
         <p className="text-sm text-muted-foreground font-bold uppercase tracking-wide">
           Choose a strong password for your account
         </p>
@@ -79,9 +75,7 @@ export function AuthFormPasswordSetNew({
       {showSuccessMessage && (
         <Alert variant="success">
           <Lock className="h-5 w-5" />
-          <AlertDescription>
-            {ValidationMessages.PASSWORD_UPDATED}
-          </AlertDescription>
+          <AlertDescription>{ValidationMessages.PASSWORD_UPDATED}</AlertDescription>
         </Alert>
       )}
 

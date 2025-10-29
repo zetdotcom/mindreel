@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect, useRef } from "react";
-import { summariesRepository, type Summary } from "./repository";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { type Summary, summariesRepository } from "./repository";
 
 /**
  * useCurrentWeekSummary
@@ -72,15 +72,13 @@ export interface UseCurrentWeekSummaryResult {
   clearError: () => void;
 }
 
-export function useCurrentWeekSummary(
-  {
-    autoLoad = true,
-    autoLoadRecent = false,
-    recentLimit = 5,
-    onCreated,
-    suppressErrorState = false,
-  }: UseCurrentWeekSummaryOptions = {},
-): UseCurrentWeekSummaryResult {
+export function useCurrentWeekSummary({
+  autoLoad = true,
+  autoLoadRecent = false,
+  recentLimit = 5,
+  onCreated,
+  suppressErrorState = false,
+}: UseCurrentWeekSummaryOptions = {}): UseCurrentWeekSummaryResult {
   const [summary, setSummary] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -95,11 +93,7 @@ export function useCurrentWeekSummary(
     (err: unknown) => {
       if (suppressErrorState) return;
       const msg =
-        err instanceof Error
-          ? err.message
-          : typeof err === "string"
-            ? err
-            : "Unknown error";
+        err instanceof Error ? err.message : typeof err === "string" ? err : "Unknown error";
       setError(msg);
     },
     [suppressErrorState],

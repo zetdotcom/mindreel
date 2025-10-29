@@ -1,5 +1,5 @@
-import { defineConfig, UserConfig } from "vite";
 import path from "path";
+import { defineConfig, type UserConfig } from "vite";
 
 /**
  * Renderer Vite configuration.

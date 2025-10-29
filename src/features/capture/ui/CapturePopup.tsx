@@ -1,10 +1,11 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardHeader, CardContent, CardFooter, CardAction } from "@/components/ui/card";
 import { Clock } from "lucide-react";
-import { useCapture } from "../model/useCapture";
+import type React from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardAction, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { closeCaptureWindow } from "../model/repository";
+import { useCapture } from "../model/useCapture";
 
 /**
  * CapturePopup

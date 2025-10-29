@@ -1,14 +1,14 @@
-import { ipcMain, BrowserWindow } from "electron";
+import { BrowserWindow, ipcMain } from "electron";
 import { databaseService } from "../sqlite/databaseService";
-import {
+import { IsoWeekIdentifier } from "../sqlite/dateUtils";
+import type {
   CreateEntryInput,
   CreateSummaryInput,
-  UpdateSettingsInput,
   EntryFilters,
+  UpdateSettingsInput,
 } from "../sqlite/types";
-import { IsoWeekIdentifier } from "../sqlite/dateUtils";
-import { syncShortcutFromDatabase } from "./globalShortcutManager";
 import { updateCaptureTimerInterval } from "./captureTimerManager";
+import { syncShortcutFromDatabase } from "./globalShortcutManager";
 
 /**
  * Register all database-related IPC handlers

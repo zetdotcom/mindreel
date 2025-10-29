@@ -1,5 +1,7 @@
-import React from "react";
-import { Trash2, AlertTriangle } from "lucide-react";
+import { AlertTriangle, Trash2 } from "lucide-react";
+import type React from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,8 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface DeleteConfirmationModalProps {
   open: boolean;
@@ -72,12 +72,7 @@ export function DeleteConfirmationModal({
         </Alert>
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
-          <Button
-            variant="outline"
-            onClick={onCancel}
-            disabled={loading}
-            className="sm:order-1"
-          >
+          <Button variant="outline" onClick={onCancel} disabled={loading} className="sm:order-1">
             Cancel
           </Button>
           <Button

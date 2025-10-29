@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import * as captureModule from "@/features/capture";
+import * as onboardingModule from "@/features/onboarding";
 import { render, screen, waitFor } from "@/tests/utils/testUtils";
 import { HistoryPageView } from "./HistoryPageView";
-import * as onboardingModule from "@/features/onboarding";
-import * as captureModule from "@/features/capture";
 
 vi.mock("@/features/onboarding", () => ({
   hasSeenOnboarding: vi.fn(),

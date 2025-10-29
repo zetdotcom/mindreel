@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import type React from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -141,7 +142,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({
           type="text"
           aria-label="New entry content"
           aria-invalid={canSubmit ? undefined : trimmed.length === 0 ? true : undefined}
-            // Provide helper id so screen readers can announce instructions if added
+          // Provide helper id so screen readers can announce instructions if added
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -150,12 +151,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({
           className="flex-1 px-3 py-2 bg-neutral-800 border border-neutral-600 rounded text-white placeholder-neutral-400 focus:outline-none focus:border-blue-500 disabled:opacity-60"
           autoFocus={autoFocus}
         />
-        <Button
-          type="submit"
-          disabled={!canSubmit}
-          variant="default"
-          className="px-6"
-        >
+        <Button type="submit" disabled={!canSubmit} variant="default" className="px-6">
           {submitting ? "Adding..." : "Add Entry"}
         </Button>
       </form>

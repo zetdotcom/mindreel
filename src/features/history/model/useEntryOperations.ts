@@ -1,7 +1,7 @@
-import { useState, useCallback } from "react";
-import { EntryViewModel } from "./types";
-import { historyRepository } from "./repository";
+import { useCallback, useState } from "react";
 import type { Entry } from "../../../sqlite/types";
+import { historyRepository } from "./repository";
+import { EntryViewModel } from "./types";
 
 /**
  * Hook for managing entry CRUD operations
@@ -39,35 +39,35 @@ export function useEntryOperations() {
   /**
    * Update an existing entry
    */
-  const updateEntry = useCallback(async (
-    entryId: number,
-    content: string
-  ): Promise<Entry | null> => {
-    try {
-      setLoading(true);
-      setError(null);
+  const updateEntry = useCallback(
+    async (entryId: number, content: string): Promise<Entry | null> => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      const trimmedContent = content.trim();
-      if (!trimmedContent) {
-        throw new Error("Entry content cannot be empty");
+        const trimmedContent = content.trim();
+        if (!trimmedContent) {
+          throw new Error("Entry content cannot be empty");
+        }
+
+        const updatedEntry = await historyRepository.updateEntry(entryId, trimmedContent);
+
+        if (!updatedEntry) {
+          throw new Error("Entry not found or could not be updated");
+        }
+
+        return updatedEntry;
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Failed to update entry";
+        setError(errorMessage);
+        console.error("Error updating entry:", err);
+        return null;
+      } finally {
+        setLoading(false);
       }
-
-      const updatedEntry = await historyRepository.updateEntry(entryId, trimmedContent);
-
-      if (!updatedEntry) {
-        throw new Error("Entry not found or could not be updated");
-      }
-
-      return updatedEntry;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to update entry";
-      setError(errorMessage);
-      console.error("Error updating entry:", err);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
   /**
    * Delete an entry

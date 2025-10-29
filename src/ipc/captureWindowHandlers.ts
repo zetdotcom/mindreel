@@ -1,7 +1,7 @@
 /// <reference types="@electron-forge/plugin-vite/forge-vite-env" />
 
-import { ipcMain, BrowserWindow } from "electron";
 import path from "node:path";
+import { BrowserWindow, ipcMain } from "electron";
 
 // Vite environment variables injected by Electron Forge at build time
 declare const CAPTURE_WINDOW_VITE_DEV_SERVER_URL: string;
@@ -54,17 +54,11 @@ export function createCaptureWindow(): BrowserWindow {
   if (CAPTURE_WINDOW_VITE_DEV_SERVER_URL) {
     const devCaptureUrl = `${CAPTURE_WINDOW_VITE_DEV_SERVER_URL}/src/capture.html`;
     captureWindow.loadURL(devCaptureUrl).catch((err) => {
-      console.error(
-        "[capture] Failed to load capture.html dev URL, falling back to base:",
-        err,
-      );
+      console.error("[capture] Failed to load capture.html dev URL, falling back to base:", err);
       captureWindow?.loadURL(CAPTURE_WINDOW_VITE_DEV_SERVER_URL);
     });
   } else {
-    const prodPath = path.join(
-      __dirname,
-      `../renderer/${CAPTURE_WINDOW_VITE_NAME}/index.html`,
-    );
+    const prodPath = path.join(__dirname, `../renderer/${CAPTURE_WINDOW_VITE_NAME}/index.html`);
     captureWindow.loadFile(prodPath);
   }
 

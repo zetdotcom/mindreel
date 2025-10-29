@@ -1,6 +1,6 @@
+import type { Session, User } from "@supabase/supabase-js";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabaseRendererClient } from "./rendererClient";
-import type { Session, User } from "@supabase/supabase-js";
 
 /**
  * Internal helper to safely access the preload-exposed Supabase IPC API.
@@ -44,9 +44,7 @@ export function useSupabaseAuth() {
         setUser(data.session?.user ?? null);
       } catch (err) {
         if (mountedRef.current) {
-          setInitError(
-            err instanceof Error ? err.message : "Unknown session fetch error",
-          );
+          setInitError(err instanceof Error ? err.message : "Unknown session fetch error");
         }
       } finally {
         if (mountedRef.current) setLoading(false);
@@ -68,19 +66,13 @@ export function useSupabaseAuth() {
     };
   }, []);
 
-  const signInWithPassword = useCallback(
-    async (creds: { email: string; password: string }) => {
-      return supabaseRendererClient.auth.signInWithPassword(creds);
-    },
-    [],
-  );
+  const signInWithPassword = useCallback(async (creds: { email: string; password: string }) => {
+    return supabaseRendererClient.auth.signInWithPassword(creds);
+  }, []);
 
-  const signUp = useCallback(
-    async (creds: { email: string; password: string }) => {
-      return supabaseRendererClient.auth.signUp(creds);
-    },
-    [],
-  );
+  const signUp = useCallback(async (creds: { email: string; password: string }) => {
+    return supabaseRendererClient.auth.signUp(creds);
+  }, []);
 
   const signOut = useCallback(async () => {
     return supabaseRendererClient.auth.signOut();

@@ -6,12 +6,12 @@
  * Available authentication states for the modal
  */
 export type AuthState =
-  | 'login'
-  | 'register'
-  | 'email_verification_pending'
-  | 'password_reset_request'
-  | 'password_set_new'
-  | 'password_change';
+  | "login"
+  | "register"
+  | "email_verification_pending"
+  | "password_reset_request"
+  | "password_set_new"
+  | "password_change";
 
 /**
  * Form validation error structure
@@ -67,17 +67,17 @@ export interface PasswordChangeFormData {
  * Validation error messages
  */
 export const ValidationMessages = {
-  EMAIL_INVALID: 'Invalid email address',
-  PASSWORD_TOO_SHORT: 'Password is too short (min 8 chars)',
-  PASSWORDS_DO_NOT_MATCH: 'Passwords do not match',
-  TOS_NOT_ACCEPTED: 'You must accept Terms of Service',
-  NETWORK_ERROR: 'Network error, please try again',
-  INVALID_CREDENTIALS: 'Invalid credentials',
-  EMAIL_ALREADY_REGISTERED: 'Email already registered',
-  EMAIL_NOT_VERIFIED: 'Please verify your email to access this feature',
-  PASSWORD_RECOVERY_SENT: 'If the account exists, password recovery instructions were sent',
-  PASSWORD_UPDATED: 'Password updated',
-  PASSWORD_UPDATE_FAILED: 'Could not update password',
+  EMAIL_INVALID: "Invalid email address",
+  PASSWORD_TOO_SHORT: "Password is too short (min 8 chars)",
+  PASSWORDS_DO_NOT_MATCH: "Passwords do not match",
+  TOS_NOT_ACCEPTED: "You must accept Terms of Service",
+  NETWORK_ERROR: "Network error, please try again",
+  INVALID_CREDENTIALS: "Invalid credentials",
+  EMAIL_ALREADY_REGISTERED: "Email already registered",
+  EMAIL_NOT_VERIFIED: "Please verify your email to access this feature",
+  PASSWORD_RECOVERY_SENT: "If the account exists, password recovery instructions were sent",
+  PASSWORD_UPDATED: "Password updated",
+  PASSWORD_UPDATE_FAILED: "Could not update password",
 } as const;
 
 /**
@@ -116,10 +116,7 @@ export function validatePassword(password: string): string | null {
 /**
  * Validate password confirmation
  */
-export function validatePasswordConfirm(
-  password: string,
-  confirmPassword: string
-): string | null {
+export function validatePasswordConfirm(password: string, confirmPassword: string): string | null {
   if (password !== confirmPassword) {
     return ValidationMessages.PASSWORDS_DO_NOT_MATCH;
   }
@@ -134,11 +131,11 @@ export function validateLoginForm(data: LoginFormData): ValidationError[] {
 
   const emailError = validateEmail(data.email);
   if (emailError) {
-    errors.push({ field: 'email', message: emailError });
+    errors.push({ field: "email", message: emailError });
   }
 
   if (!data.password) {
-    errors.push({ field: 'password', message: ValidationMessages.PASSWORD_TOO_SHORT });
+    errors.push({ field: "password", message: ValidationMessages.PASSWORD_TOO_SHORT });
   }
 
   return errors;
@@ -152,21 +149,21 @@ export function validateRegisterForm(data: RegisterFormData): ValidationError[] 
 
   const emailError = validateEmail(data.email);
   if (emailError) {
-    errors.push({ field: 'email', message: emailError });
+    errors.push({ field: "email", message: emailError });
   }
 
   const passwordError = validatePassword(data.password);
   if (passwordError) {
-    errors.push({ field: 'password', message: passwordError });
+    errors.push({ field: "password", message: passwordError });
   }
 
   const confirmError = validatePasswordConfirm(data.password, data.confirmPassword);
   if (confirmError) {
-    errors.push({ field: 'confirmPassword', message: confirmError });
+    errors.push({ field: "confirmPassword", message: confirmError });
   }
 
   if (!data.tosAccepted) {
-    errors.push({ field: 'tosAccepted', message: ValidationMessages.TOS_NOT_ACCEPTED });
+    errors.push({ field: "tosAccepted", message: ValidationMessages.TOS_NOT_ACCEPTED });
   }
 
   return errors;
@@ -176,13 +173,13 @@ export function validateRegisterForm(data: RegisterFormData): ValidationError[] 
  * Validate password reset request form
  */
 export function validatePasswordResetRequestForm(
-  data: PasswordResetRequestFormData
+  data: PasswordResetRequestFormData,
 ): ValidationError[] {
   const errors: ValidationError[] = [];
 
   const emailError = validateEmail(data.email);
   if (emailError) {
-    errors.push({ field: 'email', message: emailError });
+    errors.push({ field: "email", message: emailError });
   }
 
   return errors;
@@ -191,19 +188,17 @@ export function validatePasswordResetRequestForm(
 /**
  * Validate new password form
  */
-export function validatePasswordSetNewForm(
-  data: PasswordSetNewFormData
-): ValidationError[] {
+export function validatePasswordSetNewForm(data: PasswordSetNewFormData): ValidationError[] {
   const errors: ValidationError[] = [];
 
   const passwordError = validatePassword(data.password);
   if (passwordError) {
-    errors.push({ field: 'password', message: passwordError });
+    errors.push({ field: "password", message: passwordError });
   }
 
   const confirmError = validatePasswordConfirm(data.password, data.confirmPassword);
   if (confirmError) {
-    errors.push({ field: 'confirmPassword', message: confirmError });
+    errors.push({ field: "confirmPassword", message: confirmError });
   }
 
   return errors;
@@ -212,19 +207,17 @@ export function validatePasswordSetNewForm(
 /**
  * Validate password change form
  */
-export function validatePasswordChangeForm(
-  data: PasswordChangeFormData
-): ValidationError[] {
+export function validatePasswordChangeForm(data: PasswordChangeFormData): ValidationError[] {
   const errors: ValidationError[] = [];
 
   const passwordError = validatePassword(data.newPassword);
   if (passwordError) {
-    errors.push({ field: 'newPassword', message: passwordError });
+    errors.push({ field: "newPassword", message: passwordError });
   }
 
   const confirmError = validatePasswordConfirm(data.newPassword, data.confirmPassword);
   if (confirmError) {
-    errors.push({ field: 'confirmPassword', message: confirmError });
+    errors.push({ field: "confirmPassword", message: confirmError });
   }
 
   return errors;

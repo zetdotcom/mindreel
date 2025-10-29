@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import sqlite3 from "sqlite3";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import type { CreateSummaryInput } from "../types";
 import { SummariesRepository } from "./summariesRepository";
-import { CreateSummaryInput } from "../types";
 
 describe("SummariesRepository", () => {
   let db: sqlite3.Database;
@@ -27,7 +27,7 @@ describe("SummariesRepository", () => {
         (err) => {
           if (err) reject(err);
           else resolve();
-        }
+        },
       );
     });
   });
@@ -264,10 +264,7 @@ describe("SummariesRepository", () => {
         iso_year: 2024,
       });
 
-      const updated = await repository.updateSummary(
-        created.id,
-        "Updated content"
-      );
+      const updated = await repository.updateSummary(created.id, "Updated content");
 
       expect(updated).not.toBeNull();
       expect(updated?.content).toBe("Updated content");
@@ -473,10 +470,7 @@ describe("SummariesRepository", () => {
         iso_year: 2024,
       });
 
-      const summaries = await repository.getSummariesInDateRange(
-        "2024-01-01",
-        "2024-02-28"
-      );
+      const summaries = await repository.getSummariesInDateRange("2024-01-01", "2024-02-28");
 
       expect(summaries).toHaveLength(2);
       expect(summaries.some((s) => s.content === "January Week 1")).toBe(true);
@@ -484,10 +478,7 @@ describe("SummariesRepository", () => {
     });
 
     it("should return empty array when no summaries in range", async () => {
-      const summaries = await repository.getSummariesInDateRange(
-        "2000-01-01",
-        "2000-12-31"
-      );
+      const summaries = await repository.getSummariesInDateRange("2000-01-01", "2000-12-31");
       expect(summaries).toEqual([]);
     });
   });

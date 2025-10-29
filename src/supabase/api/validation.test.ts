@@ -1,23 +1,23 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
+import type { Entry, WeeklySummaryRequest } from "./types";
 import {
-  isValidDateString,
+  createWeekRange,
+  getCurrentWeekRange,
+  getMondayOfWeek,
+  getPreviousWeekRange,
+  getWeekRangeForDate,
   isMonday,
   isSunday,
-  validateWeekRange,
-  validateEntry,
+  isValidDateString,
+  preprocessRequest,
+  sanitizeEntries,
+  sanitizeEntryText,
   validateEntries,
+  validateEntry,
   validateLanguage,
   validateWeeklySummaryRequest,
-  createWeekRange,
-  getMondayOfWeek,
-  getWeekRangeForDate,
-  getCurrentWeekRange,
-  getPreviousWeekRange,
-  sanitizeEntryText,
-  sanitizeEntries,
-  preprocessRequest,
+  validateWeekRange,
 } from "./validation";
-import type { Entry, WeeklySummaryRequest } from "./types";
 
 describe("validation", () => {
   describe("isValidDateString", () => {
@@ -109,17 +109,13 @@ describe("validation", () => {
     it("should reject when range is not exactly 7 days", () => {
       const result = validateWeekRange("2025-01-06", "2025-01-19");
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain(
-        "Week range must be exactly 7 days (Monday to Sunday)",
-      );
+      expect(result.errors).toContain("Week range must be exactly 7 days (Monday to Sunday)");
     });
 
     it("should reject invalid date formats", () => {
       const result = validateWeekRange("2025-1-6", "2025-01-12");
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain(
-        "week_start must be in YYYY-MM-DD format",
-      );
+      expect(result.errors).toContain("week_start must be in YYYY-MM-DD format");
     });
 
     it("should reject dates too far in future", () => {
@@ -135,9 +131,7 @@ describe("validation", () => {
       );
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.includes("cannot be more than"))).toBe(
-        true,
-      );
+      expect(result.errors.some((e) => e.includes("cannot be more than"))).toBe(true);
     });
 
     it("should accumulate multiple errors", () => {
@@ -163,17 +157,13 @@ describe("validation", () => {
     it("should reject missing timestamp", () => {
       const entry = { text: "Valid text" } as Entry;
       const errors = validateEntry(entry, 0, weekStart, weekEnd);
-      expect(errors).toContain(
-        "Entry 1: timestamp is required and must be a string",
-      );
+      expect(errors).toContain("Entry 1: timestamp is required and must be a string");
     });
 
     it("should reject missing text", () => {
       const entry = { timestamp: "2025-01-08T12:00:00.000Z" } as Entry;
       const errors = validateEntry(entry, 0, weekStart, weekEnd);
-      expect(errors).toContain(
-        "Entry 1: text is required and must be a string",
-      );
+      expect(errors).toContain("Entry 1: text is required and must be a string");
     });
 
     it("should reject invalid timestamp format", () => {
@@ -191,9 +181,7 @@ describe("validation", () => {
         text: "Valid text",
       };
       const errors = validateEntry(entry, 0, weekStart, weekEnd);
-      expect(errors).toContain(
-        "Entry 1: timestamp must be within the specified week range",
-      );
+      expect(errors).toContain("Entry 1: timestamp must be within the specified week range");
     });
 
     it("should reject timestamp outside week range (after)", () => {
@@ -202,9 +190,7 @@ describe("validation", () => {
         text: "Valid text",
       };
       const errors = validateEntry(entry, 0, weekStart, weekEnd);
-      expect(errors).toContain(
-        "Entry 1: timestamp must be within the specified week range",
-      );
+      expect(errors).toContain("Entry 1: timestamp must be within the specified week range");
     });
 
     it("should reject text that is too long", () => {
@@ -265,9 +251,7 @@ describe("validation", () => {
       }));
       const result = validateEntries(entries, weekStart, weekEnd);
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.includes("Too many entries"))).toBe(
-        true,
-      );
+      expect(result.errors.some((e) => e.includes("Too many entries"))).toBe(true);
     });
 
     it("should reject when total text length exceeds limit", () => {
@@ -277,9 +261,7 @@ describe("validation", () => {
       }));
       const result = validateEntries(entries, weekStart, weekEnd);
       expect(result.valid).toBe(false);
-      expect(
-        result.errors.some((e) => e.includes("Total text content too large")),
-      ).toBe(true);
+      expect(result.errors.some((e) => e.includes("Total text content too large"))).toBe(true);
     });
 
     it("should accumulate errors from multiple entries", () => {
@@ -341,18 +323,14 @@ describe("validation", () => {
       const request = { ...validRequest, week_start: undefined as any };
       const result = validateWeeklySummaryRequest(request);
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain(
-        "week_start is required and must be a string",
-      );
+      expect(result.errors).toContain("week_start is required and must be a string");
     });
 
     it("should reject missing week_end", () => {
       const request = { ...validRequest, week_end: undefined as any };
       const result = validateWeeklySummaryRequest(request);
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain(
-        "week_end is required and must be a string",
-      );
+      expect(result.errors).toContain("week_end is required and must be a string");
     });
 
     it("should reject missing entries", () => {
@@ -478,9 +456,7 @@ describe("validation", () => {
       const currentRange = getCurrentWeekRange();
       const previousRange = getPreviousWeekRange();
 
-      expect(previousRange.end.getTime()).toBeLessThan(
-        currentRange.start.getTime(),
-      );
+      expect(previousRange.end.getTime()).toBeLessThan(currentRange.start.getTime());
     });
 
     it("should return range 7 days before current week", () => {
@@ -488,8 +464,7 @@ describe("validation", () => {
       const previousRange = getPreviousWeekRange();
 
       const daysDiff = Math.floor(
-        (currentRange.start.getTime() - previousRange.start.getTime()) /
-          (1000 * 60 * 60 * 24),
+        (currentRange.start.getTime() - previousRange.start.getTime()) / (1000 * 60 * 60 * 24),
       );
 
       expect(daysDiff).toBe(7);
@@ -564,9 +539,7 @@ describe("validation", () => {
     });
 
     it("should preserve original entry properties", () => {
-      const entries: Entry[] = [
-        { timestamp: "2025-01-08T10:00:00.000Z", text: "hello" },
-      ];
+      const entries: Entry[] = [{ timestamp: "2025-01-08T10:00:00.000Z", text: "hello" }];
       const result = sanitizeEntries(entries);
 
       expect(result[0].timestamp).toBe("2025-01-08T10:00:00.000Z");

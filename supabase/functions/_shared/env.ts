@@ -5,9 +5,7 @@ import type { EdgeFunctionEnv } from "./types.ts";
 
 export class EnvError extends Error {
   constructor(variable: string, message?: string) {
-    super(
-      `Environment variable ${variable} is missing or invalid${message ? `: ${message}` : ""}`,
-    );
+    super(`Environment variable ${variable} is missing or invalid${message ? `: ${message}` : ""}`);
     this.name = "EnvError";
   }
 }
@@ -80,19 +78,13 @@ export function validateEnvironment(): EdgeFunctionEnv {
 
     // Validate OpenRouter model format (should contain a slash)
     if (!env.OPENROUTER_MODEL.includes("/")) {
-      throw new EnvError(
-        "OPENROUTER_MODEL",
-        'should be in format "provider/model"',
-      );
+      throw new EnvError("OPENROUTER_MODEL", 'should be in format "provider/model"');
     }
 
     // Validate log level
     const validLogLevels = ["debug", "info", "warn", "error"];
     if (env.LOG_LEVEL && !validLogLevels.includes(env.LOG_LEVEL)) {
-      throw new EnvError(
-        "LOG_LEVEL",
-        `must be one of: ${validLogLevels.join(", ")}`,
-      );
+      throw new EnvError("LOG_LEVEL", `must be one of: ${validLogLevels.join(", ")}`);
     }
 
     return env;

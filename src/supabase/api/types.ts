@@ -28,21 +28,14 @@ export interface WeeklySummarySuccessResponse {
 
 export interface WeeklySummaryErrorResponse {
   ok: false;
-  reason:
-    | "auth_error"
-    | "validation_error"
-    | "quota_exceeded"
-    | "provider_error"
-    | "other_error";
+  reason: "auth_error" | "validation_error" | "quota_exceeded" | "provider_error" | "other_error";
   message?: string;
   remaining?: number;
   cycle_end?: string;
   retryable?: boolean;
 }
 
-export type WeeklySummaryResponse =
-  | WeeklySummarySuccessResponse
-  | WeeklySummaryErrorResponse;
+export type WeeklySummaryResponse = WeeklySummarySuccessResponse | WeeklySummaryErrorResponse;
 
 // Client configuration
 export interface EdgeFunctionClientConfig {
@@ -66,7 +59,7 @@ export class EdgeFunctionError extends Error {
     public readonly reason: WeeklySummaryErrorResponse["reason"],
     message: string,
     public readonly response?: WeeklySummaryErrorResponse,
-    public readonly retryable: boolean = false
+    public readonly retryable: boolean = false,
   ) {
     super(message);
     this.name = "EdgeFunctionError";
@@ -74,7 +67,10 @@ export class EdgeFunctionError extends Error {
 }
 
 export class NetworkError extends Error {
-  constructor(message: string, public readonly retryable: boolean = true) {
+  constructor(
+    message: string,
+    public readonly retryable: boolean = true,
+  ) {
     super(message);
     this.name = "NetworkError";
   }
@@ -133,7 +129,7 @@ export const DEFAULT_RETRY_CONFIG: RetryConfig = {
   delay: 1000, // 1 second
   backoffMultiplier: 2,
   maxDelay: 10000, // 10 seconds
-  retryableErrors: ["provider_error", "other_error"]
+  retryableErrors: ["provider_error", "other_error"],
 };
 
 // Constants
@@ -146,7 +142,7 @@ export const QUOTA_LIMITS = {
 } as const;
 
 export const SUPPORTED_LANGUAGES = ["pl", "en"] as const;
-export type SupportedLanguage = typeof SUPPORTED_LANGUAGES[number];
+export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
 // Validation constraints
 export const VALIDATION_RULES = {

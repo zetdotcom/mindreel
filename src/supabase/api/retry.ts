@@ -48,7 +48,7 @@ export function calculateRetryDelay(
   jitter: boolean = true,
 ): number {
   // Calculate exponential backoff: baseDelay * (backoffMultiplier ^ attempt)
-  let delay = baseDelay * Math.pow(backoffMultiplier, attempt - 1);
+  let delay = baseDelay * backoffMultiplier ** (attempt - 1);
 
   // Cap at maximum delay
   delay = Math.min(delay, maxDelay);
@@ -138,9 +138,7 @@ export class RetryManager {
           await Promise.race([
             sleep(delay),
             new Promise<never>((_, reject) => {
-              signal.addEventListener("abort", () =>
-                reject(new Error("Operation was cancelled")),
-              );
+              signal.addEventListener("abort", () => reject(new Error("Operation was cancelled")));
             }),
           ]);
         } else {
@@ -188,9 +186,7 @@ export async function withRetry<T>(
 /**
  * Creates a retry manager optimized for network requests
  */
-export function createNetworkRetryManager(
-  baseDelay: number = 1000,
-): RetryManager {
+export function createNetworkRetryManager(baseDelay: number = 1000): RetryManager {
   return new RetryManager({
     attempts: 3,
     delay: baseDelay,

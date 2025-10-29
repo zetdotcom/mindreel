@@ -13,13 +13,7 @@ const os = require("os");
 const fs = require("fs");
 
 // Get the database path
-const dbPath = path.join(
-  os.homedir(),
-  "Library",
-  "Application Support",
-  "mindreel",
-  "mindreel.db",
-);
+const dbPath = path.join(os.homedir(), "Library", "Application Support", "mindreel", "mindreel.db");
 
 console.log("=".repeat(60));
 console.log("🔍 MindReel Global Shortcut Debugger");
@@ -90,15 +84,10 @@ db.get("SELECT * FROM settings WHERE id = 1", [], (err, row) => {
     // Expected migrations
     const expectedMigrations = [1, 2];
     const appliedMigrationIds = migrations.map((m) => m.id);
-    const missingMigrations = expectedMigrations.filter(
-      (id) => !appliedMigrationIds.includes(id),
-    );
+    const missingMigrations = expectedMigrations.filter((id) => !appliedMigrationIds.includes(id));
 
     if (missingMigrations.length > 0) {
-      console.log(
-        "⚠️  WARNING: Missing migrations:",
-        missingMigrations.join(", "),
-      );
+      console.log("⚠️  WARNING: Missing migrations:", missingMigrations.join(", "));
       console.log("   Restart the app to run pending migrations.");
       console.log();
     }
@@ -111,9 +100,7 @@ db.get("SELECT * FROM settings WHERE id = 1", [], (err, row) => {
     console.log("1. Make sure the app is running");
     console.log("2. Check the console for these log messages:");
     console.log("   [GlobalShortcut] Initializing global shortcuts...");
-    console.log(
-      "   [GlobalShortcut] ✓ Successfully registered: Option+Command+Space",
-    );
+    console.log("   [GlobalShortcut] ✓ Successfully registered: Option+Command+Space");
     console.log();
     console.log("3. Press: Option + Command + Space");
     console.log("   (⌥ + ⌘ + Space on macOS keyboard)");
@@ -131,9 +118,7 @@ db.get("SELECT * FROM settings WHERE id = 1", [], (err, row) => {
     console.log();
     console.log("B. Try a different shortcut:");
     console.log("   Open DevTools in the app and run:");
-    console.log(
-      "   await window.appApi.db.updateGlobalShortcut('Command+Shift+M');",
-    );
+    console.log("   await window.appApi.db.updateGlobalShortcut('Command+Shift+M');");
     console.log();
     console.log("C. Check registration status:");
     console.log("   await window.appApi.shortcut.isRegistered();");

@@ -1,25 +1,25 @@
 /// <reference types="@electron-forge/plugin-vite/forge-vite-env" />
 
-import { app, BrowserWindow } from "electron";
 import path from "node:path";
+import { app, BrowserWindow } from "electron";
 import started from "electron-squirrel-startup";
-import { registerPing } from "./ipc/setupPing";
+import { cleanupCaptureTimer, initializeCaptureTimer } from "./ipc/captureTimerManager";
 import {
-  registerDatabaseHandlers,
-  initializeDatabase,
-  closeDatabase,
-} from "./ipc/databaseHandlers";
-import {
-  registerCaptureWindowHandlers,
   cleanupCaptureWindow,
   createCaptureWindow,
+  registerCaptureWindowHandlers,
 } from "./ipc/captureWindowHandlers";
 import {
+  closeDatabase,
+  initializeDatabase,
+  registerDatabaseHandlers,
+} from "./ipc/databaseHandlers";
+import {
+  cleanupGlobalShortcuts,
   initializeGlobalShortcut,
   registerGlobalShortcutHandlers,
-  cleanupGlobalShortcuts,
 } from "./ipc/globalShortcutManager";
-import { initializeCaptureTimer, cleanupCaptureTimer } from "./ipc/captureTimerManager";
+import { registerPing } from "./ipc/setupPing";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {

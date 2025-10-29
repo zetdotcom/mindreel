@@ -1,5 +1,5 @@
-import sqlite3 from "sqlite3";
 import { getISOWeek, getISOWeekYear } from "date-fns";
+import type sqlite3 from "sqlite3";
 
 export interface Migration {
   id: number;
@@ -19,25 +19,16 @@ const migration001: Migration = {
     return new Promise((resolve, reject) => {
       db.serialize(() => {
         // Helper function to check if column exists
-        const checkColumnExists = (
-          tableName: string,
-          columnName: string,
-        ): Promise<boolean> => {
+        const checkColumnExists = (tableName: string, columnName: string): Promise<boolean> => {
           return new Promise((resolve, reject) => {
-            db.all(
-              `PRAGMA table_info(${tableName})`,
-              [],
-              (err, rows: any[]) => {
-                if (err) {
-                  reject(err);
-                  return;
-                }
-                const columnExists = rows.some(
-                  (row) => row.name === columnName,
-                );
-                resolve(columnExists);
-              },
-            );
+            db.all(`PRAGMA table_info(${tableName})`, [], (err, rows: any[]) => {
+              if (err) {
+                reject(err);
+                return;
+              }
+              const columnExists = rows.some((row) => row.name === columnName);
+              resolve(columnExists);
+            });
           });
         };
 
@@ -49,17 +40,14 @@ const migration001: Migration = {
               return Promise.resolve();
             }
             return new Promise<void>((resolve, reject) => {
-              db.run(
-                "ALTER TABLE entries ADD COLUMN iso_year INTEGER",
-                (err) => {
-                  if (err) {
-                    reject(err);
-                    return;
-                  }
-                  console.log("Added iso_year column to entries table");
-                  resolve();
-                },
-              );
+              db.run("ALTER TABLE entries ADD COLUMN iso_year INTEGER", (err) => {
+                if (err) {
+                  reject(err);
+                  return;
+                }
+                console.log("Added iso_year column to entries table");
+                resolve();
+              });
             });
           })
           .then(() => checkColumnExists("summaries", "iso_year"))
@@ -69,17 +57,14 @@ const migration001: Migration = {
               return Promise.resolve();
             }
             return new Promise<void>((resolve, reject) => {
-              db.run(
-                "ALTER TABLE summaries ADD COLUMN iso_year INTEGER",
-                (err) => {
-                  if (err) {
-                    reject(err);
-                    return;
-                  }
-                  console.log("Added iso_year column to summaries table");
-                  resolve();
-                },
-              );
+              db.run("ALTER TABLE summaries ADD COLUMN iso_year INTEGER", (err) => {
+                if (err) {
+                  reject(err);
+                  return;
+                }
+                console.log("Added iso_year column to summaries table");
+                resolve();
+              });
             });
           })
           .then(() => {
@@ -126,11 +111,7 @@ const migration001: Migration = {
                       },
                     );
                   } catch (dateErr) {
-                    reject(
-                      new Error(
-                        `Invalid date format for entry ${row.id}: ${row.date}`,
-                      ),
-                    );
+                    reject(new Error(`Invalid date format for entry ${row.id}: ${row.date}`));
                     return;
                   }
                 }
@@ -154,9 +135,7 @@ const migration001: Migration = {
                     return;
                   }
 
-                  console.log(
-                    `Backfilling iso_year for ${rows.length} summaries`,
-                  );
+                  console.log(`Backfilling iso_year for ${rows.length} summaries`);
 
                   let completed = 0;
                   const total = rows.length;
@@ -177,18 +156,14 @@ const migration001: Migration = {
 
                           completed++;
                           if (completed === total) {
-                            console.log(
-                              `Completed backfilling ${total} summaries`,
-                            );
+                            console.log(`Completed backfilling ${total} summaries`);
                             createIndexes();
                           }
                         },
                       );
                     } catch (dateErr) {
                       reject(
-                        new Error(
-                          `Invalid date format for summary ${row.id}: ${row.start_date}`,
-                        ),
+                        new Error(`Invalid date format for summary ${row.id}: ${row.start_date}`),
                       );
                       return;
                     }
@@ -215,9 +190,7 @@ const migration001: Migration = {
                         return;
                       }
 
-                      console.log(
-                        "Migration 001 completed: Added iso_year columns and indexes",
-                      );
+                      console.log("Migration 001 completed: Added iso_year columns and indexes");
                       resolve();
                     },
                   );
@@ -283,19 +256,14 @@ const migration002: Migration = {
   down: async (db: sqlite3.Database): Promise<void> => {
     return new Promise((resolve, reject) => {
       // Rollback: Set global_shortcut back to NULL
-      db.run(
-        "UPDATE settings SET global_shortcut = NULL WHERE id = 1",
-        (err) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          console.log(
-            "Migration 002 rolled back: Reset global_shortcut to NULL",
-          );
-          resolve();
-        },
-      );
+      db.run("UPDATE settings SET global_shortcut = NULL WHERE id = 1", (err) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        console.log("Migration 002 rolled back: Reset global_shortcut to NULL");
+        resolve();
+      });
     });
   },
 };
@@ -332,17 +300,13 @@ export class MigrationRunner {
 
   async getAppliedMigrations(): Promise<number[]> {
     return new Promise((resolve, reject) => {
-      this.db.all(
-        "SELECT id FROM migrations ORDER BY id",
-        [],
-        (err, rows: any[]) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(rows.map((row) => row.id));
-          }
-        },
-      );
+      this.db.all("SELECT id FROM migrations ORDER BY id", [], (err, rows: any[]) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows.map((row) => row.id));
+        }
+      });
     });
   }
 

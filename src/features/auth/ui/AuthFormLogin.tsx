@@ -1,14 +1,10 @@
-import React, { useState, FormEvent, useId } from "react";
 import { LogIn } from "lucide-react";
+import React, { type FormEvent, useId, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { FormField } from "./FormField";
-import { AuthErrorBanner } from "./AuthErrorBanner";
-import {
-  LoginFormData,
-  validateLoginForm,
-  ValidationError,
-} from "../model/types";
 import { cn } from "@/lib/utils";
+import { type LoginFormData, type ValidationError, validateLoginForm } from "../model/types";
+import { AuthErrorBanner } from "./AuthErrorBanner";
+import { FormField } from "./FormField";
 
 interface AuthFormLoginProps {
   onSubmit: (data: LoginFormData) => Promise<void>;
@@ -37,9 +33,7 @@ export function AuthFormLogin({
   const passwordId = useId();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [validationErrors, setValidationErrors] = useState<
-    Record<string, string>
-  >({});
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

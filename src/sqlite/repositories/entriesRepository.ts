@@ -1,11 +1,6 @@
-import sqlite3 from "sqlite3";
-import { Entry, CreateEntryInput, EntryFilters } from "../types";
-import {
-  getISOWeekNumber,
-  getISOYear,
-  formatDate,
-  IsoWeekIdentifier,
-} from "../dateUtils";
+import type sqlite3 from "sqlite3";
+import { formatDate, getISOWeekNumber, getISOYear, type IsoWeekIdentifier } from "../dateUtils";
+import type { CreateEntryInput, Entry, EntryFilters } from "../types";
 
 export class EntriesRepository {
   constructor(private db: sqlite3.Database) {}
@@ -158,10 +153,7 @@ export class EntriesRepository {
   /**
    * Get entries for a specific ISO week
    */
-  async getEntriesForIsoWeek(
-    isoYear: number,
-    weekOfYear: number,
-  ): Promise<Entry[]> {
+  async getEntriesForIsoWeek(isoYear: number, weekOfYear: number): Promise<Entry[]> {
     return new Promise((resolve, reject) => {
       const sql =
         "SELECT * FROM entries WHERE iso_year = ? AND week_of_year = ? ORDER BY created_at DESC";
@@ -180,10 +172,7 @@ export class EntriesRepository {
   /**
    * Get entries for a date range
    */
-  async getEntriesForDateRange(
-    startDate: string,
-    endDate: string,
-  ): Promise<Entry[]> {
+  async getEntriesForDateRange(startDate: string, endDate: string): Promise<Entry[]> {
     return this.getEntries({ start_date: startDate, end_date: endDate });
   }
 
@@ -261,8 +250,7 @@ export class EntriesRepository {
    */
   async getEntryCountForWeek(weekOfYear: number): Promise<number> {
     return new Promise((resolve, reject) => {
-      const sql =
-        "SELECT COUNT(*) as count FROM entries WHERE week_of_year = ?";
+      const sql = "SELECT COUNT(*) as count FROM entries WHERE week_of_year = ?";
 
       this.db.get(sql, [weekOfYear], (err, row: { count: number }) => {
         if (err) {
@@ -298,8 +286,7 @@ export class EntriesRepository {
    */
   async getWeeksWithEntries(): Promise<number[]> {
     return new Promise((resolve, reject) => {
-      const sql =
-        "SELECT DISTINCT week_of_year FROM entries ORDER BY week_of_year";
+      const sql = "SELECT DISTINCT week_of_year FROM entries ORDER BY week_of_year";
 
       this.db.all(sql, [], (err, rows: { week_of_year: number }[]) => {
         if (err) {
@@ -329,27 +316,22 @@ export class EntriesRepository {
         if (hasIsoYear) {
           const sql =
             "SELECT DISTINCT iso_year, week_of_year FROM entries ORDER BY iso_year DESC, week_of_year DESC";
-          this.db.all(
-            sql,
-            [],
-            (err, rows: { iso_year: number; week_of_year: number }[]) => {
-              if (err) {
-                reject(err);
-                return;
-              }
-              resolve(
-                rows.map((row) => ({
-                  iso_year: row.iso_year,
-                  week_of_year: row.week_of_year,
-                })),
-              );
-            },
-          );
+          this.db.all(sql, [], (err, rows: { iso_year: number; week_of_year: number }[]) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+            resolve(
+              rows.map((row) => ({
+                iso_year: row.iso_year,
+                week_of_year: row.week_of_year,
+              })),
+            );
+          });
         } else {
           // Fallback: return current year for all weeks when iso_year column doesn't exist
           const currentYear = new Date().getFullYear();
-          const sql =
-            "SELECT DISTINCT week_of_year FROM entries ORDER BY week_of_year DESC";
+          const sql = "SELECT DISTINCT week_of_year FROM entries ORDER BY week_of_year DESC";
           this.db.all(sql, [], (err, rows: { week_of_year: number }[]) => {
             if (err) {
               reject(err);

@@ -1,16 +1,13 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  hasSeenOnboarding,
-  setOnboardingSeen,
-} from "@/features/onboarding/model/onboardingState";
-import { OnboardingModal } from "@/features/onboarding";
+import { Button } from "@/components/ui/button";
+import { openCaptureWindow } from "@/features/capture";
 import { useEntries } from "@/features/entries/model/useEntries";
 import { EntryForm } from "@/features/entries/ui/EntryForm";
 import { EntryList } from "@/features/entries/ui/EntryList";
+import { OnboardingModal } from "@/features/onboarding";
+import { hasSeenOnboarding, setOnboardingSeen } from "@/features/onboarding/model/onboardingState";
 import { CurrentWeekSummarySection } from "@/features/summaries/ui/CurrentWeekSummarySection";
 import { ErrorDisplay } from "@/shared/ui/ErrorDisplay";
-import { Button } from "@/components/ui/button";
-import { openCaptureWindow } from "@/features/capture";
 
 /**
  * DashboardView
@@ -113,21 +110,14 @@ export function DashboardView() {
   // --- Render -----------------------------------------------------------------
   return (
     <>
-      <OnboardingModal
-        open={showOnboarding}
-        onConfirm={handleOnboardingConfirm}
-      />
+      <OnboardingModal open={showOnboarding} onConfirm={handleOnboardingConfirm} />
 
       <main className="min-h-screen p-8 bg-neutral-950 text-neutral-100 font-sans">
         <div className="max-w-4xl mx-auto space-y-8">
           <header className="text-center space-y-4">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight mb-2">
-                MindReel sss
-              </h1>
-              <p className="text-neutral-400 text-sm">
-                Your personal productivity journal x x
-              </p>
+              <h1 className="text-3xl font-bold tracking-tight mb-2">MindReel sss</h1>
+              <p className="text-neutral-400 text-sm">Your personal productivity journal x x</p>
             </div>
             <div>
               <Button
@@ -142,11 +132,7 @@ export function DashboardView() {
 
           {/* Global error (cross-feature) */}
           {globalError && (
-            <ErrorDisplay
-              error={globalError}
-              onDismiss={handleDismissError}
-              variant="solid"
-            />
+            <ErrorDisplay error={globalError} onDismiss={handleDismissError} variant="solid" />
           )}
 
           {/* Entries domain error */}
@@ -171,11 +157,7 @@ export function DashboardView() {
             }}
           />
 
-          <EntryList
-            entries={entries}
-            loading={entriesLoading}
-            onDelete={handleDeleteEntry}
-          />
+          <EntryList entries={entries} loading={entriesLoading} onDelete={handleDeleteEntry} />
 
           <CurrentWeekSummarySection
             heading="Current Week Summary"
@@ -190,8 +172,8 @@ export function DashboardView() {
           <section className="bg-neutral-900 rounded-lg p-6 border border-neutral-800">
             <h2 className="text-xl font-semibold mb-4">Settings (Preview)</h2>
             <p className="text-neutral-400 text-sm">
-              Settings management feature not yet extracted. Future: popup
-              interval, global shortcut.
+              Settings management feature not yet extracted. Future: popup interval, global
+              shortcut.
             </p>
           </section>
 

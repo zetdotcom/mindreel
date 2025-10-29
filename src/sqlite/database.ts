@@ -1,6 +1,6 @@
-import sqlite3 from "sqlite3";
-import path from "node:path";
 import fs from "node:fs";
+import path from "node:path";
+import sqlite3 from "sqlite3";
 import { MigrationRunner } from "./migrations";
 
 interface DatabaseVersion {

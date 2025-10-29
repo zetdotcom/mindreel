@@ -1,6 +1,6 @@
 import React from "react";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 interface FormFieldProps {
@@ -36,10 +36,7 @@ export function FormField({
 }: FormFieldProps) {
   return (
     <div className={cn("space-y-2", className)}>
-      <Label
-        htmlFor={id}
-        className="text-sm font-black uppercase tracking-wide"
-      >
+      <Label htmlFor={id} className="text-sm font-black uppercase tracking-wide">
         {label}
         {required && <span className="text-destructive ml-1">*</span>}
       </Label>
@@ -57,11 +54,7 @@ export function FormField({
         required={required}
       />
       {error && (
-        <p
-          id={`${id}-error`}
-          className="text-sm font-bold text-destructive"
-          role="alert"
-        >
+        <p id={`${id}-error`} className="text-sm font-bold text-destructive" role="alert">
           {error}
         </p>
       )}

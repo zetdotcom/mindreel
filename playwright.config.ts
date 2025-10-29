@@ -1,21 +1,21 @@
-import { defineConfig } from '@playwright/test'
+import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
-  testDir: './src/tests/e2e',
+  testDir: "./src/tests/e2e",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: 'html',
+  reporter: "html",
   use: {
-    trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
+    trace: "on-first-retry",
+    screenshot: "only-on-failure",
   },
 
   projects: [
     {
-      name: 'electron',
-      testMatch: '**/*.e2e.{ts,tsx}',
+      name: "electron",
+      testMatch: "**/*.e2e.{ts,tsx}",
     },
   ],
 
@@ -23,4 +23,4 @@ export default defineConfig({
   expect: {
     timeout: 5000,
   },
-})
+});

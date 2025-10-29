@@ -3,47 +3,43 @@
  * Exports UI components and types for authentication functionality
  */
 
-// UI Components
-export { AuthModal } from "./ui/AuthModal";
-export { AuthFormLogin } from "./ui/AuthFormLogin";
-export { AuthFormRegister } from "./ui/AuthFormRegister";
-export { AuthEmailVerificationNotice } from "./ui/AuthEmailVerificationNotice";
-export { AuthFormPasswordResetRequest } from "./ui/AuthFormPasswordResetRequest";
-export { AuthFormPasswordSetNew } from "./ui/AuthFormPasswordSetNew";
-export { AuthFormPasswordChange } from "./ui/AuthFormPasswordChange";
-export { AuthErrorBanner } from "./ui/AuthErrorBanner";
-export { FormField } from "./ui/FormField";
-export { ProtectedFeatureGate } from "./ui/ProtectedFeatureGate";
-
+export { AuthProvider, useAuthContext } from "./model/AuthContext";
 // Types
 export type {
   AuthState,
   LoginFormData,
-  RegisterFormData,
+  PasswordChangeFormData,
   PasswordResetRequestFormData,
   PasswordSetNewFormData,
-  PasswordChangeFormData,
+  RegisterFormData,
   ValidationError,
 } from "./model/types";
-
 // Validation utilities
 export {
+  MIN_PASSWORD_LENGTH,
+  ValidationMessages,
   validateEmail,
-  validatePassword,
-  validatePasswordConfirm,
   validateLoginForm,
-  validateRegisterForm,
+  validatePassword,
+  validatePasswordChangeForm,
+  validatePasswordConfirm,
   validatePasswordResetRequestForm,
   validatePasswordSetNewForm,
-  validatePasswordChangeForm,
-  ValidationMessages,
-  MIN_PASSWORD_LENGTH,
+  validateRegisterForm,
 } from "./model/types";
-
-export { AuthProvider, useAuthContext } from "./model/AuthContext";
-
 export type {
+  UseAuthActions,
   UseAuthReturn,
   UseAuthState,
-  UseAuthActions,
 } from "./model/useAuth";
+export { AuthEmailVerificationNotice } from "./ui/AuthEmailVerificationNotice";
+export { AuthErrorBanner } from "./ui/AuthErrorBanner";
+export { AuthFormLogin } from "./ui/AuthFormLogin";
+export { AuthFormPasswordChange } from "./ui/AuthFormPasswordChange";
+export { AuthFormPasswordResetRequest } from "./ui/AuthFormPasswordResetRequest";
+export { AuthFormPasswordSetNew } from "./ui/AuthFormPasswordSetNew";
+export { AuthFormRegister } from "./ui/AuthFormRegister";
+// UI Components
+export { AuthModal } from "./ui/AuthModal";
+export { FormField } from "./ui/FormField";
+export { ProtectedFeatureGate } from "./ui/ProtectedFeatureGate";

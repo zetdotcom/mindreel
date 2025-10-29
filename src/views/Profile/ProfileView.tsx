@@ -1,6 +1,6 @@
 import React from "react";
-import { useAuthContext } from "@/features/auth";
 import { Button } from "@/components/ui/button";
+import { useAuthContext } from "@/features/auth";
 
 export function ProfileView() {
   const { authenticated, emailVerified, user, openAuthModal, logout } = useAuthContext();

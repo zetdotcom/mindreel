@@ -1,16 +1,16 @@
-import React, { useState, FormEvent, useId } from "react";
-import { Mail, ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { FormField } from "./FormField";
-import { AuthErrorBanner } from "./AuthErrorBanner";
+import { ArrowLeft, Mail } from "lucide-react";
+import React, { type FormEvent, useId, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  PasswordResetRequestFormData,
-  validatePasswordResetRequestForm,
-  ValidationError,
-  ValidationMessages,
-} from "../model/types";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import {
+  type PasswordResetRequestFormData,
+  type ValidationError,
+  ValidationMessages,
+  validatePasswordResetRequestForm,
+} from "../model/types";
+import { AuthErrorBanner } from "./AuthErrorBanner";
+import { FormField } from "./FormField";
 
 interface AuthFormPasswordResetRequestProps {
   onSubmit: (data: PasswordResetRequestFormData) => Promise<void>;
@@ -37,9 +37,7 @@ export function AuthFormPasswordResetRequest({
 }: AuthFormPasswordResetRequestProps) {
   const emailId = useId();
   const [email, setEmail] = useState("");
-  const [validationErrors, setValidationErrors] = useState<
-    Record<string, string>
-  >({});
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -64,9 +62,7 @@ export function AuthFormPasswordResetRequest({
     <div className={cn("space-y-6", className)}>
       {/* Header */}
       <div className="space-y-2 text-center">
-        <h2 className="text-2xl font-black uppercase tracking-wide">
-          Reset Password
-        </h2>
+        <h2 className="text-2xl font-black uppercase tracking-wide">Reset Password</h2>
         <p className="text-sm text-muted-foreground font-bold uppercase tracking-wide">
           Enter your email to receive reset instructions
         </p>
@@ -76,9 +72,7 @@ export function AuthFormPasswordResetRequest({
       {showSuccessMessage && (
         <Alert variant="success">
           <Mail className="h-5 w-5" />
-          <AlertDescription>
-            {ValidationMessages.PASSWORD_RECOVERY_SENT}
-          </AlertDescription>
+          <AlertDescription>{ValidationMessages.PASSWORD_RECOVERY_SENT}</AlertDescription>
         </Alert>
       )}
 

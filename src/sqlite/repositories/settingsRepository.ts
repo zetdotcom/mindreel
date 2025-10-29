@@ -1,5 +1,5 @@
-import sqlite3 from "sqlite3";
-import { Settings, UpdateSettingsInput } from "../types";
+import type sqlite3 from "sqlite3";
+import type { Settings, UpdateSettingsInput } from "../types";
 
 export class SettingsRepository {
   constructor(private db: sqlite3.Database) {}
@@ -33,9 +33,7 @@ export class SettingsRepository {
           const newSettings: Settings = {
             id: 1,
             popup_interval_minutes:
-              input.popup_interval_minutes ??
-              currentSettings?.popup_interval_minutes ??
-              60,
+              input.popup_interval_minutes ?? currentSettings?.popup_interval_minutes ?? 60,
             global_shortcut:
               input.global_shortcut !== undefined
                 ? input.global_shortcut
@@ -50,7 +48,7 @@ export class SettingsRepository {
           this.db.run(
             sql,
             [newSettings.popup_interval_minutes, newSettings.global_shortcut],
-            function (err) {
+            (err) => {
               if (err) {
                 reject(err);
                 return;
@@ -96,11 +94,8 @@ export class SettingsRepository {
 
       this.db.run(
         sql,
-        [
-          defaultSettings.popup_interval_minutes,
-          defaultSettings.global_shortcut,
-        ],
-        function (err) {
+        [defaultSettings.popup_interval_minutes, defaultSettings.global_shortcut],
+        (err) => {
           if (err) {
             reject(err);
             return;

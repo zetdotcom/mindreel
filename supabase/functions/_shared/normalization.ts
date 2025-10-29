@@ -1,11 +1,6 @@
 // Entry normalization and prompt building utilities for MindReel Edge Functions
 
-import type {
-  Entry,
-  NormalizedEntry,
-  PromptData,
-  SupportedLanguage,
-} from "./types.ts";
+import type { Entry, NormalizedEntry, PromptData, SupportedLanguage } from "./types.ts";
 
 /**
  * Normalizes and deduplicates entries for AI processing
@@ -33,8 +28,7 @@ export function normalizeEntries(
 
     // Apply truncation if needed
     if (processedText.length > truncationLimit) {
-      processedText =
-        processedText.substring(0, truncationLimit) + "… [truncated]";
+      processedText = processedText.substring(0, truncationLimit) + "… [truncated]";
       truncated = true;
     }
 
@@ -72,8 +66,7 @@ export function detectLanguage(entries: NormalizedEntry[]): SupportedLanguage {
   // Polish diacritics: ą ć ę ł ń ó ś ź ż
   const polishDiacritics = /[ąćęłńóśźż]/g;
   const diacriticMatches = allText.match(polishDiacritics) || [];
-  const totalLetters =
-    allText.match(/[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/g)?.length || 0;
+  const totalLetters = allText.match(/[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/g)?.length || 0;
 
   if (totalLetters === 0) return "en"; // Default to English if no letters
 
@@ -129,8 +122,7 @@ export function truncateToLimit(
     }
   }
 
-  const omittedCount =
-    entries.length - earliestEntries.length - latestEntries.length;
+  const omittedCount = entries.length - earliestEntries.length - latestEntries.length;
 
   if (omittedCount > 0) {
     // Add omission marker between earliest and latest
@@ -256,10 +248,7 @@ export function buildPromptData(
 /**
  * Formats AI response to ensure proper bullet point format
  */
-export function formatSummary(
-  rawSummary: string,
-  language: SupportedLanguage,
-): string {
+export function formatSummary(rawSummary: string, language: SupportedLanguage): string {
   const lines = rawSummary
     .split("\n")
     .map((line) => line.trim())

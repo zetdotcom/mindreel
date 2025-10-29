@@ -47,33 +47,12 @@
   --shadow-brutal-xl: 0 0 0 2px #41657b, 0 0 14px 4px rgba(62, 75, 84, 0.45);
   --border-brutal: 2px solid #41657b;
   --border-brutal-thick: 3px solid #41657b;
-  --shadow-glow:
-    0 0 4px 1px rgba(65, 101, 123, 0.35), 0 0 10px 4px rgba(199, 130, 38, 0.25);
+  --shadow-glow: 0 0 4px 1px rgba(65, 101, 123, 0.35), 0 0 10px 4px rgba(199, 130, 38, 0.25);
   --shadow-glow-subtle: 0 0 3px 1px rgba(62, 75, 84, 0.3);
-  --card-gradient: linear-gradient(
-    135deg,
-    #c2d0db 0%,
-    #ffffff 45%,
-    #e3e9ed 100%
-  );
-  --button-primary-gradient: linear-gradient(
-    135deg,
-    #41657b 0%,
-    #3e4b54 60%,
-    #41657b 100%
-  );
-  --button-accent-gradient: linear-gradient(
-    135deg,
-    #c78226 0%,
-    #d69745 55%,
-    #e3a857 100%
-  );
-  --button-spice-gradient: linear-gradient(
-    135deg,
-    #b9486d 0%,
-    #953356 70%,
-    #b9486d 100%
-  );
+  --card-gradient: linear-gradient(135deg, #c2d0db 0%, #ffffff 45%, #e3e9ed 100%);
+  --button-primary-gradient: linear-gradient(135deg, #41657b 0%, #3e4b54 60%, #41657b 100%);
+  --button-accent-gradient: linear-gradient(135deg, #c78226 0%, #d69745 55%, #e3a857 100%);
+  --button-spice-gradient: linear-gradient(135deg, #b9486d 0%, #953356 70%, #b9486d 100%);
   /* Layout / Sidebar extended variables */
   --sidebar-active-bg: var(--sidebar-primary);
   --sidebar-active-fg: var(--sidebar-primary-foreground);
