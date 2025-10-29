@@ -32,17 +32,32 @@ describe("retry", () => {
     });
 
     it("should return true for retryable EdgeFunctionError with provider_error", () => {
-      const error = new EdgeFunctionError("provider_error", "Provider failed", undefined, true);
+      const error = new EdgeFunctionError(
+        "provider_error",
+        "Provider failed",
+        undefined,
+        true,
+      );
       expect(isRetryableError(error)).toBe(true);
     });
 
     it("should return false for retryable EdgeFunctionError with non-retryable reason", () => {
-      const error = new EdgeFunctionError("auth_error", "Unauthorized", undefined, true);
+      const error = new EdgeFunctionError(
+        "auth_error",
+        "Unauthorized",
+        undefined,
+        true,
+      );
       expect(isRetryableError(error)).toBe(false);
     });
 
     it("should return false for non-retryable EdgeFunctionError", () => {
-      const error = new EdgeFunctionError("quota_exceeded", "Quota exceeded", undefined, false);
+      const error = new EdgeFunctionError(
+        "quota_exceeded",
+        "Quota exceeded",
+        undefined,
+        false,
+      );
       expect(isRetryableError(error)).toBe(false);
     });
 
@@ -64,7 +79,12 @@ describe("retry", () => {
     });
 
     it("should respect custom retry config retryableErrors", () => {
-      const error = new EdgeFunctionError("validation_error", "Invalid", undefined, true);
+      const error = new EdgeFunctionError(
+        "validation_error",
+        "Invalid",
+        undefined,
+        true,
+      );
       const config = {
         ...DEFAULT_RETRY_CONFIG,
         retryableErrors: ["validation_error" as const],
@@ -80,16 +100,24 @@ describe("retry", () => {
       const maxDelay = 30000;
 
       // Attempt 1: 1000 * 2^0 = 1000ms
-      expect(calculateRetryDelay(1, baseDelay, multiplier, maxDelay, false)).toBe(1000);
+      expect(
+        calculateRetryDelay(1, baseDelay, multiplier, maxDelay, false),
+      ).toBe(1000);
 
       // Attempt 2: 1000 * 2^1 = 2000ms
-      expect(calculateRetryDelay(2, baseDelay, multiplier, maxDelay, false)).toBe(2000);
+      expect(
+        calculateRetryDelay(2, baseDelay, multiplier, maxDelay, false),
+      ).toBe(2000);
 
       // Attempt 3: 1000 * 2^2 = 4000ms
-      expect(calculateRetryDelay(3, baseDelay, multiplier, maxDelay, false)).toBe(4000);
+      expect(
+        calculateRetryDelay(3, baseDelay, multiplier, maxDelay, false),
+      ).toBe(4000);
 
       // Attempt 4: 1000 * 2^3 = 8000ms
-      expect(calculateRetryDelay(4, baseDelay, multiplier, maxDelay, false)).toBe(8000);
+      expect(
+        calculateRetryDelay(4, baseDelay, multiplier, maxDelay, false),
+      ).toBe(8000);
     });
 
     it("should cap delay at maxDelay", () => {
@@ -98,7 +126,9 @@ describe("retry", () => {
       const maxDelay = 5000;
 
       // Attempt 10 would be 1000 * 2^9 = 512000ms, but capped at 5000ms
-      expect(calculateRetryDelay(10, baseDelay, multiplier, maxDelay, false)).toBe(5000);
+      expect(
+        calculateRetryDelay(10, baseDelay, multiplier, maxDelay, false),
+      ).toBe(5000);
     });
 
     it("should add jitter when enabled", () => {
@@ -109,7 +139,13 @@ describe("retry", () => {
       // Run multiple times to verify jitter randomness
       const delays = new Set();
       for (let i = 0; i < 10; i++) {
-        const delay = calculateRetryDelay(2, baseDelay, multiplier, maxDelay, true);
+        const delay = calculateRetryDelay(
+          2,
+          baseDelay,
+          multiplier,
+          maxDelay,
+          true,
+        );
         delays.add(delay);
         // Should be around 2000ms ± 25% (1500-2500ms range)
         expect(delay).toBeGreaterThanOrEqual(1500);
@@ -125,8 +161,20 @@ describe("retry", () => {
       const maxDelay = 30000;
 
       // Without jitter, should always return same value
-      const delay1 = calculateRetryDelay(2, baseDelay, multiplier, maxDelay, false);
-      const delay2 = calculateRetryDelay(2, baseDelay, multiplier, maxDelay, false);
+      const delay1 = calculateRetryDelay(
+        2,
+        baseDelay,
+        multiplier,
+        maxDelay,
+        false,
+      );
+      const delay2 = calculateRetryDelay(
+        2,
+        baseDelay,
+        multiplier,
+        maxDelay,
+        false,
+      );
       expect(delay1).toBe(delay2);
       expect(delay1).toBe(2000);
     });
@@ -141,9 +189,15 @@ describe("retry", () => {
       const multiplier = 1;
       const maxDelay = 30000;
 
-      expect(calculateRetryDelay(1, baseDelay, multiplier, maxDelay, false)).toBe(1000);
-      expect(calculateRetryDelay(2, baseDelay, multiplier, maxDelay, false)).toBe(1000);
-      expect(calculateRetryDelay(3, baseDelay, multiplier, maxDelay, false)).toBe(1000);
+      expect(
+        calculateRetryDelay(1, baseDelay, multiplier, maxDelay, false),
+      ).toBe(1000);
+      expect(
+        calculateRetryDelay(2, baseDelay, multiplier, maxDelay, false),
+      ).toBe(1000);
+      expect(
+        calculateRetryDelay(3, baseDelay, multiplier, maxDelay, false),
+      ).toBe(1000);
     });
   });
 
@@ -171,7 +225,9 @@ describe("retry", () => {
       });
 
       it("should throw error for negative delay", () => {
-        expect(() => new RetryManager({ delay: -100 })).toThrow("Retry delay must be non-negative");
+        expect(() => new RetryManager({ delay: -100 })).toThrow(
+          "Retry delay must be non-negative",
+        );
       });
 
       it("should throw error for invalid backoff multiplier", () => {
@@ -225,7 +281,12 @@ describe("retry", () => {
 
       it("should not retry on non-retryable errors", async () => {
         const manager = new RetryManager({ attempts: 3 });
-        const error = new EdgeFunctionError("auth_error", "Unauthorized", undefined, false);
+        const error = new EdgeFunctionError(
+          "auth_error",
+          "Unauthorized",
+          undefined,
+          false,
+        );
         const fn = vi.fn().mockRejectedValue(error);
 
         await expect(manager.execute(fn)).rejects.toThrow("Unauthorized");
@@ -239,19 +300,25 @@ describe("retry", () => {
 
         const promise = manager.execute(fn);
 
+        // Attach rejection handler before advancing timers to prevent unhandled rejection
+        const rejectPromise =
+          expect(promise).rejects.toThrow("Connection failed");
+
         // Fast-forward through all retries (with extra time for jitter)
         await vi.advanceTimersByTimeAsync(150); // First retry
         await vi.advanceTimersByTimeAsync(250); // Second retry
-        await vi.advanceTimersByTimeAsync(100); // Final attempt completes
+        await vi.advanceTimersByTimeAsync(500); // Final attempt completes
 
-        await expect(promise).rejects.toThrow("Connection failed");
+        await rejectPromise;
         expect(fn).toHaveBeenCalledTimes(3);
       }, 10000);
 
       it("should respect abort signal", async () => {
         const manager = new RetryManager({ attempts: 3, delay: 1000 });
         const controller = new AbortController();
-        const fn = vi.fn().mockRejectedValue(new NetworkError("Connection failed", true));
+        const fn = vi
+          .fn()
+          .mockRejectedValue(new NetworkError("Connection failed", true));
 
         const promise = manager.execute(fn, controller.signal);
 
@@ -285,6 +352,9 @@ describe("retry", () => {
 
         const executePromise = manager.execute(fn);
 
+        // Attach rejection handler before advancing timers to prevent unhandled rejection
+        const rejectPromise = expect(executePromise).rejects.toThrow("Failed");
+
         // First attempt happens immediately, then wait for first retry delay (100ms base)
         await vi.advanceTimersByTimeAsync(150);
         expect(fn).toHaveBeenCalledTimes(2);
@@ -293,16 +363,18 @@ describe("retry", () => {
         await vi.advanceTimersByTimeAsync(250);
         expect(fn).toHaveBeenCalledTimes(3);
 
-        // Wait for final attempt to complete
-        await vi.advanceTimersByTimeAsync(100);
+        // Wait for final attempt to complete and handle rejection
+        await vi.advanceTimersByTimeAsync(500);
 
-        // Now the promise should be rejected
-        await expect(executePromise).rejects.toThrow("Failed");
+        // Now await the rejection
+        await rejectPromise;
         expect(fn).toHaveBeenCalledTimes(3);
       }, 10000);
 
       it("should log retry attempts", async () => {
-        const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+        const consoleSpy = vi
+          .spyOn(console, "log")
+          .mockImplementation(() => {});
         const manager = new RetryManager({ attempts: 2, delay: 100 });
         const fn = vi
           .fn()
@@ -316,7 +388,9 @@ describe("retry", () => {
         expect(consoleSpy).toHaveBeenCalledWith(
           expect.stringContaining("Retry attempt 1/2 failed"),
         );
-        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Retrying in"));
+        expect(consoleSpy).toHaveBeenCalledWith(
+          expect.stringContaining("Retrying in"),
+        );
 
         consoleSpy.mockRestore();
       });
