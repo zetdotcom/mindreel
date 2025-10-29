@@ -137,6 +137,7 @@ export const CapturePopup: React.FC<CapturePopupProps> = ({ onSave, onClose }) =
               aria-describedby="char-counter-hint shortcut-hint"
               disabled={saving}
               className="h-40 resize-none placeholder:normal-case placeholder:font-medium placeholder:tracking-normal border-glow focus-visible:border-glow"
+              data-testid="capture-textarea"
             />
 
             {/* Character counter + shortcut helpers in a row */}
@@ -177,6 +178,7 @@ export const CapturePopup: React.FC<CapturePopupProps> = ({ onSave, onClose }) =
               className="flex-1 normal-case tracking-normal font-semibold"
               size="lg"
               aria-label="Save entry"
+              data-testid="save-entry-button"
             >
               {saving ? "Saving..." : "Save"}
             </Button>

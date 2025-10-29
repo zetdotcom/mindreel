@@ -1,8 +1,8 @@
 // Retry logic with exponential backoff for MindReel Edge Function integration
 // Provides robust retry mechanisms for handling transient failures
 
-import type { RetryConfig, EdgeFunctionError, NetworkError } from "./types";
-import { DEFAULT_RETRY_CONFIG } from "./types";
+import type { RetryConfig } from "./types";
+import { DEFAULT_RETRY_CONFIG, EdgeFunctionError, NetworkError } from "./types";
 
 /**
  * Sleep for a specified number of milliseconds

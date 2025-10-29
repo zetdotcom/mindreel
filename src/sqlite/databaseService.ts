@@ -1,24 +1,21 @@
-import { database, Database } from "./database";
-import { EntriesRepository } from "./repositories/entriesRepository";
-import { SummariesRepository } from "./repositories/summariesRepository";
-import { SettingsRepository } from "./repositories/settingsRepository";
-import {
-  Entry,
-  Summary,
-  Settings,
-  CreateEntryInput,
-  CreateSummaryInput,
-  UpdateSettingsInput,
-  EntryFilters,
-} from "./types";
+import { type Database, database } from "./database";
 import {
   getCurrentWeekRange,
   getWeekRangeForDate,
-  IsoWeekIdentifier,
-  getIsoWeekIdentifier,
-  makeWeekKey,
-  WeekKey,
+  type IsoWeekIdentifier,
 } from "./dateUtils";
+import { EntriesRepository } from "./repositories/entriesRepository";
+import { SettingsRepository } from "./repositories/settingsRepository";
+import { SummariesRepository } from "./repositories/summariesRepository";
+import type {
+  CreateEntryInput,
+  CreateSummaryInput,
+  Entry,
+  EntryFilters,
+  Settings,
+  Summary,
+  UpdateSettingsInput,
+} from "./types";
 
 export class DatabaseService {
   private db: Database;
@@ -65,8 +62,15 @@ export class DatabaseService {
    * Ensure the service is initialized
    */
   private ensureInitialized(): void {
-    if (!this.isInitialized || !this.entriesRepo || !this.summariesRepo || !this.settingsRepo) {
-      throw new Error("Database service not initialized. Call initialize() first.");
+    if (
+      !this.isInitialized ||
+      !this.entriesRepo ||
+      !this.summariesRepo ||
+      !this.settingsRepo
+    ) {
+      throw new Error(
+        "Database service not initialized. Call initialize() first.",
+      );
     }
   }
 
@@ -119,7 +123,10 @@ export class DatabaseService {
   /**
    * Get entries for a specific ISO week
    */
-  async getEntriesForIsoWeek(iso_year: number, week_of_year: number): Promise<Entry[]> {
+  async getEntriesForIsoWeek(
+    iso_year: number,
+    week_of_year: number,
+  ): Promise<Entry[]> {
     this.ensureInitialized();
     return this.entriesRepo!.getEntriesForIsoWeek(iso_year, week_of_year);
   }
@@ -143,7 +150,10 @@ export class DatabaseService {
   /**
    * Get entries for a date range
    */
-  async getEntriesForDateRange(startDate: string, endDate: string): Promise<Entry[]> {
+  async getEntriesForDateRange(
+    startDate: string,
+    endDate: string,
+  ): Promise<Entry[]> {
     this.ensureInitialized();
     return this.entriesRepo!.getEntriesForDateRange(startDate, endDate);
   }
@@ -205,7 +215,8 @@ export class DatabaseService {
    */
   async createCurrentWeekSummary(content: string): Promise<Summary> {
     this.ensureInitialized();
-    const { start_date, end_date, week_of_year, iso_year } = getCurrentWeekRange();
+    const { start_date, end_date, week_of_year, iso_year } =
+      getCurrentWeekRange();
 
     return this.summariesRepo!.createSummary({
       content,
@@ -244,7 +255,10 @@ export class DatabaseService {
   /**
    * Get summary for a specific ISO week
    */
-  async getSummaryForIsoWeek(iso_year: number, week_of_year: number): Promise<Summary | null> {
+  async getSummaryForIsoWeek(
+    iso_year: number,
+    week_of_year: number,
+  ): Promise<Summary | null> {
     this.ensureInitialized();
     return this.summariesRepo!.getSummaryForIsoWeek(iso_year, week_of_year);
   }
@@ -293,7 +307,10 @@ export class DatabaseService {
   /**
    * Check if summary exists for a specific ISO week
    */
-  async summaryExistsForIsoWeek(iso_year: number, week_of_year: number): Promise<boolean> {
+  async summaryExistsForIsoWeek(
+    iso_year: number,
+    week_of_year: number,
+  ): Promise<boolean> {
     this.ensureInitialized();
     return this.summariesRepo!.summaryExistsForIsoWeek(iso_year, week_of_year);
   }
@@ -402,12 +419,13 @@ export class DatabaseService {
   }> {
     this.ensureInitialized();
 
-    const [todayEntries, currentWeekSummary, recentSummaries, settings] = await Promise.all([
-      this.getTodayEntries(),
-      this.getCurrentWeekSummary(),
-      this.getAllSummaries().then((summaries) => summaries.slice(0, 5)), // Get last 5 summaries
-      this.getSettings(),
-    ]);
+    const [todayEntries, currentWeekSummary, recentSummaries, settings] =
+      await Promise.all([
+        this.getTodayEntries(),
+        this.getCurrentWeekSummary(),
+        this.getAllSummaries().then((summaries) => summaries.slice(0, 5)), // Get last 5 summaries
+        this.getSettings(),
+      ]);
 
     return {
       todayEntries,

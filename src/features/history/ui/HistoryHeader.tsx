@@ -34,9 +34,7 @@ export function HistoryHeader({
     <div className={cn("flex items-center justify-between", className)}>
       <div>
         <h1 className="text-2xl font-bold text-foreground">MindReel</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Your work entries organized by week
-        </p>
+        <p className="text-sm text-muted-foreground mt-1">Your work entries organized by week</p>
       </div>
 
       <div className="flex items-center space-x-2">
@@ -54,7 +52,7 @@ export function HistoryHeader({
 
         {/* Add Entry Button */}
         {showAddButton && (
-          <Button size="sm" onClick={handleAddEntry} className="h-9">
+          <Button size="sm" onClick={handleAddEntry} className="h-9" data-testid="add-entry-button">
             <Plus className="h-4 w-4" />
             <span className="ml-2 hidden sm:inline">Add Entry</span>
           </Button>
