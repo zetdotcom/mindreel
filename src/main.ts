@@ -3,7 +3,10 @@
 import path from "node:path";
 import { app, BrowserWindow } from "electron";
 import started from "electron-squirrel-startup";
-import { cleanupCaptureTimer, initializeCaptureTimer } from "./ipc/captureTimerManager";
+import {
+  cleanupCaptureTimer,
+  initializeCaptureTimer,
+} from "./ipc/captureTimerManager";
 import {
   cleanupCaptureWindow,
   createCaptureWindow,
@@ -38,7 +41,10 @@ const createWindow = () => {
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
-    const prodMainPath = path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`);
+    const prodMainPath = path.join(
+      __dirname,
+      `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`,
+    );
     mainWindow.loadFile(prodMainPath);
   }
 
@@ -77,7 +83,10 @@ app.on("ready", async () => {
         createCaptureWindow();
         console.log("[SHORTCUT PRESSED] Capture window opened successfully");
       } catch (error) {
-        console.error("[SHORTCUT PRESSED] Error opening capture window:", error);
+        console.error(
+          "[SHORTCUT PRESSED] Error opening capture window:",
+          error,
+        );
       }
     };
 

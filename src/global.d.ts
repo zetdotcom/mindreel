@@ -31,8 +31,14 @@ declare global {
         getCurrentWeekEntries: () => Promise<Entry[]>;
         getEntriesForDate: (date: string) => Promise<Entry[]>;
         getEntriesForWeek: (weekOfYear: number) => Promise<Entry[]>;
-        getEntriesForIsoWeek: (iso_year: number, week_of_year: number) => Promise<Entry[]>;
-        getEntriesForDateRange: (startDate: string, endDate: string) => Promise<Entry[]>;
+        getEntriesForIsoWeek: (
+          iso_year: number,
+          week_of_year: number,
+        ) => Promise<Entry[]>;
+        getEntriesForDateRange: (
+          startDate: string,
+          endDate: string,
+        ) => Promise<Entry[]>;
         updateEntry: (id: number, content: string) => Promise<Entry | null>;
         deleteEntry: (id: number) => Promise<boolean>;
         getDatesWithEntries: () => Promise<string[]>;
@@ -44,7 +50,10 @@ declare global {
         createCurrentWeekSummary: (content: string) => Promise<Summary>;
         getSummaryById: (id: number) => Promise<Summary | null>;
         getSummaryByWeek: (weekOfYear: number) => Promise<Summary | null>;
-        getSummaryForIsoWeek: (iso_year: number, week_of_year: number) => Promise<Summary | null>;
+        getSummaryForIsoWeek: (
+          iso_year: number,
+          week_of_year: number,
+        ) => Promise<Summary | null>;
         getCurrentWeekSummary: () => Promise<Summary | null>;
         getAllSummaries: () => Promise<Summary[]>;
         getSummariesByYear: (year: number) => Promise<Summary[]>;
@@ -52,7 +61,10 @@ declare global {
         deleteSummary: (id: number) => Promise<boolean>;
         currentWeekSummaryExists: () => Promise<boolean>;
         summaryExistsForWeek: (weekOfYear: number) => Promise<boolean>;
-        summaryExistsForIsoWeek: (iso_year: number, week_of_year: number) => Promise<boolean>;
+        summaryExistsForIsoWeek: (
+          iso_year: number,
+          week_of_year: number,
+        ) => Promise<boolean>;
         getLatestSummary: () => Promise<Summary | null>;
 
         // Settings
@@ -88,7 +100,9 @@ declare global {
       };
       // Global shortcut API
       shortcut: {
-        register: (accelerator: string | null) => Promise<{ success: boolean; error?: string }>;
+        register: (
+          accelerator: string | null,
+        ) => Promise<{ success: boolean; error?: string }>;
         isRegistered: () => Promise<{
           isRegistered: boolean;
           shortcut: string | null;

@@ -31,7 +31,11 @@ const NAV_ITEMS: NavItem[] = [
 
 function SidebarNav() {
   return (
-    <nav aria-label="Primary" className="flex flex-col gap-2 px-3 pt-4" role="navigation">
+    <nav
+      aria-label="Primary"
+      className="flex flex-col gap-2 px-3 pt-4"
+      role="navigation"
+    >
       {NAV_ITEMS.map((item) => (
         <NavLink
           key={item.to}
@@ -41,7 +45,8 @@ function SidebarNav() {
             cn(
               "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
               "text-neutral-300 hover:text-[var(--sidebar-active-fg)] hover:bg-[var(--sidebar-active-bg)]",
-              isActive && "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-fg)]",
+              isActive &&
+                "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-fg)]",
             )
           }
         >
@@ -61,7 +66,10 @@ function SidebarNav() {
 function AppBrand() {
   return (
     <div className="px-4 py-4 border-b border-neutral-800">
-      <h1 className="text-lg font-semibold tracking-tight text-neutral-100">MindReel</h1>
+      <h1 className="text-lg font-semibold tracking-tight text-neutral-100">
+        {" "}
+        MindReel
+      </h1>
       <p className="text-xs text-neutral-400 mt-0.5">Productivity Journal</p>
     </div>
   );
@@ -87,7 +95,9 @@ export function Main() {
         >
           <AppBrand />
           <SidebarNav />
-          <div className="mt-auto px-4 py-3 text-[10px] text-neutral-500">v1.0.0</div>
+          <div className="mt-auto px-4 py-3 text-[10px] text-neutral-500">
+            v1.0.0
+          </div>
         </aside>
 
         <div
@@ -97,7 +107,11 @@ export function Main() {
           <div id="app-content" className="min-h-full">
             <RouteErrorBoundary>
               <Suspense
-                fallback={<div className="p-6 text-sm text-muted-foreground">Loading…</div>}
+                fallback={
+                  <div className="p-6 text-sm text-muted-foreground">
+                    Loading…
+                  </div>
+                }
               >
                 <AppRoutes />
               </Suspense>

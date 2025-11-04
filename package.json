@@ -1,8 +1,8 @@
 {
   "name": "mindreel",
-  "productName": "mindreel",
+  "productName": "MindReel",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "Daily Logs. AI Highlights.",
   "main": ".vite/build/main.js",
   "scripts": {
     "start": "electron-forge start",
@@ -29,7 +29,7 @@
     "supabase:functions": "supabase functions serve --env-file ./supabase/.env.local"
   },
   "keywords": [],
-  "author": "michalzadarnowski",
+  "author": "zetdotcom",
   "license": "MIT",
   "devDependencies": {
     "@biomejs/biome": "2.2.5",
@@ -41,6 +41,7 @@
     "@electron-forge/plugin-auto-unpack-natives": "^7.9.0",
     "@electron-forge/plugin-fuses": "^7.9.0",
     "@electron-forge/plugin-vite": "^7.9.0",
+    "@electron-forge/publisher-github": "^7.10.2",
     "@electron/fuses": "^1.8.0",
     "@playwright/test": "^1.56.1",
     "@tailwindcss/postcss": "^4.0.0",

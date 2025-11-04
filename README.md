@@ -61,7 +61,7 @@ Planned / Described (not yet present in dependencies):
 
 ### Clone & Install
 ```bash
-git clone https://github.com/<your-user-or-org>/mindreel.git
+git clone https://github.com/zetdotcom/mindreel.git
 cd mindreel
 nvm use
 npm install
@@ -107,16 +107,7 @@ Tailwind v4 uses a CSS-first approach:
 - Custom utilities via `@utility`
 A minimal or absent `tailwind.config.js` is acceptable until extended customization is needed.
 
-### Environment Variables (Planned – Not Yet Active)
-Future features (auth + AI summaries) will likely require:
-```bash
-# .env (example – do not commit real values)
-SUPABASE_URL=https://<your-supabase-project>.supabase.co
-SUPABASE_ANON_KEY=<public-anon-key>
-OPENROUTER_API_KEY=<api-key>
-SUMMARY_WEEKLY_CRON=Sunday_23_00   # Informational placeholder
-```
-(Feature integration pending; variables unused until code is introduced.)
+
 
 ### Debugging Forge + Vite Startup
 If startup stalls at “Building main process and preload bundles…”:

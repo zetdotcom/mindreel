@@ -6,14 +6,61 @@ import { MakerZIP } from "@electron-forge/maker-zip";
 import { AutoUnpackNativesPlugin } from "@electron-forge/plugin-auto-unpack-natives";
 import { FusesPlugin } from "@electron-forge/plugin-fuses";
 import { VitePlugin } from "@electron-forge/plugin-vite";
+import { PublisherGithub } from "@electron-forge/publisher-github";
 import type { ForgeConfig } from "@electron-forge/shared-types";
 
 const config: ForgeConfig = {
   packagerConfig: {
-    asar: true,
+    icon: "./assets/icons/icon",
+    asar: {
+      unpack: "*.{node,dll}",
+    },
+    extraResource: [],
   },
   rebuildConfig: {},
-  makers: [new MakerSquirrel({}), new MakerZIP({}, ["darwin"]), new MakerRpm({}), new MakerDeb({})],
+  hooks: {
+    packageAfterCopy: async (
+      _config,
+      buildPath,
+      _electronVersion,
+      platform,
+      arch,
+    ) => {
+      const { execSync } = require("child_process");
+      const fs = require("fs");
+      const path = require("path");
+
+      // Check if package.json exists
+      const packageJsonPath = path.join(buildPath, "package.json");
+      if (!fs.existsSync(packageJsonPath)) {
+        const minimalPackageJson = {
+          name: "mindreel",
+          version: "1.0.0",
+          main: ".vite/build/main.js",
+          dependencies: {
+            sqlite3: "^5.1.7",
+          },
+        };
+        fs.writeFileSync(
+          packageJsonPath,
+          JSON.stringify(minimalPackageJson, null, 2),
+        );
+      }
+
+      // Install production dependencies
+      execSync("npm install --production --no-package-lock --loglevel=error", {
+        cwd: buildPath,
+        stdio: "pipe",
+        env: { ...process.env, npm_config_build_from_source: "true" },
+      });
+    },
+  },
+  makers: [
+    new MakerSquirrel({}),
+    new MakerZIP({}, ["darwin"]),
+    new MakerRpm({}),
+    new MakerDeb({}),
+  ],
   plugins: [
     // Auto-unpack native modules like sqlite3
     new AutoUnpackNativesPlugin({}),
@@ -53,7 +100,17 @@ const config: ForgeConfig = {
       [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
       [FuseV1Options.EnableNodeCliInspectArguments]: false,
       [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
-      [FuseV1Options.OnlyLoadAppFromAsar]: true,
+      [FuseV1Options.OnlyLoadAppFromAsar]: false,
+    }),
+  ],
+  publishers: [
+    new PublisherGithub({
+      repository: {
+        owner: "zetdotcom",
+        name: "mindreel",
+      },
+      prerelease: false,
+      draft: true,
     }),
   ],
 };

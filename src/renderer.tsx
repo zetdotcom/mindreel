@@ -1,7 +1,9 @@
 import { createRoot } from "react-dom/client";
 import "./index.css";
 
-import { BrowserRouter } from "react-router";
+// HashRouter is required for Electron apps because they use file:// protocol
+// in production builds. BrowserRouter only works with http:// URLs.
+import { HashRouter } from "react-router";
 import { AuthProvider } from "@/features/auth";
 import { Main } from "./views/Main/Main";
 
@@ -12,9 +14,9 @@ if (!container) {
 
 const root = createRoot(container);
 root.render(
-  <BrowserRouter>
+  <HashRouter>
     <AuthProvider>
       <Main />
     </AuthProvider>
-  </BrowserRouter>,
+  </HashRouter>,
 );
