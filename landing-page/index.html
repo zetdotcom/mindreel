@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="pl" class="">
+  <head>
+    <meta charset="UTF-8" />
+    <title>MindReel – Twoja inteligentna pamięć zawodowa</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="MindReel pomaga profesjonalistom IT automatycznie dokumentować codzienną pracę i generować cotygodniowe podsumowania AI."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body class="min-h-screen flex flex-col bg-background text-foreground">
+    <!-- NAVBAR -->
+    <header class="w-full border-brutal bg-card-gradient shadow-brutal-lg">
+      <div
+        class="max-w-6xl mx-auto flex items-center justify-between px-6 py-4"
+      >
+        <div class="flex items-center gap-3">
+          <div
+            class="h-10 w-10 flex items-center justify-center bg-button-primary-gradient text-white font-black tracking-brutal shadow-brutal border-brutal"
+          >
+            MR
+          </div>
+          <h1 class="text-2xl font-black tracking-tightest uppercase">
+            MindReel
+          </h1>
+        </div>
+        <nav class="hidden md:flex gap-6 font-bold uppercase text-sm">
+          <a href="#jak-dziala" class="hover:underline">Jak działa</a>
+          <a href="#korzysci" class="hover:underline">Korzyści</a>
+          <a href="#funkcje" class="hover:underline">Funkcje</a>
+          <a href="#pobierz" class="hover:underline text-accent">Pobierz</a>
+        </nav>
+        <button
+          id="modeToggle"
+          class="border-brutal px-3 py-2 text-sm bg-button-warm text-white shadow-brutal active:scale-95"
+        >
+          Tryb Dark
+        </button>
+      </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="relative overflow-hidden">
+      <div
+        class="max-w-6xl mx-auto px-6 py-14 grid md:grid-cols-2 gap-10 items-center"
+      >
+        <div class="space-y-6">
+          <h2
+            class="text-4xl md:text-5xl font-black uppercase tracking-brutal text-cyber"
+          >
+            Twoja praca. Zapamiętana. Podsumowana.
+          </h2>
+          <p class="text-lg leading-relaxed font-semibold">
+            MindReel to aplikacja desktopowa dla macOS, która w tle dyskretnie
+            zapisuje nad czym pracujesz i co tydzień tworzy zwięzłe podsumowanie
+            Twoich dokonań przy pomocy AI. Zero ręcznej spiny przed stand‑upem –
+            wszystko już jest.
+          </p>
+          <ul class="space-y-2 text-sm font-bold">
+            <li class="flex items-start gap-2">
+              <span class="text-accent">▹</span> Automatyczne okna pop‑up:
+              szybkie pytanie „Nad czym teraz pracujesz?”
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-accent">▹</span> Inteligentne tygodniowe
+              podsumowania AI (limit darmowych w cyklu)
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-accent">▹</span> Lokalne przechowywanie wpisów –
+              Twoje dane zostają u Ciebie
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-accent">▹</span> Idealne do stand‑upów, 1:1,
+              retrospektyw i „brag document”
+            </li>
+          </ul>
+          <div class="flex flex-wrap gap-4 pt-4" id="pobierz">
+            <a
+              href="https://github.com/zetdotcom/mindreel/releases/download/v1.0.0/MindReel-darwin-arm64-1.0.0.zip"
+              class="shadow-brutal-lg border-brutal px-6 py-4 bg-button-primary-gradient text-white font-black uppercase tracking-brutal text-sm hover:shadow-brutal-xl active:scale-95"
+            >
+              Pobierz dla macOS (Apple Silicon)
+            </a>
+            <button
+              class="border-brutal px-6 py-4 bg-button-accent-gradient text-white font-black uppercase tracking-brutal text-sm hover:shadow-brutal-xl active:scale-95"
+              onclick="document.getElementById('jak-dziala').scrollIntoView({behavior:'smooth'})"
+            >
+              Zobacz jak działa
+            </button>
+          </div>
+          <p class="text-xs uppercase tracking-wider font-bold text-muted">
+            Wersja MVP – wyłącznie macOS (Apple Silicon), lokalne dane, 5
+            darmowych podsumowań / 28 dni.
+          </p>
+        </div>
+        <div class="relative">
+          <div
+            class="border-brutal shadow-brutal-xl bg-card-gradient p-6 rounded-app space-y-4"
+          >
+            <h3 class="text-xl font-black uppercase tracking-brutal">
+              Przykładowe Podsumowanie Tygodnia
+            </h3>
+            <ul class="text-sm space-y-2 font-semibold">
+              <li>• Usprawniono logowanie i obsługę błędów (Supabase)</li>
+              <li>• Zaimplementowano globalny skrót do szybkich wpisów</li>
+              <li>• Poprawiono wydajność renderowania historii wpisów</li>
+              <li>
+                • Wsparcie edycji / usuwania zapisów oraz grupowanie x2/x3
+              </li>
+              <li>• Dodano limit darmowych podsumowań i obsługę cyklu</li>
+            </ul>
+            <div class="text-xs font-bold pt-2 text-muted">
+              Generowane automatycznie w niedzielę o 23:00 • Format: ISO tydzień
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="jak-dziala" class="max-w-6xl mx-auto px-6 py-12">
+      <h2 class="text-3xl font-black uppercase tracking-brutal mb-8">
+        Jak to działa?
+      </h2>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div
+          class="border-brutal bg-card-gradient p-6 shadow-brutal-lg space-y-4"
+        >
+          <h3 class="font-black uppercase tracking-brutal text-lg">
+            1. Zbieranie „klatek”
+          </h3>
+          <p class="text-sm font-semibold leading-relaxed">
+            Co określony interwał (np. 60 min) pojawia się pop‑up: „Nad czym
+            teraz pracujesz?”. Jedno zdanie = jedna „klatka” Twojego dnia.
+          </p>
+        </div>
+        <div
+          class="border-brutal bg-card-gradient p-6 shadow-brutal-lg space-y-4"
+        >
+          <h3 class="font-black uppercase tracking-brutal text-lg">
+            2. Lokalna historia
+          </h3>
+          <p class="text-sm font-semibold leading-relaxed">
+            Wszystko zapisane lokalnie. Możesz edytować, usuwać, szybko
+            powtarzać poprzednie zadania („To samo”), używać hashtagów do
+            kategoryzacji.
+          </p>
+        </div>
+        <div
+          class="border-brutal bg-card-gradient p-6 shadow-brutal-lg space-y-4"
+        >
+          <h3 class="font-black uppercase tracking-brutal text-lg">
+            3. Tygodniowe AI Reel
+          </h3>
+          <p class="text-sm font-semibold leading-relaxed">
+            W niedzielę system wysyła tylko wpisy bieżącego tygodnia do funkcji
+            brzegowej – AI tworzy spójne, gotowe do użycia podsumowanie
+            osiągnięć. Treść wraca do aplikacji jako karta tygodnia.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- BENEFITS -->
+    <section id="korzysci" class="max-w-6xl mx-auto px-6 py-12">
+      <h2 class="text-3xl font-black uppercase tracking-brutal mb-8">
+        Korzyści dla Ciebie
+      </h2>
+      <div class="grid md:grid-cols-2 gap-10">
+        <div class="space-y-6">
+          <div class="border-brutal p-5 bg-card-gradient shadow-brutal-lg">
+            <h3 class="font-black uppercase tracking-brutal text-lg mb-2">
+              Szybkie raportowanie
+            </h3>
+            <p class="text-sm font-semibold">
+              Stand‑up? Retrospektywa? Otwierasz kartę tygodnia i masz gotową
+              listę punktów.
+            </p>
+          </div>
+          <div class="border-brutal p-5 bg-card-gradient shadow-brutal-lg">
+            <h3 class="font-black uppercase tracking-brutal text-lg mb-2">
+              Budowanie „brag document”
+            </h3>
+            <p class="text-sm font-semibold">
+              Nigdy więcej „Nic nie pamiętam”. Twoje małe i duże zwycięstwa są
+              utrwalone.
+            </p>
+          </div>
+          <div class="border-brutal p-5 bg-card-gradient shadow-brutal-lg">
+            <h3 class="font-black uppercase tracking-brutal text-lg mb-2">
+              Świadomość czasu
+            </h3>
+            <p class="text-sm font-semibold">
+              Wiesz, ile faktycznie czasu idzie na kontekst, pomoc innym,
+              przerwy techniczne.
+            </p>
+          </div>
+        </div>
+        <div class="space-y-6">
+          <div class="border-brutal p-5 bg-card-gradient shadow-brutal-lg">
+            <h3 class="font-black uppercase tracking-brutal text-lg mb-2">
+              Minimalne tarcie
+            </h3>
+            <p class="text-sm font-semibold">
+              Jedno zdanie co jakiś czas – bez integracji, bez konfiguracji
+              narzędzi zewnętrznych.
+            </p>
+          </div>
+          <div class="border-brutal p-5 bg-card-gradient shadow-brutal-lg">
+            <h3 class="font-black uppercase tracking-brutal text-lg mb-2">
+              Prywatność domyślnie
+            </h3>
+            <p class="text-sm font-semibold">
+              Wpisy są lokalne. Przesyłane krótkotrwale tylko gdy generujesz
+              podsumowanie tygodnia.
+            </p>
+          </div>
+          <div class="border-brutal p-5 bg-card-gradient shadow-brutal-lg">
+            <h3 class="font-black uppercase tracking-brutal text-lg mb-2">
+              Koncentracja na wartości
+            </h3>
+            <p class="text-sm font-semibold">
+              MVP skupia się na rzeczach, które naprawdę rozwiązują codzienny
+              ból programistów.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="funkcje" class="max-w-6xl mx-auto px-6 py-12">
+      <h2 class="text-3xl font-black uppercase tracking-brutal mb-8">
+        Kluczowe Funkcje (MVP)
+      </h2>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div
+          class="border-brutal p-5 bg-card-gradient shadow-brutal-lg space-y-2"
+        >
+          <h3 class="font-black uppercase tracking-brutal text-sm">
+            Pop‑up Logowania
+          </h3>
+          <p class="text-xs font-semibold">
+            Konfigurowalny interwał: 30 min – 4 h. Minimalistyczne okno, szybkie
+            pole tekstowe.
+          </p>
+        </div>
+        <div
+          class="border-brutal p-5 bg-card-gradient shadow-brutal-lg space-y-2"
+        >
+          <h3 class="font-black uppercase tracking-brutal text-sm">
+            „To samo” & Historia
+          </h3>
+          <p class="text-xs font-semibold">
+            Powtarzaj ostatnie zadanie jednym kliknięciem. Przeglądaj dni z
+            etykietami x2/x3.
+          </p>
+        </div>
+        <div
+          class="border-brutal p-5 bg-card-gradient shadow-brutal-lg space-y-2"
+        >
+          <h3 class="font-black uppercase tracking-brutal text-sm">
+            Globalny Skrót
+          </h3>
+          <p class="text-xs font-semibold">
+            Dodaj wpis bez odrywania rąk – nawet gdy aplikacja nie jest na
+            wierzchu.
+          </p>
+        </div>
+        <div
+          class="border-brutal p-5 bg-card-gradient shadow-brutal-lg space-y-2"
+        >
+          <h3 class="font-black uppercase tracking-brutal text-sm">
+            Edycja & Usuwanie
+          </h3>
+          <p class="text-xs font-semibold">
+            Popraw błędy, doprecyzuj zadanie – kontrola nad Twoją historią.
+          </p>
+        </div>
+        <div
+          class="border-brutal p-5 bg-card-gradient shadow-brutal-lg space-y-2"
+        >
+          <h3 class="font-black uppercase tracking-brutal text-sm">
+            Cotygodniowe AI
+          </h3>
+          <p class="text-xs font-semibold">
+            Niedziela 23:00: generowanie podsumowania z całego tygodnia (ISO
+            tydzień).
+          </p>
+        </div>
+        <div
+          class="border-brutal p-5 bg-card-gradient shadow-brutal-lg space-y-2"
+        >
+          <h3 class="font-black uppercase tracking-brutal text-sm">
+            Limit Podsumowań
+          </h3>
+          <p class="text-xs font-semibold">
+            5 darmowych podsumowań w cyklu 28‑dniowym. Transparentny komunikat o
+            zużyciu.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="max-w-6xl mx-auto px-6 py-16">
+      <div
+        class="border-brutal bg-button-primary-gradient text-white shadow-brutal-xl p-10 flex flex-col md:flex-row gap-10 items-center justify-between"
+      >
+        <div class="space-y-4">
+          <h2 class="text-3xl font-black uppercase tracking-brutal">
+            Gotowy, by pamiętać wszystko?
+          </h2>
+          <p class="text-sm font-semibold">
+            Zacznij budować swoją zawodową „rolkę z najlepszymi akcjami”.
+            Zainstaluj MindReel i pozwól, by Twoje codzienne małe postępy stały
+            się dużą przewagą podczas rozmów o awans.
+          </p>
+        </div>
+        <div class="flex flex-col gap-4">
+          <a
+            href="https://github.com/zetdotcom/mindreel/releases/download/v1.0.0/MindReel-darwin-arm64-1.0.0.zip"
+            class="border-brutal px-8 py-4 bg-button-accent-gradient text-white font-black uppercase tracking-brutal text-sm shadow-brutal-lg hover:shadow-brutal-xl active:scale-95 text-center"
+          >
+            Pobierz v1.0.0 (macOS ARM64)
+          </a>
+          <p class="text-[10px] font-bold opacity-90 text-center">
+            Wsparcie dla Intel / innych OS może pojawić się w przyszłych
+            wersjach.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="mt-auto border-brutal bg-card-gradient shadow-brutal-lg">
+      <div
+        class="max-w-6xl mx-auto px-6 py-8 flex flex-col md:flex-row gap-6 md:gap-0 justify-between"
+      >
+        <div class="space-y-2 text-xs font-semibold">
+          <div class="font-black uppercase tracking-brutal">MindReel</div>
+          <p>Inteligentna pamięć Twojej codziennej pracy.</p>
+          <p class="text-muted">MVP • macOS • Lokalna prywatność</p>
+        </div>
+        <div class="space-y-2 text-xs font-semibold">
+          <div class="font-black uppercase tracking-brutal">Informacje</div>
+          <p>
+            Podsumowania generowane przez API openrouter.ai (efemeryczne
+            przetwarzanie).
+          </p>
+          <p>
+            Brak stałego backupu w chmurze – wszystkie wpisy trzymane lokalnie.
+          </p>
+        </div>
+        <div class="space-y-2 text-xs font-semibold">
+          <div class="font-black uppercase tracking-brutal">Kontakt</div>
+          <p>Masz pomysł na ulepszenie? Wyślij Issue na GitHub.</p>
+          <a href="https://github.com/zetdotcom/mindreel" class="underline"
+            >Repozytorium</a
+          >
+        </div>
+      </div>
+      <div class="text-center text-[10px] font-bold py-4">
+        © <span id="year"></span> MindReel. Wszystkie prawa zastrzeżone.
+      </div>
+    </footer>
+
+    <script>
+      const yearEl = document.getElementById("year");
+      yearEl.textContent = new Date().getFullYear();
+      const toggle = document.getElementById("modeToggle");
+      toggle.addEventListener("click", () => {
+        document.documentElement.classList.toggle("dark");
+        toggle.textContent = document.documentElement.classList.contains("dark")
+          ? "Tryb Light"
+          : "Tryb Dark";
+      });
+    </script>
+  </body>
+</html>

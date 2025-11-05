@@ -1,0 +1,165 @@
+/* Landing Page Tailwind Entry
+ * Minimal, production-focused CSS input for Tailwind v4 build.
+ * This file purposefully narrows scope vs app-wide src/index.css
+ * to reduce final CSS size while preserving design tokens needed
+ * for the marketing page.
+ */
+
+/* 1. Pull in Tailwind layers (base, components, utilities) */
+@import "tailwindcss";
+
+/* 2. Optional animation utility package (only if you use animate-* classes) */
+@import "tw-animate-css";
+
+/* 3. Dark mode handled by toggling .dark class on <html>.
+ * We use CSS variables + @theme inline so utilities (bg-background, text-foreground, etc.)
+ * resolve to dynamic values instead of static hex codes.
+ */
+:root {
+  --background: #f5f7f9;
+  --foreground: #3e4b54;
+  --card: #ffffff;
+  --card-foreground: #3e4b54;
+  --popover: #ffffff;
+  --popover-foreground: #3e4b54;
+  --primary: #41657b;
+  --primary-foreground: #ffffff;
+  --secondary: #3e4b54;
+  --secondary-foreground: #ffffff;
+  --muted: #c2d0db;
+  --muted-foreground: #3e4b54;
+  --accent: #c78226;
+  --accent-foreground: #ffffff;
+  --destructive: #b9486d;
+  --destructive-foreground: #ffffff;
+  --border: #41657b;
+  --input: #ffffff;
+  --ring: #c78226;
+
+  /* Gradient + shadow tokens (subset used on landing page) */
+  --shadow-brutal-lg: 0 0 0 2px #41657b, 0 0 10px 3px rgba(65, 101, 123, 0.4);
+  --shadow-brutal-xl: 0 0 0 2px #41657b, 0 0 14px 4px rgba(62, 75, 84, 0.45);
+  --border-brutal: 2px solid #41657b;
+  --card-gradient: linear-gradient(165deg, #c2d0db 0%, #ffffff 45%);
+  /*--card-gradient: linear-gradient(135deg, #c2d0db 0%, #ffffff 45%, #e3e9ed 100%);*/
+  --button-primary-gradient: linear-gradient(
+    135deg,
+    #41657b 0%,
+    #3e4b54 60%,
+    #41657b 100%
+  );
+  --button-accent-gradient: linear-gradient(
+    135deg,
+    #c78226 0%,
+    #d69745 55%,
+    #e3a857 100%
+  );
+  --button-spice-gradient: linear-gradient(
+    135deg,
+    #b9486d 0%,
+    #953356 70%,
+    #b9486d 100%
+  );
+  --radius-lg: 12px;
+}
+
+.dark {
+  --background: #1f2730;
+  --foreground: #c2d0db;
+  --card: #25313c;
+  --card-foreground: #c2d0db;
+  --popover: #25313c;
+  --popover-foreground: #c2d0db;
+  --muted: #3e4b54;
+  --muted-foreground: #c2d0db;
+  --input: #25313c;
+  /* Shadows strengthened subtly in dark mode */
+  --shadow-brutal-lg: 0 0 0 2px #41657b, 0 0 14px 4px rgba(62, 75, 84, 0.5);
+  --shadow-brutal-xl: 0 0 0 2px #41657b, 0 0 18px 6px rgba(62, 75, 84, 0.55);
+}
+
+/* 4. Map tokens to Tailwind theme so utilities are dynamic */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-lg: var(--radius-lg);
+}
+
+/* 5. Base layer adjustments (keep minimal) */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-bold;
+    font-family: "Inter", "system-ui", sans-serif;
+    font-weight: 600;
+  }
+}
+
+/* 6. Utility supplements (only those not covered by plugin+core but used by page) */
+@layer utilities {
+  .border-brutal {
+    border: var(--border-brutal);
+    border-radius: var(--radius-lg);
+  }
+  .bg-card-gradient {
+    background: var(--card-gradient);
+  }
+  .bg-button-primary-gradient {
+    background: var(--button-primary-gradient);
+  }
+  .bg-button-accent-gradient {
+    background: var(--button-accent-gradient);
+  }
+  .bg-button-warm {
+    background: var(
+      --button-accent-gradient
+    ); /* Warm gradient alias for landing */
+  }
+  .shadow-brutal-lg {
+    box-shadow: var(--shadow-brutal-lg);
+  }
+  .shadow-brutal-xl {
+    box-shadow: var(--shadow-brutal-xl);
+  }
+  .rounded-app {
+    border-radius: var(--radius-lg);
+  }
+  .text-cyber {
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-shadow: 0 2px 6px rgba(185, 72, 109, 0.5);
+  }
+  /* Dark mode shadow overrides (ensures consistency if nested) */
+  .dark .shadow-brutal-lg,
+  .dark .shadow-brutal-xl {
+    box-shadow: var(--shadow-brutal-lg);
+  }
+  .dark .border-brutal {
+    border: var(--border-brutal);
+  }
+}
+
+/* 7. Notes:
+ * - If size is still large, create a purge-only config pointing at this HTML file.
+ * - For future DRY: extract shared tokens into `design-tokens.css` and @import here + app entry.
+ */
