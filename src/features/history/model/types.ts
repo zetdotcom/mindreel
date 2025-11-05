@@ -37,6 +37,8 @@ export interface DayGroupViewModel {
   items: (EntryViewModel | DuplicateGroupViewModel)[];
   totalEntries: number;
   weekKey: WeekKey;
+  // Optional flag to allow per-day collapsed state in the UI
+  collapsed?: boolean;
 }
 
 export type SummaryCardState =

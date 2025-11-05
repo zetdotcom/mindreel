@@ -1,8 +1,8 @@
 import { Calendar, ChevronDown, ChevronRight } from "lucide-react";
-import React from "react";
+
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { WeekGroupViewModel } from "../model/types";
+import type { WeekGroupViewModel, SummaryViewModel } from "../model/types";
 import { DayGroup } from "./DayGroup";
 import { SummaryCard } from "./SummaryCard";
 
@@ -65,14 +65,18 @@ export function WeekGroup({
             {/* Week Title */}
             <div className="flex items-center space-x-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
-              <h2 className="font-semibold text-foreground">{week.headerLabel}</h2>
+              <h2 className="font-semibold text-foreground">
+                {week.headerLabel}
+              </h2>
             </div>
           </div>
 
           {/* Week Stats */}
           <div className="flex items-center space-x-4 text-sm text-muted-foreground">
             <span>{week.totalEntries} entries</span>
-            {week.summary && <span className="text-primary">Summary available</span>}
+            {week.summary && (
+              <span className="text-primary">Summary available</span>
+            )}
           </div>
         </div>
       </div>
@@ -89,6 +93,18 @@ export function WeekGroup({
                   day={day}
                   onEntryEdit={onEntryEdit}
                   onEntryDelete={onEntryDelete}
+                  // Pass per-day collapsed state and handler from the week so days can be collapsed individually
+                  collapsed={day.collapsed}
+                  onToggleCollapsed={() => {
+                    if (!onWeekUpdate) return;
+                    // Toggle the collapsed flag for the specific day and propagate via onWeekUpdate
+                    const updatedDays = week.days.map((d) =>
+                      d.date === day.date
+                        ? { ...d, collapsed: !d.collapsed }
+                        : d,
+                    );
+                    onWeekUpdate({ days: updatedDays });
+                  }}
                 />
               ))}
             </div>
@@ -158,7 +174,7 @@ export function WeekGroup({
                           draftContent: existing.content,
                           state: "success",
                           weekKey: week.weekKey,
-                        } as any,
+                        } as SummaryViewModel,
                         summaryState: "success",
                       });
                     } else {
@@ -181,7 +197,9 @@ export function WeekGroup({
               }
             }}
             onClearSummary={async (summaryId) => {
-              const { summariesRepository } = await import("../../summaries/model/repository");
+              const { summariesRepository } = await import(
+                "../../summaries/model/repository"
+              );
               await summariesRepository.delete(summaryId);
               if (onWeekUpdate) {
                 onWeekUpdate({ summary: undefined, summaryState: "pending" });

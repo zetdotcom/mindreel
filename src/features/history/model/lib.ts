@@ -1,5 +1,9 @@
 import { format, parseISO } from "date-fns";
-import { getWeekRange, makeWeekKey, parseWeekKey } from "../../../sqlite/dateUtils";
+import {
+  getWeekRange,
+  makeWeekKey,
+  parseWeekKey,
+} from "../../../sqlite/dateUtils";
 import type { Entry, Summary } from "../../../sqlite/types";
 import {
   type DayGroupViewModel,
@@ -33,7 +37,9 @@ export function transformWeekData(rawWeek: RawWeekData): WeekGroupViewModel {
   const totalEntries = days.reduce((sum, day) => sum + day.totalEntries, 0);
 
   // Transform summary if exists
-  const summaryViewModel = rawWeek.summary ? transformSummary(rawWeek.summary, weekKey) : undefined;
+  const summaryViewModel = rawWeek.summary
+    ? transformSummary(rawWeek.summary, weekKey)
+    : undefined;
 
   // Determine summary state
   const summaryState = determineSummaryState(summaryViewModel, totalEntries);
@@ -60,7 +66,10 @@ export function transformWeekData(rawWeek: RawWeekData): WeekGroupViewModel {
 /**
  * Group entries by date and transform to EntryViewModel
  */
-function groupEntriesByDate(entries: Entry[], weekKey: WeekKey): Record<string, EntryViewModel[]> {
+function groupEntriesByDate(
+  entries: Entry[],
+  weekKey: WeekKey,
+): Record<string, EntryViewModel[]> {
   const grouped: Record<string, EntryViewModel[]> = {};
 
   entries.forEach((entry) => {
@@ -117,6 +126,7 @@ function transformDayGroup(
     items,
     totalEntries,
     weekKey,
+    collapsed: false, // default to expanded day
   };
 }
 
@@ -124,12 +134,16 @@ function transformDayGroup(
  * Detect consecutive duplicate entries and group them
  * Based on the algorithm from the implementation plan
  */
-function detectDuplicates(entries: EntryViewModel[], weekKey: WeekKey): DuplicateDetectionResult {
+function detectDuplicates(
+  entries: EntryViewModel[],
+  weekKey: WeekKey,
+): DuplicateDetectionResult {
   const items: (EntryViewModel | DuplicateGroupViewModel)[] = [];
 
   // Sort entries by creation time
   const sortedEntries = [...entries].sort(
-    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+    (a, b) =>
+      new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
   );
 
   let i = 0;
@@ -196,7 +210,10 @@ function normalizeContent(content: string): string {
 /**
  * Transform Summary to SummaryViewModel
  */
-function transformSummary(summary: Summary, weekKey: WeekKey): SummaryViewModel {
+function transformSummary(
+  summary: Summary,
+  weekKey: WeekKey,
+): SummaryViewModel {
   return {
     ...summary,
     isEditing: false,
@@ -262,7 +279,9 @@ export function isDuplicateGroup(
 /**
  * Type guard to check if item is an entry
  */
-export function isEntry(item: EntryViewModel | DuplicateGroupViewModel): item is EntryViewModel {
+export function isEntry(
+  item: EntryViewModel | DuplicateGroupViewModel,
+): item is EntryViewModel {
   return !isDuplicateGroup(item);
 }
 
@@ -295,7 +314,9 @@ export function calculateWeekTotalEntries(week: WeekGroupViewModel): number {
 /**
  * Sort weeks by ISO year and week number (descending - newest first)
  */
-export function sortWeeksDescending(weeks: WeekGroupViewModel[]): WeekGroupViewModel[] {
+export function sortWeeksDescending(
+  weeks: WeekGroupViewModel[],
+): WeekGroupViewModel[] {
   return weeks
     .sort((a, b) => {
       if (a.iso_year !== b.iso_year) {
@@ -312,6 +333,8 @@ export function sortWeeksDescending(weeks: WeekGroupViewModel[]): WeekGroupViewM
 /**
  * Filter weeks to only show those with entries or summaries
  */
-export function filterWeeksWithContent(weeks: WeekGroupViewModel[]): WeekGroupViewModel[] {
+export function filterWeeksWithContent(
+  weeks: WeekGroupViewModel[],
+): WeekGroupViewModel[] {
   return weeks.filter((week) => week.totalEntries > 0 || week.summary);
 }
