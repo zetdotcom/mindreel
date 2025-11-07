@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindReel - Never Forget Your Wins Again</title>
+    <meta name="description" content="Free & open-source desktop app that automatically logs your work with hourly popups and generates AI-powered weekly summaries. Your data stays local.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="modern.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <svg class="logo-icon" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <rect width="32" height="32" rx="8" fill="currentColor"/>
+                    <path d="M10 16L14 20L22 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="logo-text">MindReel</span>
+            </div>
+            <nav class="nav">
+                <a href="#features" data-i18n="nav-features">Features</a>
+                <a href="#how" data-i18n="nav-how">How it works</a>
+                <a href="#download" data-i18n="nav-download">Download</a>
+                <a href="https://github.com/zetdotcom/mindreel" target="_blank" class="github-link" aria-label="GitHub">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                </a>
+            </nav>
+            <div class="lang-switch">
+                <button class="lang-btn active" data-lang="en">EN</button>
+                <button class="lang-btn" data-lang="pl">PL</button>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badge" data-i18n="hero-badge">Free & Open Source</div>
+                <h1 class="hero-title" data-i18n="hero-title">Never forget your achievements again</h1>
+                <p class="hero-subtitle" data-i18n="hero-subtitle">MindReel is a free desktop app that automatically logs your work with gentle hourly reminders and generates AI-powered weekly summaries. Perfect for standups, reviews, and career tracking.</p>
+                <div class="hero-features">
+                    <div class="hero-feature">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span data-i18n="hero-feature1">Automatic logging</span>
+                    </div>
+                    <div class="hero-feature">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span data-i18n="hero-feature2">AI summaries</span>
+                    </div>
+                    <div class="hero-feature">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span data-i18n="hero-feature3">100% local data</span>
+                    </div>
+                </div>
+                <div class="hero-cta">
+                    <a href="https://github.com/zetdotcom/mindreel/releases" class="btn btn-primary" data-i18n="btn-download">Download for macOS</a>
+                    <a href="https://github.com/zetdotcom/mindreel" target="_blank" class="btn btn-secondary" data-i18n="btn-github">View on GitHub</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="mockup">
+                    <!-- Image placeholder: Main app window screenshot showing history view with daily cards and weekly summary -->
+                    <div class="mockup-window">
+                        <div class="mockup-header">
+                            <div class="mockup-dots">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                        <div class="mockup-content">
+                            <img src="./assets/capture-popup.png" alt="MindReel app interface" class="mockup-img">
+                            <div class="mockup-overlay" data-i18n="mockup-overlay">Main app screenshot placeholder</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title" data-i18n="features-title">Everything you need to track your wins</h2>
+                <p class="section-subtitle" data-i18n="features-subtitle">Simple, powerful features that help you remember and showcase your work</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title" data-i18n="feature1-title">Automatic hourly popups</h3>
+                    <p class="feature-text" data-i18n="feature1-text">Gentle reminders every hour ask "What are you working on?" Quick to answer with "Same as before" option.</p>
+                    <!-- Image placeholder: Small popup window with text input and buttons -->
+                    <div class="feature-preview" data-i18n="feature1-preview">Popup window screenshot</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title" data-i18n="feature2-title">AI-powered summaries</h3>
+                    <p class="feature-text" data-i18n="feature2-text">Weekly AI summaries analyze your work and create professional highlights perfect for meetings and reviews.</p>
+                    <!-- Image placeholder: Weekly summary card with bullet points -->
+                    <div class="feature-preview" data-i18n="feature2-preview">Weekly summary card</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title" data-i18n="feature3-title">Local & private</h3>
+                    <p class="feature-text" data-i18n="feature3-text">Your data stays on your machine. Only sent to OpenRouter API when you request a summary.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title" data-i18n="feature4-title">Organized history</h3>
+                    <p class="feature-text" data-i18n="feature4-text">View all your entries organized by day. Edit, delete, or search through your work history anytime.</p>
+                    <!-- Image placeholder: History view with daily cards -->
+                    <div class="feature-preview" data-i18n="feature4-preview">History view screenshot</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 16v-4"></path>
+                            <path d="M12 8h.01"></path>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title" data-i18n="feature5-title">Free forever</h3>
+                    <p class="feature-text" data-i18n="feature5-text">100% free and open source. No subscriptions, no ads, no hidden costs. MIT licensed.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title" data-i18n="feature6-title">For everyone</h3>
+                    <p class="feature-text" data-i18n="feature6-text">Perfect for developers, designers, managers, students, and anyone who wants to track their progress.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="how" class="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title" data-i18n="how-title">Simple workflow, powerful results</h2>
+                <p class="section-subtitle" data-i18n="how-subtitle">Start logging your work in minutes</p>
+            </div>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3 class="step-title" data-i18n="step1-title">Answer the popup</h3>
+                    <p class="step-text" data-i18n="step1-text">Every hour, a small popup asks what you're working on. Type your task or click "Same as before" to continue.</p>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3 class="step-title" data-i18n="step2-title">Build your history</h3>
+                    <p class="step-text" data-i18n="step2-text">All entries are automatically saved and organized by day in your local database.</p>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3 class="step-title" data-i18n="step3-title">Get AI summaries</h3>
+                    <p class="step-text" data-i18n="step3-text">Generate weekly summaries that highlight your key achievements and progress.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="download" class="download">
+        <div class="container">
+            <div class="download-card">
+                <h2 class="download-title" data-i18n="download-title">Ready to track your wins?</h2>
+                <p class="download-subtitle" data-i18n="download-subtitle">Download MindReel for macOS and start building your achievement history today.</p>
+                <a href="https://github.com/zetdotcom/mindreel/releases" class="btn btn-download" data-i18n="btn-download-main">Download for macOS</a>
+                <div class="download-info">
+                    <div class="download-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span data-i18n="download-info1">macOS 10.15+</span>
+                    </div>
+                    <div class="download-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span data-i18n="download-info2">Free forever</span>
+                    </div>
+                    <div class="download-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span data-i18n="download-info3">Open source</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <div class="footer-logo">MindReel</div>
+                    <p class="footer-text" data-i18n="footer-text">Your work. Automatically documented.</p>
+                </div>
+                <div class="footer-links">
+                    <a href="https://github.com/zetdotcom/mindreel" target="_blank">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        GitHub
+                    </a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p data-i18n="footer-copyright">© 2025 MindReel. Open source software under MIT license.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="modern.js"></script>
+</body>
+</html>
