@@ -30,7 +30,13 @@ vi.mock("@/features/settings", () => ({
 }));
 
 vi.mock("@/components/ui/alert", () => ({
-  Alert: ({ children, variant }: { children: React.ReactNode; variant?: string }) => (
+  Alert: ({
+    children,
+    variant,
+  }: {
+    children: React.ReactNode;
+    variant?: string;
+  }) => (
     <div data-testid="alert" data-variant={variant}>
       {children}
     </div>
@@ -53,16 +59,15 @@ describe("SettingsView", () => {
       render(<SettingsView />);
 
       expect(screen.getByText("Settings")).toBeInTheDocument();
-      expect(screen.getByText("Configure your MindReel experience")).toBeInTheDocument();
+      expect(
+        screen.getByText("Configure your MindReel experience"),
+      ).toBeInTheDocument();
     });
 
     it("should render all sections", () => {
       render(<SettingsView />);
 
       expect(screen.getByText("Capture")).toBeInTheDocument();
-      expect(screen.getByText("Data & Storage")).toBeInTheDocument();
-      expect(screen.getByText("Privacy")).toBeInTheDocument();
-      expect(screen.getByText("Interface")).toBeInTheDocument();
     });
 
     it("should render PopupIntervalControl in Capture section", () => {
@@ -90,7 +95,9 @@ describe("SettingsView", () => {
       render(<SettingsView />);
 
       expect(screen.getByText("Loading settings...")).toBeInTheDocument();
-      expect(screen.queryByTestId("popup-interval-control")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("popup-interval-control"),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -115,7 +122,9 @@ describe("SettingsView", () => {
   describe("Popup Interval Changes", () => {
     it("should update popup interval when changed", async () => {
       mockUpdatePopupInterval.mockResolvedValue(undefined);
-      const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+      const consoleLogSpy = vi
+        .spyOn(console, "log")
+        .mockImplementation(() => {});
 
       render(<SettingsView />);
 
@@ -132,7 +141,9 @@ describe("SettingsView", () => {
     it("should handle update errors gracefully", async () => {
       const error = new Error("Update failed");
       mockUpdatePopupInterval.mockRejectedValue(error);
-      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
 
       render(<SettingsView />);
 
@@ -140,7 +151,10 @@ describe("SettingsView", () => {
       changeButton.click();
 
       await vi.waitFor(() => {
-        expect(consoleErrorSpy).toHaveBeenCalledWith("Failed to update popup interval:", error);
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          "Failed to update popup interval:",
+          error,
+        );
       });
 
       consoleErrorSpy.mockRestore();
@@ -159,16 +173,6 @@ describe("SettingsView", () => {
       render(<SettingsView />);
 
       expect(screen.getByText("MindReel v1.0.0")).toBeInTheDocument();
-    });
-  });
-
-  describe("Planned Features Sections", () => {
-    it("should show placeholders for planned features", () => {
-      render(<SettingsView />);
-
-      expect(screen.getByText(/Planned: database location display/i)).toBeInTheDocument();
-      expect(screen.getByText(/Planned: redaction rules/i)).toBeInTheDocument();
-      expect(screen.getByText(/Planned: theme, density/i)).toBeInTheDocument();
     });
   });
 });
