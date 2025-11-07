@@ -11,8 +11,14 @@ export async function initializeCaptureTimer(): Promise<void> {
 
     console.log(`[CaptureTimer] Initializing with interval: ${currentIntervalMinutes} minutes`);
 
-    createCaptureWindow();
-    console.log("[CaptureTimer] Initial capture window opened on app start");
+    const onboardingCompleted = settings?.onboarding_completed ?? 0;
+
+    if (onboardingCompleted === 1) {
+      createCaptureWindow();
+      console.log("[CaptureTimer] Initial capture window opened on app start");
+    } else {
+      console.log("[CaptureTimer] Skipping initial capture window - onboarding not completed");
+    }
 
     startTimer();
   } catch (error) {

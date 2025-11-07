@@ -1,5 +1,15 @@
 import { format, parseISO } from "date-fns";
-import { AlertCircle, Calendar, Check, Edit2, Loader2, Lock, Sparkles, X, Zap } from "lucide-react";
+import {
+  AlertCircle,
+  Calendar,
+  Check,
+  Edit2,
+  Loader2,
+  Lock,
+  Sparkles,
+  X,
+  Zap,
+} from "lucide-react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -200,7 +210,9 @@ export function SummaryCard({
 
     if (sections.length === 0) {
       return (
-        <div className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{content}</div>
+        <div className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+          {content}
+        </div>
       );
     }
 
@@ -209,7 +221,10 @@ export function SummaryCard({
         {sections.map((section, idx) => (
           <div
             key={section.project}
-            className={cn("space-y-3", idx > 0 && "pt-4 border-t-2 border-border/30")}
+            className={cn(
+              "space-y-3",
+              idx > 0 && "pt-4 border-t-2 border-border/30",
+            )}
           >
             <Badge variant="neon" size="default" className="font-black text-xs">
               {section.project}
@@ -285,7 +300,11 @@ export function SummaryCard({
                     : `Ready to generate summary for ${totalEntries} entries`}
                 </div>
                 {totalEntries > 0 && (
-                  <Button onClick={handleGenerate} disabled={!onGenerate} className="gap-2">
+                  <Button
+                    onClick={handleGenerate}
+                    disabled={!onGenerate}
+                    className="gap-2"
+                  >
                     <Sparkles className="h-4 w-4" />
                     Generate AI Summary
                   </Button>
@@ -293,7 +312,8 @@ export function SummaryCard({
               </>
             ) : (
               <div className="text-sm text-muted-foreground">
-                Week still in progress. Summary generation available after Sunday.
+                Week still in progress. Summary generation available after
+                Sunday.
               </div>
             )}
           </div>
@@ -306,7 +326,9 @@ export function SummaryCard({
               <Loader2 className="h-5 w-5 animate-spin" />
               <span className="text-sm">Generating your weekly summary...</span>
             </div>
-            <div className="text-xs text-muted-foreground">This may take a few moments</div>
+            <div className="text-xs text-muted-foreground">
+              This may take a few moments
+            </div>
           </div>
         );
 
@@ -365,15 +387,22 @@ export function SummaryCard({
 
             <div className="flex items-center justify-between border-t pt-3">
               <div className="text-xs text-muted-foreground">
-                {summary?.created_at && <>Generated {formatSummaryDate(summary.created_at)}</>}
+                {summary?.created_at && (
+                  <>Generated {formatSummaryDate(summary.created_at)}</>
+                )}
               </div>
               <div className="flex items-center space-x-2">
-                <Button variant="ghost" size="sm" onClick={handleStartEdit} className="gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleStartEdit}
+                  className="gap-2"
+                >
                   <Edit2 className="h-3 w-3" />
                   Edit
                 </Button>
                 {/* TEST-ONLY clear summary button */}
-                {summary?.id && (
+                {/*{summary?.id && (
                   <Button
                     data-testid="clear-summary-test-button"
                     variant="destructive"
@@ -384,7 +413,7 @@ export function SummaryCard({
                     <X className="h-3 w-3" />
                     Clear (TEST)
                   </Button>
-                )}
+                )}*/}
               </div>
             </div>
           </div>
@@ -396,8 +425,8 @@ export function SummaryCard({
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Failed to generate summary. Please try again or contact support if the problem
-                persists.
+                Failed to generate summary. Please try again or contact support
+                if the problem persists.
               </AlertDescription>
             </Alert>
             <Button
@@ -418,7 +447,11 @@ export function SummaryCard({
             <div className="text-sm text-muted-foreground">
               Sign in to generate AI-powered weekly summaries
             </div>
-            <Button variant="outline" className="gap-2" onClick={onLoginRequest}>
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={onLoginRequest}
+            >
               <Lock className="h-4 w-4" />
               Sign In to Generate
             </Button>
@@ -431,10 +464,13 @@ export function SummaryCard({
             <Alert>
               <Zap className="h-4 w-4" />
               <AlertDescription>
-                You've reached your monthly AI summary limit. Limit resets on the 1st of each month.
+                You've reached your monthly AI summary limit. Limit resets on
+                the 1st of each month.
               </AlertDescription>
             </Alert>
-            <div className="text-xs text-muted-foreground">Upgrade to increase your limit</div>
+            <div className="text-xs text-muted-foreground">
+              Upgrade to increase your limit
+            </div>
           </div>
         );
 
@@ -444,7 +480,8 @@ export function SummaryCard({
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Generating summaries for arbitrary past weeks is not yet supported in this build.
+                Generating summaries for arbitrary past weeks is not yet
+                supported in this build.
               </AlertDescription>
             </Alert>
           </div>

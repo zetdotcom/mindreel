@@ -105,7 +105,8 @@ export class Database {
       CREATE TABLE IF NOT EXISTS settings (
         id INTEGER PRIMARY KEY CHECK (id = 1),
         popup_interval_minutes INTEGER NOT NULL DEFAULT 60,
-        global_shortcut TEXT NULL
+        global_shortcut TEXT NULL,
+        onboarding_completed INTEGER NOT NULL DEFAULT 0
       );
 
       -- Create indexes
@@ -157,8 +158,8 @@ export class Database {
       }
 
       const insertSQL = `
-        INSERT OR IGNORE INTO settings (id, popup_interval_minutes, global_shortcut)
-        VALUES (1, 60, 'Option+Command+Space')
+        INSERT OR IGNORE INTO settings (id, popup_interval_minutes, global_shortcut, onboarding_completed)
+        VALUES (1, 60, 'Option+Command+Space', 0)
       `;
 
       this.db.run(insertSQL, (err) => {

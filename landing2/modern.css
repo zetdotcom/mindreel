@@ -276,7 +276,7 @@ body {
 
 .mockup-content {
   position: relative;
-  padding: 24px;
+  padding: 10px;
   min-height: 400px;
   display: flex;
   align-items: center;
@@ -377,7 +377,7 @@ body {
 .feature-preview {
   background: var(--bg-secondary);
   border: 1px dashed var(--border);
-  padding: 32px;
+  padding: 16px;
   border-radius: 8px;
   text-align: center;
   font-size: 13px;
@@ -567,7 +567,7 @@ body {
   }
 
   .step-arrow {
-    transform: rotate(90deg);
+    display: none;
   }
 
   .nav {

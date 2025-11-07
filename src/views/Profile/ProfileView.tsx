@@ -9,10 +9,9 @@ export function ProfileView() {
     <main className="min-h-screen w-full bg-background px-8 py-10 text-foreground">
       <div className="mx-auto max-w-3xl space-y-10">
         <header>
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Profile (Preview)</h1>
+          <h1 className="text-3xl font-bold tracking-tight mb-2">Profile</h1>
           <p className="text-sm text-muted-foreground">
-            User profile details and activity insights will appear here. This page establishes the
-            route and layout skeleton.
+            Manage your account settings and preferences.
           </p>
         </header>
 
@@ -51,34 +50,6 @@ export function ProfileView() {
             </div>
           )}
         </section>
-
-        <section className="rounded-lg border border-border bg-card p-6">
-          <h2 className="text-lg font-semibold mb-3">Identity</h2>
-          <p className="text-sm text-muted-foreground">
-            Planned: avatar upload, display name, short bio or mission statement.
-          </p>
-        </section>
-
-        <section className="rounded-lg border border-border bg-card p-6">
-          <h2 className="text-lg font-semibold mb-3">Activity</h2>
-          <p className="text-sm text-muted-foreground">
-            Planned: capture streak, weekly entry counts, summary generation stats, time since first
-            entry.
-          </p>
-        </section>
-
-        <section className="rounded-lg border border-border bg-card p-6">
-          <h2 className="text-lg font-semibold mb-3">Milestones</h2>
-          <p className="text-sm text-muted-foreground">
-            Planned: badges / achievements (e.g. 100 entries, 10 weeks summarized).
-          </p>
-        </section>
-
-        <footer className="pt-4 border-t border-border/50">
-          <p className="text-xs text-muted-foreground">
-            Profile feature not yet implemented. All sections are placeholders.
-          </p>
-        </footer>
       </div>
     </main>
   );

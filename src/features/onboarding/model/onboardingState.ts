@@ -59,9 +59,13 @@ export function hasSeenOnboarding(): boolean {
 export function setOnboardingSeen(): void {
   try {
     storage.setItem(ONBOARDING_KEY, "true");
-  } catch {
-    // Swallow; onboarding will simply reappear next run if persist fails.
-  }
+
+    if (typeof window !== "undefined" && window.appApi?.db?.updateSettings) {
+      window.appApi.db.updateSettings({ onboarding_completed: 1 }).catch((err: Error) => {
+        console.error("Failed to update onboarding_completed in database:", err);
+      });
+    }
+  } catch {}
 }
 
 /**
