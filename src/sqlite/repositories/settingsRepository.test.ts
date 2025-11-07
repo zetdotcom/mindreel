@@ -16,7 +16,8 @@ describe("SettingsRepository", () => {
         CREATE TABLE settings (
           id INTEGER PRIMARY KEY CHECK (id = 1),
           popup_interval_minutes INTEGER NOT NULL DEFAULT 60,
-          global_shortcut TEXT
+          global_shortcut TEXT,
+          onboarding_completed INTEGER NOT NULL DEFAULT 0
         )
       `,
         (err) => {
