@@ -1,837 +1,478 @@
 <!doctype html>
-<html lang="pl" class="">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>MindReel – Stop Forgetting Your Wins</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MindReel - Never Forget Your Wins Again</title>
     <meta
       name="description"
-      content="MindReel to darmowa, open-source'owa aplikacja desktopowa, która pomaga logować codzienne zadania i generuje AI podsumowania Twoich osiągnięć."
+      content="Free & open-source desktop app that automatically logs your work with hourly popups and generates AI-powered weekly summaries. Your data stays local."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="index.css" />
+    <link rel="stylesheet" href="modern.css" />
   </head>
-  <body class="min-h-screen flex flex-col bg-background text-foreground">
-    <!-- NAVBAR -->
-    <header class="w-full border-brutal bg-card-gradient shadow-brutal-lg">
-      <div
-        class="max-w-6xl mx-auto flex items-center justify-between px-6 py-4"
-      >
-        <div class="flex items-center gap-3">
-          <div
-            class="h-10 w-10 flex items-center justify-center bg-button-primary-gradient text-white font-black tracking-brutal shadow-brutal border-brutal"
+  <body>
+    <header class="header">
+      <div class="container">
+        <div class="logo">
+          <svg
+            class="logo-icon"
+            width="32"
+            height="32"
+            viewBox="0 0 32 32"
+            fill="none"
           >
-            MR
-          </div>
-          <div class="text-2xl font-black tracking-tightest uppercase">
-            MindReel
-          </div>
+            <rect width="32" height="32" rx="8" fill="currentColor" />
+            <path
+              d="M10 16L14 20L22 12"
+              stroke="white"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <span class="logo-text">MindReel</span>
         </div>
-        <nav class="hidden md:flex gap-6 font-bold uppercase text-sm">
-          <a href="#problem" class="hover:underline" data-i18n-nav="problem"
-            >Problem</a
-          >
+        <nav class="nav">
+          <a href="#features" data-i18n="nav-features">Features</a>
+          <a href="#how" data-i18n="nav-how">How it works</a>
+          <a href="#download" data-i18n="nav-download">Download</a>
           <a
-            href="#rozwiazanie"
-            class="hover:underline"
-            data-i18n-nav="solution"
-            >Rozwiązanie</a
+            href="https://github.com/zetdotcom/mindreel"
+            target="_blank"
+            class="github-link"
+            aria-label="GitHub"
           >
-          <a href="#jak-dziala" class="hover:underline" data-i18n-nav="how"
-            >Jak działa</a
-          >
-          <a href="#dla-kogo" class="hover:underline" data-i18n-nav="who"
-            >Dla kogo</a
-          >
-          <a
-            href="#pobierz"
-            class="hover:underline text-accent"
-            data-i18n-nav="download"
-            >Pobierz</a
-          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+              />
+            </svg>
+          </a>
         </nav>
-        <div class="flex gap-2 items-center">
-          <button
-            id="langToggle"
-            class="border-brutal px-3 py-2 text-xs font-bold bg-button-accent-gradient text-white shadow-brutal active:scale-95"
-          >
-            EN
-          </button>
-          <button
-            id="modeToggle"
-            class="border-brutal px-3 py-2 text-xs font-bold bg-button-warm text-white shadow-brutal active:scale-95"
-          >
-            <span data-i18n="darkMode">Tryb Dark</span>
-          </button>
+        <div class="lang-switch">
+          <button class="lang-btn active" data-lang="en">EN</button>
+          <button class="lang-btn" data-lang="pl">PL</button>
         </div>
       </div>
     </header>
 
-    <!-- HERO -->
-    <section class="relative overflow-hidden">
-      <div
-        class="max-w-6xl mx-auto px-6 py-16 grid md:grid-cols-2 gap-12 items-center"
-      >
-        <div class="space-y-7">
-          <h1 class="text-4xl md:text-5xl font-black tracking-tightest">
-            <span data-i18n="heroTitle"
-              >Stop Forgetting Your Wins.<br />Start Building Your "Highlight
-              Reel".</span
-            >
-          </h1>
-          <p
-            class="text-lg leading-relaxed font-semibold"
-            data-i18n="heroSubtitle"
-          >
-            MindReel to darmowa, open-source'owa aplikacja desktopowa, która
-            pomaga Ci logować codzienne zadania i wykorzystuje AI do generowania
-            potężnych podsumowań Twoich osiągnięć. Idealna do raportów, spotkań
-            i śledzenia postępów.
-          </p>
-          <div class="flex flex-wrap gap-4 pt-2">
-            <a
-              id="heroDownload"
-              data-dl-label
-              href="https://github.com/zetdotcom/mindreel/releases"
-              class="shadow-brutal-lg border-brutal px-7 py-4 bg-button-primary-gradient text-white font-black uppercase tracking-brutal text-sm hover:shadow-brutal-xl active:scale-95"
-            >
-              <span data-i18n="downloadFree">Pobierz za Darmo</span>
-            </a>
-            <button
-              class="border-brutal px-7 py-4 bg-button-accent-gradient text-white font-black uppercase tracking-brutal text-sm hover:shadow-brutal-xl active:scale-95"
-              onclick="document.getElementById('problem').scrollIntoView({behavior:'smooth'})"
-            >
-              <span data-i18n="learnMore">Dowiedz się więcej</span>
-            </button>
+    <section class="hero">
+      <div class="container">
+        <div class="hero-content">
+          <div class="hero-badge" data-i18n="hero-badge">
+            Free & Open Source
           </div>
-          <p
-            class="text-xs font-bold uppercase tracking-wider"
-            data-i18n="trustBadge"
-          >
-            100% Free & Open Source. Bez reklam, bez subskrypcji.
+          <h1 class="hero-title" data-i18n="hero-title">
+            Never forget your achievements again
+          </h1>
+          <p class="hero-subtitle" data-i18n="hero-subtitle">
+            MindReel is a free desktop app that automatically logs your work
+            with gentle hourly reminders and generates AI-powered weekly
+            summaries. Perfect for standups, reviews, and career tracking.
           </p>
-        </div>
-        <div class="relative">
-          <!-- MOCKUP / SCREENSHOT -->
-          <div
-            class="border-brutal shadow-brutal-xl bg-card-gradient p-6 rounded-app space-y-4"
-          >
-            <h3
-              class="text-xl font-black uppercase tracking-brutal"
-              data-i18n="aiReelTitle"
-            >
-              AI Reel – Podsumowanie
-            </h3>
-            <ul class="text-sm space-y-2 font-semibold">
-              <li data-i18n="example1">
-                • Usprawniono logowanie i obsługę błędów (Supabase)
-              </li>
-              <li data-i18n="example2">
-                • Dodano globalny skrót do szybkiego wpisu
-              </li>
-              <li data-i18n="example3">
-                • Poprawiono wydajność listy dziennych wpisów
-              </li>
-              <li data-i18n="example4">
-                • Wsparcie edycji / usuwania + grupowanie x2/x3
-              </li>
-              <li data-i18n="example5">
-                • Limit darmowych podsumowań i cykl odnowienia
-              </li>
-            </ul>
-            <div
-              class="text-xs font-bold pt-2 text-muted"
-              data-i18n="exampleCaption"
-            >
-              Przykładowa „Highlight Reel" • Generowana automatycznie
+          <div class="hero-features">
+            <div class="hero-feature">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span data-i18n="hero-feature1">Automatic logging</span>
+            </div>
+            <div class="hero-feature">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span data-i18n="hero-feature2">AI summaries</span>
+            </div>
+            <div class="hero-feature">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span data-i18n="hero-feature3">100% local data</span>
             </div>
           </div>
-          <div
-            class="absolute -bottom-6 -right-6 w-40 h-24 border-brutal bg-card-gradient shadow-brutal flex items-center justify-center text-[10px] font-bold opacity-80"
-          >
-            <span data-i18n="popupPlaceholder">[Pop‑up Screenshot]</span>
+          <div class="hero-cta">
+            <a
+              href="https://github.com/zetdotcom/mindreel/releases"
+              target="_blank"
+              class="btn btn-primary"
+              data-i18n="btn-download"
+              >Download for macOS</a
+            >
+            <a
+              href="https://github.com/zetdotcom/mindreel"
+              target="_blank"
+              class="btn btn-secondary"
+              data-i18n="btn-github"
+              >View on GitHub</a
+            >
+          </div>
+        </div>
+        <div class="hero-image">
+          <div class="mockup">
+            <!-- Image placeholder: Main app window screenshot showing history view with daily cards and weekly summary -->
+            <div class="mockup-window">
+              <div class="mockup-header">
+                <div class="mockup-dots">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+              <div class="mockup-content">
+                <img
+                  src="./assets/main-app.png"
+                  alt="MindReel app interface"
+                  height="100%"
+                  width="100%"
+                  class="mockup-img"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- PROBLEM -->
-    <section id="problem" class="max-w-6xl mx-auto px-6 py-14">
-      <h2
-        class="text-3xl font-black uppercase tracking-brutal mb-6"
-        data-i18n="problemTitle"
-      >
-        Ten moment zawahania na cotygodniowym spotkaniu...
-      </h2>
-      <div class="grid md:grid-cols-3 gap-8">
-        <div
-          class="border-brutal bg-card-gradient p-6 shadow-brutal-lg space-y-3"
-        >
-          <h3
-            class="font-black text-sm uppercase tracking-brutal"
-            data-i18n="problem1Title"
-          >
-            Pustka w głowie
-          </h3>
-          <p
-            class="text-sm font-semibold leading-relaxed"
-            data-i18n="problem1Text"
-          >
-            Starasz się przypomnieć sobie, co właściwie robiłeś w zeszły wtorek,
-            aby uzupełnić status?
+    <section id="features" class="features">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title" data-i18n="features-title">
+            Everything you need to track your wins
+          </h2>
+          <p class="section-subtitle" data-i18n="features-subtitle">
+            Simple, powerful features that help you remember and showcase your
+            work
           </p>
         </div>
-        <div
-          class="border-brutal bg-card-gradient p-6 shadow-brutal-lg space-y-3"
-        >
-          <h3
-            class="font-black text-sm uppercase tracking-brutal"
-            data-i18n="problem2Title"
-          >
-            Utracone osiągnięcia
-          </h3>
-          <p
-            class="text-sm font-semibold leading-relaxed"
-            data-i18n="problem2Text"
-          >
-            Znalazłeś sprytne rozwiązanie lub ukończyłeś kluczowe zadanie – i
-            zapominasz o nim przy następnym podsumowaniu?
-          </p>
-        </div>
-        <div
-          class="border-brutal bg-card-gradient p-6 shadow-brutal-lg space-y-3"
-        >
-          <h3
-            class="font-black text-sm uppercase tracking-brutal"
-            data-i18n="problem3Title"
-          >
-            Stracony czas
-          </h3>
-          <p
-            class="text-sm font-semibold leading-relaxed"
-            data-i18n="problem3Text"
-          >
-            Marnujesz 15 minut przed każdym spotkaniem, próbując poskładać
-            postępy z notatek, e‑maili i logów?
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- SOLUTION -->
-    <section id="rozwiazanie" class="max-w-6xl mx-auto px-6 py-14">
-      <h2
-        class="text-3xl font-black uppercase tracking-brutal mb-6"
-        data-i18n="solutionTitle"
-      >
-        MindReel Pamięta za Ciebie.
-      </h2>
-      <div class="grid md:grid-cols-2 gap-10 items-start">
-        <div class="space-y-5">
-          <p
-            class="text-sm font-semibold leading-relaxed"
-            data-i18n="solutionIntro"
-          >
-            MindReel to Twój osobisty dokumentalista. Działa jak kamera filmowa
-            dla Twojej kariery.
-          </p>
-          <div
-            class="border-brutal bg-card-gradient p-5 shadow-brutal-lg space-y-2"
-          >
-            <h3
-              class="font-black uppercase text-xs tracking-brutal"
-              data-i18n="recordsFrames"
-            >
-              Nagrywa „klatki"
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <h3 class="feature-title" data-i18n="feature1-title">
+              Automatic hourly popups
             </h3>
-            <p class="text-xs font-semibold" data-i18n="recordsFramesText">
-              Dyskretnie pyta, nad czym pracujesz. Każda odpowiedź to pojedyncza
-              „klatka" Twojej codziennej pracy.
+            <p class="feature-text" data-i18n="feature1-text">
+              Gentle reminders every hour ask "What are you working on?" Quick
+              to answer with "Same as before" option.
+            </p>
+            <div class="feature-preview">
+              <img
+                src="./assets/popup-window.png"
+                alt="Popup window screenshot"
+                style="width: 100%; border-radius: 8px"
+              />
+            </div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                ></path>
+              </svg>
+            </div>
+            <h3 class="feature-title" data-i18n="feature2-title">
+              AI-powered summaries
+            </h3>
+            <p class="feature-text" data-i18n="feature2-text">
+              Weekly AI summaries analyze your work and create professional
+              highlights perfect for meetings and reviews.
+            </p>
+            <div class="feature-preview">
+              <img
+                src="./assets/summary-card.png"
+                alt="Weekly summary card"
+                style="width: 100%; border-radius: 8px"
+              />
+            </div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+            </div>
+            <h3 class="feature-title" data-i18n="feature3-title">
+              Local & private
+            </h3>
+            <p class="feature-text" data-i18n="feature3-text">
+              Your data stays on your machine. Only sent to OpenRouter API when
+              you request a summary.
             </p>
           </div>
-          <div
-            class="border-brutal bg-card-gradient p-5 shadow-brutal-lg space-y-2"
-          >
-            <h3
-              class="font-black uppercase text-xs tracking-brutal"
-              data-i18n="editsReel"
-            >
-              Montuje „rolkę"
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+            </div>
+            <h3 class="feature-title" data-i18n="feature4-title">
+              Organized history
             </h3>
-            <p class="text-xs font-semibold" data-i18n="editsReelText">
-              AI analizuje wszystkie klatki i automatycznie składa je w spójną
-              „rolkę z highlightami" – idealne podsumowanie Twoich dokonań.
+            <p class="feature-text" data-i18n="feature4-text">
+              View all your entries organized by day. Edit, delete, or search
+              through your work history anytime.
+            </p>
+            <div class="feature-preview">
+              <img
+                src="./assets/main-app.png"
+                alt="History view screenshot"
+                style="width: 100%; border-radius: 8px"
+              />
+            </div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 16v-4"></path>
+                <path d="M12 8h.01"></path>
+              </svg>
+            </div>
+            <h3 class="feature-title" data-i18n="feature5-title">
+              Free forever
+            </h3>
+            <p class="feature-text" data-i18n="feature5-text">
+              100% free and open source. No subscriptions, no ads, no hidden
+              costs. MIT licensed.
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
+            <h3 class="feature-title" data-i18n="feature6-title">
+              For everyone
+            </h3>
+            <p class="feature-text" data-i18n="feature6-text">
+              Perfect for developers, designers, managers, students, and anyone
+              who wants to track their progress.
             </p>
           </div>
         </div>
-        <div
-          class="border-brutal bg-card-gradient p-6 shadow-brutal-lg h-full flex items-center justify-center text-[11px] font-bold"
-        >
-          <span data-i18n="mockupPlaceholder"
-            >[Mockup głównego okna z listą „klatek" i kartą tygodniową]</span
-          >
-        </div>
       </div>
     </section>
 
-    <!-- HOW IT WORKS -->
-    <section id="jak-dziala" class="max-w-6xl mx-auto px-6 py-14">
-      <h2
-        class="text-3xl font-black uppercase tracking-brutal mb-8"
-        data-i18n="howTitle"
-      >
-        Logowanie bez Wysiłku. Potężne Podsumowania.
-      </h2>
-      <div class="grid md:grid-cols-3 gap-8">
-        <div
-          class="border-brutal bg-card-gradient p-6 shadow-brutal-lg space-y-4"
-        >
-          <h3
-            class="font-black uppercase tracking-brutal text-lg"
-            data-i18n="step1Title"
-          >
-            Krok 1: Zaloguj w 10 Sekund
-          </h3>
-          <p
-            class="text-sm font-semibold leading-relaxed"
-            data-i18n="step1Text"
-          >
-            Co godzinę pojawia się dyskretny pop‑up. Dzięki „Robię to samo co
-            godzinę temu" i opcji „drzemki", logowanie zajmuje sekundy.
+    <section id="how" class="how-it-works">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title" data-i18n="how-title">
+            Simple workflow, powerful results
+          </h2>
+          <p class="section-subtitle" data-i18n="how-subtitle">
+            Start logging your work in minutes
           </p>
-          <div
-            class="w-full h-24 border-brutal bg-background flex items-center justify-center text-[10px] font-bold"
-          >
-            <span data-i18n="step1Screenshot">[Screenshot pop‑up]</span>
-          </div>
         </div>
-        <div
-          class="border-brutal bg-card-gradient p-6 shadow-brutal-lg space-y-4"
-        >
-          <h3
-            class="font-black uppercase tracking-brutal text-lg"
-            data-i18n="step2Title"
-          >
-            Krok 2: Skup się na Pracy
-          </h3>
-          <p
-            class="text-sm font-semibold leading-relaxed"
-            data-i18n="step2Text"
-          >
-            Po prostu... pracuj. MindReel cicho buduje kompletną, przeszukiwalną
-            listę Twoich zadań, rozwiązań i sukcesów.
-          </p>
-          <div
-            class="w-full h-24 border-brutal bg-background flex items-center justify-center text-[10px] font-bold"
-          >
-            <span data-i18n="step2Screenshot"
-              >[Screenshot listy dziennych wpisów]</span
-            >
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">1</div>
+            <h3 class="step-title" data-i18n="step1-title">Answer the popup</h3>
+            <p class="step-text" data-i18n="step1-text">
+              Every hour, a small popup asks what you're working on. Type your
+              task or click "Same as before" to continue.
+            </p>
           </div>
-        </div>
-        <div
-          class="border-brutal bg-card-gradient p-6 shadow-brutal-lg space-y-4"
-        >
-          <h3
-            class="font-black uppercase tracking-brutal text-lg"
-            data-i18n="step3Title"
-          >
-            Krok 3: Wygeneruj Swój „AI Reel"
-          </h3>
-          <p
-            class="text-sm font-semibold leading-relaxed"
-            data-i18n="step3Text"
-          >
-            Jedno kliknięcie – otrzymujesz zwięzłe, inteligentne podsumowanie
-            tygodnia lub sprintu. Gotowe do e‑maila, raportu lub „brag
-            document".
-          </p>
-          <div
-            class="w-full h-24 border-brutal bg-background flex items-center justify-center text-[10px] font-bold"
-          >
-            <span data-i18n="step3Screenshot">[Screenshot AI Reel]</span>
+          <div class="step-arrow">→</div>
+          <div class="step">
+            <div class="step-number">2</div>
+            <h3 class="step-title" data-i18n="step2-title">
+              Build your history
+            </h3>
+            <p class="step-text" data-i18n="step2-text">
+              All entries are automatically saved and organized by day in your
+              local database.
+            </p>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step">
+            <div class="step-number">3</div>
+            <h3 class="step-title" data-i18n="step3-title">Get AI summaries</h3>
+            <p class="step-text" data-i18n="step3-text">
+              Generate weekly summaries that highlight your key achievements and
+              progress.
+            </p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- AUDIENCE -->
-    <section id="dla-kogo" class="max-w-6xl mx-auto px-6 py-14">
-      <h2
-        class="text-3xl font-black uppercase tracking-brutal mb-8"
-        data-i18n="audienceTitle"
-      >
-        Dla Każdego, Kto Chce Śledzić Swoje Postępy.
-      </h2>
-      <div class="grid md:grid-cols-3 gap-8">
-        <div
-          class="border-brutal bg-card-gradient p-5 shadow-brutal-lg space-y-2"
-        >
-          <h3
-            class="font-black text-sm uppercase tracking-brutal"
-            data-i18n="audience1Title"
-          >
-            🛠 Deweloperzy i Inżynierowie
-          </h3>
-          <p class="text-xs font-semibold" data-i18n="audience1Text">
-            Idealny log zadań, poprawek i rozwiązań na stand‑upy i
-            retrospektywy.
+    <section id="download" class="download">
+      <div class="container">
+        <div class="download-card">
+          <h2 class="download-title" data-i18n="download-title">
+            Ready to track your wins?
+          </h2>
+          <p class="download-subtitle" data-i18n="download-subtitle">
+            Download MindReel for macOS and start building your achievement
+            history today.
           </p>
-        </div>
-        <div
-          class="border-brutal bg-card-gradient p-5 shadow-brutal-lg space-y-2"
-        >
-          <h3
-            class="font-black text-sm uppercase tracking-brutal"
-            data-i18n="audience2Title"
-          >
-            🎨 Projektanci i Twórcy
-          </h3>
-          <p class="text-xs font-semibold" data-i18n="audience2Text">
-            Śledź iteracje, czas nad projektem i feedback klientów.
-          </p>
-        </div>
-        <div
-          class="border-brutal bg-card-gradient p-5 shadow-brutal-lg space-y-2"
-        >
-          <h3
-            class="font-black text-sm uppercase tracking-brutal"
-            data-i18n="audience3Title"
-          >
-            📚 Pisarze & Researcherzy
-          </h3>
-          <p class="text-xs font-semibold" data-i18n="audience3Text">
-            Dokumentuj postępy w draftach, fazach badań i kluczowych odkryciach.
-          </p>
-        </div>
-        <div
-          class="border-brutal bg-card-gradient p-5 shadow-brutal-lg space-y-2"
-        >
-          <h3
-            class="font-black text-sm uppercase tracking-brutal"
-            data-i18n="audience4Title"
-          >
-            👥 Managerowie i Liderzy
-          </h3>
-          <p class="text-xs font-semibold" data-i18n="audience4Text">
-            Agreguj osiągnięcia do raportów tygodniowych i aktualizacji dla
-            interesariuszy.
-          </p>
-        </div>
-        <div
-          class="border-brutal bg-card-gradient p-5 shadow-brutal-lg space-y-2"
-        >
-          <h3
-            class="font-black text-sm uppercase tracking-brutal"
-            data-i18n="audience5Title"
-          >
-            🎓 Studenci i Samoucy
-          </h3>
-          <p class="text-xs font-semibold" data-i18n="audience5Text">
-            Dokumentuj sesje nauki i kamienie milowe, aby widzieć postęp.
-          </p>
-        </div>
-        <div
-          class="border-brutal bg-card-gradient p-5 shadow-brutal-lg space-y-2"
-        >
-          <h3
-            class="font-black text-sm uppercase tracking-brutal"
-            data-i18n="audience6Title"
-          >
-            ⚙️ Każdy, kto buduje wartość
-          </h3>
-          <p class="text-xs font-semibold" data-i18n="audience6Text">
-            Jeśli chcesz lepiej mówić o swoich wynikach – MindReel tworzy pamięć
-            Twojej pracy.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- FINAL CTA -->
-    <section id="pobierz" class="max-w-6xl mx-auto px-6 py-20">
-      <div
-        class="border-brutal bg-button-primary-gradient text-white shadow-brutal-xl p-10 flex flex-col gap-8 items-start"
-      >
-        <h2
-          class="text-3xl font-black uppercase tracking-brutal"
-          data-i18n="ctaTitle"
-        >
-          Przestań Zapominać. Zacznij Budować Swoją Rolkę.
-        </h2>
-        <p class="text-sm font-semibold max-w-3xl" data-i18n="ctaText">
-          MindReel jest w 100% darmowy i open‑source. Pobierz go teraz i uzyskaj
-          pierwsze podsumowanie AI już dziś. Bez okresów próbnych, bez
-          subskrypcji – po prostu lepszy sposób na śledzenie swojej pracy.
-        </p>
-        <div class="flex flex-wrap gap-5">
           <a
-            id="finalDownload"
-            data-dl-label
             href="https://github.com/zetdotcom/mindreel/releases"
-            class="border-brutal px-8 py-4 bg-button-accent-gradient text-white font-black uppercase tracking-brutal text-sm shadow-brutal-lg hover:shadow-brutal-xl active:scale-95 text-center"
+            target="_blank"
+            class="btn btn-download"
+            data-i18n="btn-download-main"
+            >Download for macOS</a
           >
-            <span data-i18n="downloadFree">Pobierz za Darmo</span>
-          </a>
-          <a
-            href="https://github.com/zetdotcom/mindreel"
-            class="border-brutal px-8 py-4 bg-card-gradient text-foreground font-black uppercase tracking-brutal text-sm shadow-brutal-lg hover:shadow-brutal-xl active:scale-95 text-center"
-          >
-            <span data-i18n="viewGithub">Zobacz kod na GitHub</span>
-          </a>
+          <div class="download-info">
+            <div class="download-item">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span data-i18n="download-info1">macOS 10.15+</span>
+            </div>
+            <div class="download-item">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span data-i18n="download-info2">Free forever</span>
+            </div>
+            <div class="download-item">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span data-i18n="download-info3">Open source</span>
+            </div>
+          </div>
         </div>
-        <p class="text-[10px] font-bold opacity-90" data-i18n="ctaDisclaimer">
-          Wsparcie dla dodatkowych systemów operacyjnych w przyszłych wersjach.
-        </p>
       </div>
     </section>
 
-    <!-- FOOTER -->
-    <footer class="mt-auto border-brutal bg-card-gradient shadow-brutal-lg">
-      <div
-        class="max-w-6xl mx-auto px-6 py-8 flex flex-col md:flex-row gap-6 md:gap-0 justify-between"
-      >
-        <div class="space-y-2 text-xs font-semibold">
-          <div class="font-black uppercase tracking-brutal">MindReel</div>
-          <p data-i18n="footerTagline">
-            Inteligentna pamięć Twojej codziennej pracy.
-          </p>
-          <p class="text-muted" data-i18n="footerFeatures">
-            Open Source • Lokalna prywatność
-          </p>
-        </div>
-        <div class="space-y-2 text-xs font-semibold">
-          <div
-            class="font-black uppercase tracking-brutal"
-            data-i18n="footerInfoTitle"
-          >
-            Informacje
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-left">
+            <div class="footer-logo">MindReel</div>
+            <p class="footer-text" data-i18n="footer-text">
+              Your work. Automatically documented.
+            </p>
           </div>
-          <p data-i18n="footerInfo1">
-            Podsumowania generowane przez API openrouter.ai (efemeryczne
-            przetwarzanie).
-          </p>
-          <p data-i18n="footerInfo2">
-            Brak stałego backupu – wpisy tylko lokalnie.
-          </p>
-        </div>
-        <div class="space-y-2 text-xs font-semibold">
-          <div
-            class="font-black uppercase tracking-brutal"
-            data-i18n="footerContactTitle"
-          >
-            Kontakt
+          <div class="footer-links">
+            <a href="https://github.com/zetdotcom/mindreel" target="_blank">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path
+                  d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+                />
+              </svg>
+              GitHub
+            </a>
           </div>
-          <p data-i18n="footerContact">
-            Masz pomysł na ulepszenie? Wyślij Issue na GitHub.
-          </p>
-          <a
-            href="https://github.com/zetdotcom/mindreel"
-            class="underline"
-            data-i18n="footerRepo"
-            >Repozytorium</a
-          >
         </div>
-      </div>
-      <div class="text-center text-[10px] font-bold py-4">
-        © <span id="year"></span> MindReel.
-        <span data-i18n="footerCopyright">Wszystkie prawa zastrzeżone.</span>
+        <div class="footer-bottom">
+          <p data-i18n="footer-copyright">
+            © 2025 MindReel. Open source software under MIT license.
+          </p>
+          <p style="margin-top: 8px; font-size: 14px; color: rgba(255, 255, 255, 0.6);">
+            Created by <a href="https://github.com/zetdotcom" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 600;">zetdotcom</a>
+          </p>
+        </div>
       </div>
     </footer>
 
-    <script>
-      // i18n translations
-      const translations = {
-        pl: {
-          darkMode: "Tryb Dark",
-          lightMode: "Tryb Light",
-          heroTitle:
-            'Stop Forgetting Your Wins.<br />Start Building Your "Highlight Reel".',
-          heroSubtitle:
-            "MindReel to darmowa, open-source'owa aplikacja desktopowa, która pomaga Ci logować codzienne zadania i wykorzystuje AI do generowania potężnych podsumowań Twoich osiągnięć. Idealna do raportów, spotkań i śledzenia postępów.",
-          downloadFree: "Pobierz za Darmo",
-          learnMore: "Dowiedz się więcej",
-          trustBadge: "100% Free & Open Source. Bez reklam, bez subskrypcji.",
-          aiReelTitle: "AI Reel – Podsumowanie",
-          example1: "• Usprawniono logowanie i obsługę błędów (Supabase)",
-          example2: "• Dodano globalny skrót do szybkiego wpisu",
-          example3: "• Poprawiono wydajność listy dziennych wpisów",
-          example4: "• Wsparcie edycji / usuwania + grupowanie x2/x3",
-          example5: "• Limit darmowych podsumowań i cykl odnowienia",
-          exampleCaption:
-            'Przykładowa „Highlight Reel" • Generowana automatycznie',
-          popupPlaceholder: "[Pop‑up Screenshot]",
-          problemTitle: "Ten moment zawahania na cotygodniowym spotkaniu...",
-          problem1Title: "Pustka w głowie",
-          problem1Text:
-            "Starasz się przypomnieć sobie, co właściwie robiłeś w zeszły wtorek, aby uzupełnić status?",
-          problem2Title: "Utracone osiągnięcia",
-          problem2Text:
-            "Znalazłeś sprytne rozwiązanie lub ukończyłeś kluczowe zadanie – i zapominasz o nim przy następnym podsumowaniu?",
-          problem3Title: "Stracony czas",
-          problem3Text:
-            "Marnujesz 15 minut przed każdym spotkaniem, próbując poskładać postępy z notatek, e‑maili i logów?",
-          solutionTitle: "MindReel Pamięta za Ciebie.",
-          solutionIntro:
-            "MindReel to Twój osobisty dokumentalista. Działa jak kamera filmowa dla Twojej kariery.",
-          recordsFrames: 'Nagrywa „klatki"',
-          recordsFramesText:
-            'Dyskretnie pyta, nad czym pracujesz. Każda odpowiedź to pojedyncza „klatka" Twojej codziennej pracy.',
-          editsReel: 'Montuje „rolkę"',
-          editsReelText:
-            'AI analizuje wszystkie klatki i automatycznie składa je w spójną „rolkę z highlightami" – idealne podsumowanie Twoich dokonań.',
-          mockupPlaceholder:
-            '[Mockup głównego okna z listą „klatek" i kartą tygodniową]',
-          howTitle: "Logowanie bez Wysiłku. Potężne Podsumowania.",
-          step1Title: "Krok 1: Zaloguj w 10 Sekund",
-          step1Text:
-            'Co godzinę pojawia się dyskretny pop‑up. Dzięki „Robię to samo co godzinę temu" i opcji „drzemki", logowanie zajmuje sekundy.',
-          step1Screenshot: "[Screenshot pop‑up]",
-          step2Title: "Krok 2: Skup się na Pracy",
-          step2Text:
-            "Po prostu... pracuj. MindReel cicho buduje kompletną, przeszukiwalną listę Twoich zadań, rozwiązań i sukcesów.",
-          step2Screenshot: "[Screenshot listy dziennych wpisów]",
-          step3Title: 'Krok 3: Wygeneruj Swój „AI Reel"',
-          step3Text:
-            'Jedno kliknięcie – otrzymujesz zwięzłe, inteligentne podsumowanie tygodnia lub sprintu. Gotowe do e‑maila, raportu lub „brag document".',
-          step3Screenshot: "[Screenshot AI Reel]",
-          audienceTitle: "Dla Każdego, Kto Chce Śledzić Swoje Postępy.",
-          audience1Title: "🛠 Deweloperzy i Inżynierowie",
-          audience1Text:
-            "Idealny log zadań, poprawek i rozwiązań na stand‑upy i retrospektywy.",
-          audience2Title: "🎨 Projektanci i Twórcy",
-          audience2Text:
-            "Śledź iteracje, czas nad projektem i feedback klientów.",
-          audience3Title: "📚 Pisarze & Researcherzy",
-          audience3Text:
-            "Dokumentuj postępy w draftach, fazach badań i kluczowych odkryciach.",
-          audience4Title: "👥 Managerowie i Liderzy",
-          audience4Text:
-            "Agreguj osiągnięcia do raportów tygodniowych i aktualizacji dla interesariuszy.",
-          audience5Title: "🎓 Studenci i Samoucy",
-          audience5Text:
-            "Dokumentuj sesje nauki i kamienie milowe, aby widzieć postęp.",
-          audience6Title: "⚙️ Każdy, kto buduje wartość",
-          audience6Text:
-            "Jeśli chcesz lepiej mówić o swoich wynikach – MindReel tworzy pamięć Twojej pracy.",
-          ctaTitle: "Przestań Zapominać. Zacznij Budować Swoją Rolkę.",
-          ctaText:
-            "MindReel jest w 100% darmowy i open‑source. Pobierz go teraz i uzyskaj pierwsze podsumowanie AI już dziś. Bez okresów próbnych, bez subskrypcji – po prostu lepszy sposób na śledzenie swojej pracy.",
-          viewGithub: "Zobacz kod na GitHub",
-          ctaDisclaimer:
-            "Wsparcie dla dodatkowych systemów operacyjnych w przyszłych wersjach.",
-          footerTagline: "Inteligentna pamięć Twojej codziennej pracy.",
-          footerFeatures: "Open Source • Lokalna prywatność",
-          footerInfoTitle: "Informacje",
-          footerInfo1:
-            "Podsumowania generowane przez API openrouter.ai (efemeryczne przetwarzanie).",
-          footerInfo2: "Brak stałego backupu – wpisy tylko lokalnie.",
-          footerContactTitle: "Kontakt",
-          footerContact: "Masz pomysł na ulepszenie? Wyślij Issue na GitHub.",
-          footerRepo: "Repozytorium",
-          footerCopyright: "Wszystkie prawa zastrzeżone.",
-          navProblem: "Problem",
-          navSolution: "Rozwiązanie",
-          navHow: "Jak działa",
-          navWho: "Dla kogo",
-          navDownload: "Pobierz",
-        },
-        en: {
-          darkMode: "Dark Mode",
-          lightMode: "Light Mode",
-          heroTitle:
-            'Stop Forgetting Your Wins.<br />Start Building Your "Highlight Reel".',
-          heroSubtitle:
-            "MindReel is a free, open-source desktop app that helps you log daily tasks and uses AI to generate powerful summaries of your achievements. Perfect for reports, meetings, and tracking progress.",
-          downloadFree: "Download for Free",
-          learnMore: "Learn More",
-          trustBadge: "100% Free & Open Source. No ads, no subscriptions.",
-          aiReelTitle: "AI Reel – Summary",
-          example1: "• Improved authentication and error handling (Supabase)",
-          example2: "• Added global shortcut for quick entry",
-          example3: "• Enhanced performance of daily entries list",
-          example4: "• Edit / delete support + x2/x3 grouping",
-          example5: "• Free summaries limit and renewal cycle",
-          exampleCaption: 'Example "Highlight Reel" • Generated automatically',
-          popupPlaceholder: "[Pop‑up Screenshot]",
-          problemTitle: "That moment of hesitation at your weekly meeting...",
-          problem1Title: "Blank Mind",
-          problem1Text:
-            "Trying to remember what you actually did last Tuesday to update your status?",
-          problem2Title: "Lost Achievements",
-          problem2Text:
-            "Found a clever solution or completed a key task – only to forget it at the next review?",
-          problem3Title: "Wasted Time",
-          problem3Text:
-            "Spend 15 minutes before each meeting piecing together progress from notes, emails, and logs?",
-          solutionTitle: "MindReel Remembers for You.",
-          solutionIntro:
-            "MindReel is your personal documentarian. It works like a film camera for your career.",
-          recordsFrames: 'Records "frames"',
-          recordsFramesText:
-            'Discreetly asks what you\'re working on. Each answer is a single "frame" of your daily work.',
-          editsReel: 'Edits the "reel"',
-          editsReelText:
-            'AI analyzes all frames and automatically assembles them into a cohesive "highlight reel" – the perfect summary of your accomplishments.',
-          mockupPlaceholder:
-            '[Main window mockup with "frames" list and weekly card]',
-          howTitle: "Effortless Logging. Powerful Summaries.",
-          step1Title: "Step 1: Log in 10 Seconds",
-          step1Text:
-            'Every hour a discreet pop‑up appears. With "Same as an hour ago" and "snooze" options, logging takes seconds.',
-          step1Screenshot: "[Pop‑up Screenshot]",
-          step2Title: "Step 2: Focus on Work",
-          step2Text:
-            "Just... work. MindReel quietly builds a complete, searchable list of your tasks, solutions, and successes.",
-          step2Screenshot: "[Daily entries list screenshot]",
-          step3Title: 'Step 3: Generate Your "AI Reel"',
-          step3Text:
-            'One click – get a concise, intelligent summary of your week or sprint. Ready for email, reports, or your "brag document".',
-          step3Screenshot: "[AI Reel Screenshot]",
-          audienceTitle: "For Everyone Who Wants to Track Their Progress.",
-          audience1Title: "🛠 Developers & Engineers",
-          audience1Text:
-            "Perfect log of tasks, fixes, and solutions for stand‑ups and retrospectives.",
-          audience2Title: "🎨 Designers & Creators",
-          audience2Text: "Track iterations, project time, and client feedback.",
-          audience3Title: "📚 Writers & Researchers",
-          audience3Text:
-            "Document progress in drafts, research phases, and key discoveries.",
-          audience4Title: "👥 Managers & Leaders",
-          audience4Text:
-            "Aggregate achievements for weekly reports and stakeholder updates.",
-          audience5Title: "🎓 Students & Self-learners",
-          audience5Text:
-            "Document learning sessions and milestones to see your progress.",
-          audience6Title: "⚙️ Anyone Building Value",
-          audience6Text:
-            "If you want to speak better about your results – MindReel creates memory of your work.",
-          ctaTitle: "Stop Forgetting. Start Building Your Reel.",
-          ctaText:
-            "MindReel is 100% free and open‑source. Download it now and get your first AI summary today. No trials, no subscriptions – just a better way to track your work.",
-          viewGithub: "View Code on GitHub",
-          ctaDisclaimer:
-            "Support for additional operating systems in future versions.",
-          footerTagline: "Smart memory of your daily work.",
-          footerFeatures: "Open Source • Local privacy",
-          footerInfoTitle: "Information",
-          footerInfo1:
-            "Summaries generated by openrouter.ai API (ephemeral processing).",
-          footerInfo2: "No permanent backup – entries stored locally only.",
-          footerContactTitle: "Contact",
-          footerContact:
-            "Have an idea for improvement? Submit an Issue on GitHub.",
-          footerRepo: "Repository",
-          footerCopyright: "All rights reserved.",
-          navProblem: "Problem",
-          navSolution: "Solution",
-          navHow: "How it works",
-          navWho: "Who is it for",
-          navDownload: "Download",
-        },
-      };
-
-      let currentLang = "pl";
-
-      function setLanguage(lang) {
-        currentLang = lang;
-        document.documentElement.lang = lang;
-
-        // Update all i18n elements
-        document.querySelectorAll("[data-i18n]").forEach((el) => {
-          const key = el.getAttribute("data-i18n");
-          if (translations[lang][key]) {
-            el.innerHTML = translations[lang][key];
-          }
-        });
-
-        // Update navigation
-        const navMap = {
-          problem: "navProblem",
-          solution: "navSolution",
-          how: "navHow",
-          who: "navWho",
-          download: "navDownload",
-        };
-
-        document.querySelectorAll("[data-i18n-nav]").forEach((el) => {
-          const key = el.getAttribute("data-i18n-nav");
-          if (navMap[key] && translations[lang][navMap[key]]) {
-            el.textContent = translations[lang][navMap[key]];
-          }
-        });
-
-        // Update language toggle button
-        document.getElementById("langToggle").textContent =
-          lang === "pl" ? "EN" : "PL";
-
-        // Update mode toggle
-        const isDark = document.documentElement.classList.contains("dark");
-        updateModeToggle(isDark);
-
-        // Store preference
-        localStorage.setItem("preferredLang", lang);
-      }
-
-      function updateModeToggle(isDark) {
-        const modeToggle = document.getElementById("modeToggle");
-        const key = isDark ? "lightMode" : "darkMode";
-        modeToggle.querySelector("[data-i18n]").textContent =
-          translations[currentLang][key];
-      }
-
-      // Year in footer
-      const yearEl = document.getElementById("year");
-      yearEl.textContent = new Date().getFullYear();
-
-      // Language toggle
-      const langToggle = document.getElementById("langToggle");
-      langToggle.addEventListener("click", () => {
-        setLanguage(currentLang === "pl" ? "en" : "pl");
-      });
-
-      // Dark mode toggle
-      const modeToggle = document.getElementById("modeToggle");
-      modeToggle.addEventListener("click", () => {
-        document.documentElement.classList.toggle("dark");
-        const isDark = document.documentElement.classList.contains("dark");
-        updateModeToggle(isDark);
-      });
-
-      // OS detection for download buttons
-      function detectOS() {
-        const p = (navigator.platform || "").toLowerCase();
-        const ua = (navigator.userAgent || "").toLowerCase();
-        if (p.includes("mac") || ua.includes("mac"))
-          return currentLang === "pl" ? "macOS" : "macOS";
-        if (p.includes("win") || ua.includes("win")) return "Windows";
-        if (p.includes("linux") || p.includes("x11") || ua.includes("linux"))
-          return "Linux";
-        return currentLang === "pl" ? "Twój OS" : "Your OS";
-      }
-
-      function updateDownloadButtons() {
-        const os = detectOS();
-        const prefix = currentLang === "pl" ? "dla" : "for";
-        document.querySelectorAll("[data-dl-label]").forEach((btn) => {
-          const downloadText = translations[currentLang].downloadFree;
-          btn.querySelector("[data-i18n]").textContent =
-            `${downloadText} ${prefix} ${os}`;
-        });
-      }
-
-      // Initialize with saved preference or browser language
-      const savedLang = localStorage.getItem("preferredLang");
-      const browserLang = navigator.language.toLowerCase().startsWith("pl")
-        ? "pl"
-        : "en";
-      setLanguage(savedLang || browserLang);
-      updateDownloadButtons();
-    </script>
+    <script src="modern.js"></script>
   </body>
 </html>
