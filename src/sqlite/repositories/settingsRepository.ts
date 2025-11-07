@@ -4,9 +4,6 @@ import type { Settings, UpdateSettingsInput } from "../types";
 export class SettingsRepository {
   constructor(private db: sqlite3.Database) {}
 
-  /**
-   * Get the current settings (singleton row)
-   */
   async getSettings(): Promise<Settings | null> {
     return new Promise((resolve, reject) => {
       const sql = "SELECT * FROM settings WHERE id = 1";
@@ -22,12 +19,8 @@ export class SettingsRepository {
     });
   }
 
-  /**
-   * Update settings (creates if doesn't exist)
-   */
   async updateSettings(input: UpdateSettingsInput): Promise<Settings> {
     return new Promise((resolve, reject) => {
-      // First try to get current settings
       this.getSettings()
         .then((currentSettings) => {
           const newSettings: Settings = {
@@ -38,16 +31,24 @@ export class SettingsRepository {
               input.global_shortcut !== undefined
                 ? input.global_shortcut
                 : (currentSettings?.global_shortcut ?? null),
+            onboarding_completed:
+              input.onboarding_completed !== undefined
+                ? input.onboarding_completed
+                : (currentSettings?.onboarding_completed ?? 0),
           };
 
           const sql = `
-            INSERT OR REPLACE INTO settings (id, popup_interval_minutes, global_shortcut)
-            VALUES (1, ?, ?)
+            INSERT OR REPLACE INTO settings (id, popup_interval_minutes, global_shortcut, onboarding_completed)
+            VALUES (1, ?, ?, ?)
           `;
 
           this.db.run(
             sql,
-            [newSettings.popup_interval_minutes, newSettings.global_shortcut],
+            [
+              newSettings.popup_interval_minutes,
+              newSettings.global_shortcut,
+              newSettings.onboarding_completed,
+            ],
             (err) => {
               if (err) {
                 reject(err);
@@ -62,39 +63,39 @@ export class SettingsRepository {
     });
   }
 
-  /**
-   * Update popup interval
-   */
   async updatePopupInterval(minutes: number): Promise<Settings> {
     return this.updateSettings({ popup_interval_minutes: minutes });
   }
 
-  /**
-   * Update global shortcut
-   */
   async updateGlobalShortcut(shortcut: string | null): Promise<Settings> {
     return this.updateSettings({ global_shortcut: shortcut });
   }
 
-  /**
-   * Reset settings to defaults
-   */
+  async updateOnboardingCompleted(completed: number): Promise<Settings> {
+    return this.updateSettings({ onboarding_completed: completed });
+  }
+
   async resetSettings(): Promise<Settings> {
     return new Promise((resolve, reject) => {
       const defaultSettings: Settings = {
         id: 1,
         popup_interval_minutes: 60,
         global_shortcut: "Option+Command+Space",
+        onboarding_completed: 0,
       };
 
       const sql = `
-        INSERT OR REPLACE INTO settings (id, popup_interval_minutes, global_shortcut)
-        VALUES (1, ?, ?)
+        INSERT OR REPLACE INTO settings (id, popup_interval_minutes, global_shortcut, onboarding_completed)
+        VALUES (1, ?, ?, ?)
       `;
 
       this.db.run(
         sql,
-        [defaultSettings.popup_interval_minutes, defaultSettings.global_shortcut],
+        [
+          defaultSettings.popup_interval_minutes,
+          defaultSettings.global_shortcut,
+          defaultSettings.onboarding_completed,
+        ],
         (err) => {
           if (err) {
             reject(err);
@@ -107,9 +108,6 @@ export class SettingsRepository {
     });
   }
 
-  /**
-   * Check if settings exist
-   */
   async settingsExist(): Promise<boolean> {
     return new Promise((resolve, reject) => {
       const sql = "SELECT COUNT(*) as count FROM settings WHERE id = 1";
@@ -125,9 +123,6 @@ export class SettingsRepository {
     });
   }
 
-  /**
-   * Initialize default settings if they don't exist
-   */
   async initializeDefaults(): Promise<Settings> {
     const exists = await this.settingsExist();
 

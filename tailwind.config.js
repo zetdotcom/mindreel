@@ -3,6 +3,7 @@
  */
 
 export default {
+  content: ["./src/**/*.{js,ts,jsx,tsx}", "./landing-page/*.html"],
   theme: {
     extend: {
       fontFamily: {
@@ -45,37 +46,33 @@ export default {
         },
       },
       boxShadow: {
-        brutal: "0 0 0 2px #3e4b54, 0 0 8px 2px rgba(65,101,123,0.4)",
-        "brutal-lg": "0 0 0 2px #41657b, 0 0 10px 3px rgba(65,101,123,0.45)",
-        "brutal-xl": "0 0 0 2px #41657b, 0 0 14px 4px rgba(62,75,84,0.5)",
-        "brutal-2xl": "0 0 0 2px #41657b, 0 0 18px 6px rgba(62,75,84,0.55)",
-        "brutal-primary": "0 0 0 2px #c78226, 0 0 10px 2px rgba(199,130,38,0.45)",
-        "brutal-primary-lg": "0 0 0 2px #c78226, 0 0 14px 3px rgba(199,130,38,0.5)",
-        "brutal-secondary": "0 0 0 2px #41657b, 0 0 8px 2px rgba(65,101,123,0.4)",
-        "brutal-accent": "0 0 0 2px #b9486d, 0 0 12px 3px rgba(185,72,109,0.5)",
-        "brutal-destructive": "0 0 0 2px #b9486d, 0 0 12px 3px rgba(149,51,86,0.55)",
-        glow: "0 0 4px 1px rgba(65,101,123,0.4), 0 0 10px 4px rgba(199,130,38,0.25)",
-        "glow-subtle": "0 0 3px 1px rgba(62,75,84,0.35)",
+        sm: "0 2px 8px rgba(0, 0, 0, 0.3)",
+        DEFAULT: "0 4px 12px rgba(0, 0, 0, 0.4)",
+        lg: "0 8px 24px rgba(0, 0, 0, 0.5)",
+        glow: "0 0 20px rgba(45, 212, 191, 0.3)",
+        "glow-strong": "0 0 30px rgba(45, 212, 191, 0.5)",
       },
       colors: {
         brand: {
-          dark: "#3e4b54",
-          steel: "#41657b",
-          light: "#c2d0db",
-          warm: "#c78226",
+          cyan: "#2DD4BF",
+          blue: "#38BDF8",
+          slate: {
+            900: "#0f172a",
+            800: "#1e293b",
+            700: "#334155",
+            400: "#94a3b8",
+            100: "#f1f5f9",
+          },
         },
-        spice: {
-          DEFAULT: "#b9486d",
-          light: "#d8648b",
-          dark: "#953356",
-        },
-        primary: "#41657b",
-        secondary: "#3e4b54",
-        accent: "#c78226",
-        muted: "#c2d0db",
-        foreground: "#3e4b54",
-        background: "#ffffff",
+        primary: "#2DD4BF",
+        secondary: "#38BDF8",
+        accent: "#2DD4BF",
+        muted: "#94a3b8",
+        foreground: "#f1f5f9",
+        background: "#0f172a",
+        "background-secondary": "#1e293b",
         destructive: "#b9486d",
+        border: "#334155",
       },
       borderRadius: {
         lg: "0.75rem",
@@ -83,10 +80,9 @@ export default {
         "2xl": "1.25rem",
       },
       backgroundImage: {
-        "card-gradient": "linear-gradient(135deg, #c2d0db 0%, #ffffff 45%, #e3e9ed 100%)",
-        "button-primary": "linear-gradient(135deg, #41657b 0%, #3e4b54 60%, #41657b 100%)",
-        "button-warm": "linear-gradient(135deg, #c78226 0%, #d69745 55%, #e3a857 100%)",
-        "button-accent": "linear-gradient(135deg, #b9486d 0%, #953356 70%, #b9486d 100%)",
+        "gradient-primary": "linear-gradient(135deg, #2DD4BF 0%, #38BDF8 100%)",
+        "card-gradient": "linear-gradient(135deg, #1e293b 0%, #334155 100%)",
+        "button-primary": "linear-gradient(135deg, #2DD4BF 0%, #38BDF8 100%)",
       },
       borderWidth: {
         3: "3px",

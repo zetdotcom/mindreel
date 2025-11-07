@@ -268,7 +268,65 @@ const migration002: Migration = {
   },
 };
 
-export const migrations: Migration[] = [migration001, migration002];
+/**
+ * Migration 3: Add onboarding_completed column to settings
+ */
+const migration003: Migration = {
+  id: 3,
+  name: "add_onboarding_completed_to_settings",
+  up: async (db: sqlite3.Database): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      db.serialize(() => {
+        const checkColumnExists = (): Promise<boolean> => {
+          return new Promise((resolve, reject) => {
+            db.all(`PRAGMA table_info(settings)`, [], (err, rows: any[]) => {
+              if (err) {
+                reject(err);
+                return;
+              }
+              const columnExists = rows.some((row) => row.name === "onboarding_completed");
+              resolve(columnExists);
+            });
+          });
+        };
+
+        checkColumnExists()
+          .then((exists) => {
+            if (exists) {
+              console.log("onboarding_completed column already exists in settings table");
+              resolve();
+              return;
+            }
+            return new Promise<void>((resolve, reject) => {
+              db.run(
+                "ALTER TABLE settings ADD COLUMN onboarding_completed INTEGER NOT NULL DEFAULT 0",
+                (err) => {
+                  if (err) {
+                    reject(err);
+                    return;
+                  }
+                  console.log(
+                    "Migration 003 completed: Added onboarding_completed column to settings",
+                  );
+                  resolve();
+                },
+              );
+            });
+          })
+          .then(() => resolve())
+          .catch(reject);
+      });
+    });
+  },
+  down: async (db: sqlite3.Database): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      console.log("Migration 003 rollback: SQLite doesn't support DROP COLUMN - skipping rollback");
+      resolve();
+    });
+  },
+};
+
+export const migrations: Migration[] = [migration001, migration002, migration003];
 
 export class MigrationRunner {
   private db: sqlite3.Database;

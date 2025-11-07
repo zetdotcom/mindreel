@@ -33,32 +33,24 @@ export function SettingsView() {
           {loading ? (
             <p className="text-sm text-muted-foreground">Loading settings...</p>
           ) : (
-            <PopupIntervalControl
-              value={settings?.popup_interval_minutes ?? 60}
-              onChange={handleIntervalChange}
-            />
+            <div className="space-y-4">
+              <PopupIntervalControl
+                value={settings?.popup_interval_minutes ?? 60}
+                onChange={handleIntervalChange}
+              />
+
+              <div className="pt-4 border-t border-border/50">
+                <h3 className="text-sm font-medium mb-2">Global Shortcut</h3>
+                <p className="text-sm text-muted-foreground">
+                  Press{" "}
+                  <kbd className="px-2 py-1 text-xs font-semibold text-foreground bg-muted border border-border rounded">
+                    {settings?.global_shortcut ?? "Option+Command+Space"}
+                  </kbd>{" "}
+                  to open the capture window from anywhere.
+                </p>
+              </div>
+            </div>
           )}
-        </section>
-
-        <section className="rounded-lg border border-border bg-card p-6">
-          <h2 className="text-lg font-semibold mb-3">Data & Storage</h2>
-          <p className="text-sm text-muted-foreground">
-            Planned: database location display, local backup/export actions.
-          </p>
-        </section>
-
-        <section className="rounded-lg border border-border bg-card p-6">
-          <h2 className="text-lg font-semibold mb-3">Privacy</h2>
-          <p className="text-sm text-muted-foreground">
-            Planned: redaction rules, optional sync settings, analytics opt-in/out.
-          </p>
-        </section>
-
-        <section className="rounded-lg border border-border bg-card p-6">
-          <h2 className="text-lg font-semibold mb-3">Interface</h2>
-          <p className="text-sm text-muted-foreground">
-            Planned: theme, density, time display preferences.
-          </p>
         </section>
 
         <footer className="pt-4 border-t border-border/50">

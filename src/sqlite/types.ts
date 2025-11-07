@@ -21,6 +21,7 @@ export interface Settings {
   id: 1; // Always 1 for singleton
   popup_interval_minutes: number;
   global_shortcut: string | null;
+  onboarding_completed: number; // SQLite uses 0/1 for boolean
 }
 
 export interface CreateEntryInput {
@@ -38,6 +39,7 @@ export interface CreateSummaryInput {
 export interface UpdateSettingsInput {
   popup_interval_minutes?: number;
   global_shortcut?: string | null;
+  onboarding_completed?: number;
 }
 
 export interface WeekRange {
