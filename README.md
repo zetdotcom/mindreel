@@ -5,6 +5,8 @@
 [![Platform](https://img.shields.io/badge/platform-macOS-only.svg)](#project-scope)
 [![Status](https://img.shields.io/badge/status-MVP_in_development-orange.svg)](#project-status)
 
+## Landing page: [https://zetdotcom.github.io/mindreel](https://zetdotcom.github.io/mindreel)
+
 ## Project Description
 MindReel is a privacy‑first, intelligent macOS desktop application that helps software professionals effortlessly capture what they work on and automatically turn it into concise weekly summaries. Running unobtrusively in the background as a personal “professional memory,” it ensures no achievement is forgotten when preparing stand‑ups, sprint reviews, performance conversations, or interviews.
 
