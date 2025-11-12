@@ -119,18 +119,17 @@
           </div>
           <div class="hero-cta">
             <a
-              href="https://github.com/zetdotcom/mindreel/releases"
-              target="_blank"
-              class="btn btn-primary"
-              data-i18n="btn-download"
-              >Download for macOS</a
-            >
-            <a
               href="https://github.com/zetdotcom/mindreel"
               target="_blank"
-              class="btn btn-secondary"
+              class="btn btn-primary"
               data-i18n="btn-github"
               >View on GitHub</a
+            >
+            <a
+              href="#download"
+              class="btn btn-secondary"
+              data-i18n="btn-install"
+              >Installation</a
             >
           </div>
         </div>
@@ -382,16 +381,74 @@
             Ready to track your wins?
           </h2>
           <p class="download-subtitle" data-i18n="download-subtitle">
-            Download MindReel for macOS and start building your achievement
+            Build MindReel for macOS and start building your achievement
             history today.
           </p>
-          <a
-            href="https://github.com/zetdotcom/mindreel/releases"
-            target="_blank"
-            class="btn btn-download"
-            data-i18n="btn-download-main"
-            >Download for macOS</a
-          >
+
+          <div style="margin: 32px 0; padding: 24px; background: rgba(255,255,255,0.05); border-radius: 12px; text-align: left;">
+            <h3 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 600;">Installation Instructions</h3>
+
+            <p style="margin: 0 0 16px 0; opacity: 0.9;">MindReel is currently distributed as source code. Follow these steps to build and install:</p>
+
+            <div style="margin: 16px 0;">
+              <p style="margin: 0 0 8px 0; font-weight: 600;">Build steps:</p>
+              <ol style="margin: 0 0 16px 16px; opacity: 0.9;">
+                <li style="margin-bottom: 8px;">Get the source code:
+                  <p style="margin: 8px 0 4px 0; font-weight: 600; font-size: 14px;">Option A: Download ZIP (no git required)</p>
+                  <ul style="margin: 4px 0 8px 0; list-style: disc; padding-left: 20px;">
+                    <li>Download <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">Source code (zip)</code> from <a href="https://github.com/zetdotcom/mindreel/releases" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 600;">Releases</a></li>
+                    <li>Extract the ZIP and navigate to the folder</li>
+                  </ul>
+                  <pre style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; margin: 8px 0; overflow-x: auto;"><code>cd path/to/mindreel-1.0.0
+nvm use
+npm install</code></pre>
+                  <p style="margin: 8px 0 4px 0; font-weight: 600; font-size: 14px;">Option B: Clone with git</p>
+                  <pre style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; margin: 8px 0; overflow-x: auto;"><code>git clone https://github.com/zetdotcom/mindreel.git
+cd mindreel
+nvm use
+npm install</code></pre>
+                </li>
+                <li style="margin-bottom: 8px;">Build the application:
+                  <pre style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; margin: 8px 0; overflow-x: auto;"><code># For your current architecture
+npm run make
+
+# Or for specific architecture:
+npm run make:mac-intel    # Intel Macs (x64)
+npm run make:mac-arm      # Apple Silicon (arm64)</code></pre>
+                </li>
+                <li style="margin-bottom: 8px;">Find the DMG in <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">out/make/</code> directory</li>
+                <li>Install by opening the DMG and dragging MindReel to Applications</li>
+              </ol>
+            </div>
+
+undefined
+                <li style="margin-bottom: 8px;">Build the application:
+                  <pre style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; margin: 8px 0; overflow-x: auto;"><code># For your current architecture
+npm run make
+
+# Or for specific architecture:
+npm run make:mac-intel    # Intel Macs (x64)
+npm run make:mac-arm      # Apple Silicon (arm64)</code></pre>
+                </li>
+                <li style="margin-bottom: 8px;">Find the DMG in <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">out/make/</code> directory</li>
+                <li>Install by opening the DMG and dragging MindReel to Applications</li>
+              </ol>
+            </div>
+
+            <p style="margin: 16px 0 0 0; font-size: 14px; opacity: 0.7;">
+              For detailed instructions, see the <a href="https://github.com/zetdotcom/mindreel#building-for-distribution" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 600;">README</a>
+            </p>
+            <a
+                style="margin: 15px;"
+              href="https://github.com/zetdotcom/mindreel"
+              target="_blank"
+              class="btn btn-download"
+              data-i18n="btn-github-main"
+              >View on GitHub</a
+            >
+          </div>
+
+
           <div class="download-info">
             <div class="download-item">
               <svg
@@ -404,7 +461,7 @@
               >
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
-              <span data-i18n="download-info1">macOS 10.15+</span>
+              <span data-i18n="download-info1">macOS Intel & Apple Silicon</span>
             </div>
             <div class="download-item">
               <svg
