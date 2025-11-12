@@ -3,15 +3,69 @@
 [![Version](https://img.shields.io/badge/version-1.0.0-informational.svg)](./package.json)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](#license)
 [![Platform](https://img.shields.io/badge/platform-macOS-only.svg)](#project-scope)
-[![Status](https://img.shields.io/badge/status-MVP_in_development-orange.svg)](#project-status)
+[![Status](https://img.shields.io/badge/status-working_MVP-green.svg)](#project-status)
 
 ## Landing page: [https://zetdotcom.github.io/mindreel](https://zetdotcom.github.io/mindreel)
 
+## Installation
+
+MindReel supports macOS on both Intel (x64) and Apple Silicon (arm64) architectures.
+
+### Prerequisites
+- macOS (building requires macOS)
+- Node.js 22.x (install & activate with `nvm`)
+- npm (bundled with Node)
+
+### Build Instructions
+
+1. **Get the source code:**
+
+   **Option A: Download from releases (no git required)**
+   - Go to [Releases](https://github.com/zetdotcom/mindreel/releases)
+   - Download `Source code (zip)` from the latest release
+   - Extract the ZIP file
+   - Open Terminal and navigate to the extracted folder:
+   ```bash
+   cd path/to/mindreel-1.0.0
+   nvm use
+   npm install
+   ```
+
+   **Option B: Clone with git**
+   ```bash
+   git clone https://github.com/zetdotcom/mindreel.git
+   cd mindreel
+   nvm use
+   npm install
+   ```
+
+2. **Build the application:**
+```bash
+# Build for your current architecture (recommended)
+npm run make
+
+# Or build for specific architecture:
+npm run make:mac-intel    # Intel Macs (x64)
+npm run make:mac-arm      # Apple Silicon (arm64)
+npm run make:all          # Both architectures
+```
+
+3. **Locate the built application:**
+The build process creates a DMG installer in the `out/make/` directory:
+- `out/make/MindReel-darwin-x64/MindReel-*.dmg` (Intel)
+- `out/make/MindReel-darwin-arm64/MindReel-*.dmg` (Apple Silicon)
+
+4. **Install the application:**
+- Open the DMG file
+- Drag `MindReel.app` to your `/Applications` folder
+- Or directly copy `MindReel.app` from `out/MindReel-darwin-*/MindReel.app`
+
+
 ## Project Description
-MindReel is a privacy‑first, intelligent macOS desktop application that helps software professionals effortlessly capture what they work on and automatically turn it into concise weekly summaries. Running unobtrusively in the background as a personal “professional memory,” it ensures no achievement is forgotten when preparing stand‑ups, sprint reviews, performance conversations, or interviews.
+MindReel is a privacy‑first, intelligent macOS desktop application that helps software professionals effortlessly capture what they work on and automatically turn it into concise weekly summaries. Running unobtrusively in the background as a personal "professional memory," it ensures no achievement is forgotten when preparing stand‑ups, sprint reviews, performance conversations, or interviews.
 
 Key capabilities:
-- Frictionless capture: periodic lightweight popups & a global shortcut ask “What are you working on?”
+- Frictionless capture: periodic lightweight popups & a global shortcut ask "What are you working on?"
 - Structured daily history: entries grouped per day; consecutive identical entries collapsed (`xN`) only when uninterrupted
 - Automatic weekly AI summaries (authenticated + consenting users) every Sunday 23:00
 - Local‑first by default: data stays on your machine unless you opt in to summaries
@@ -24,13 +78,14 @@ Problems solved:
 - Lack of longitudinal, self-generated activity records
 
 ## Table of Contents
-1. [Project Description](#project-description)
-2. [Tech Stack](#tech-stack)
-3. [Getting Started Locally](#getting-started-locally)
-4. [Available Scripts](#available-scripts)
-5. [Project Scope](#project-scope)
-6. [Project Status](#project-status)
-7. [License](#license)
+1. [Installation](#installation)
+2. [Project Description](#project-description)
+3. [Tech Stack](#tech-stack)
+4. [Getting Started Locally](#getting-started-locally)
+5. [Available Scripts](#available-scripts)
+6. [Project Scope](#project-scope)
+7. [Project Status](#project-status)
+8. [License](#license)
 
 ## Tech Stack
 Implemented / Declared:
@@ -85,18 +140,85 @@ npm run format:write   # Apply formatting changes
 npm run validate       # typecheck + lint combo
 ```
 
-### Packaging (Distributables)
-Create signed/packaged artifacts (depends on platform & maker config):
+### Tailwind CSS v4 Notes
+Tailwind v4 uses a CSS-first approach:
+- Global import:
+  ```css
+  @import "tailwindcss";
+  ```
+- Design tokens via `@theme`
+- Custom utilities via `@utility`
+A minimal or absent `tailwind.config.js` is acceptable until extended customization is needed.
+
+
+
+### Debugging Forge + Vite Startup
+If startup stalls at "Building main process and preload bundles…":
 ```bash
+DEBUG=@electron-forge:plugin-vite*,vite:* npm run start
+```
+
+### Run in Development
+```bash
+npm start
+```
+Starts Electron (main process) and the Vite dev server for the renderer (hot reload).
+
+### Quality & Type Safety
+```bash
+npm run typecheck      # TypeScript type validation (no emit)
+npm run lint           # Biome lint & diagnostics
+npm run lint:fix       # Apply Biome autofixes
+npm run format         # Check formatting
+npm run format:write   # Apply formatting changes
+npm run validate       # typecheck + lint combo
+```
+
+### Building for Distribution
+
+MindReel supports macOS on both Intel (x64) and Apple Silicon (arm64) architectures.
+
+#### Prerequisites
+- macOS (building requires macOS)
+- Node.js 22.x (install & activate with `nvm`)
+- npm (bundled with Node)
+
+#### Build Instructions
+
+1. **Clone and install dependencies:**
+```bash
+git clone https://github.com/zetdotcom/mindreel.git
+cd mindreel
+nvm use
+npm install
+```
+
+2. **Build the application:**
+```bash
+# Build for your current architecture (recommended)
 npm run make
+
+# Or build for specific architecture:
+npm run make:mac-intel    # Intel Macs (x64)
+npm run make:mac-arm      # Apple Silicon (arm64)
+npm run make:all          # Both architectures
 ```
-Raw package (no installer):
+
+3. **Locate the built application:**
+The build process creates a DMG installer in the `out/make/` directory:
+- `out/make/MindReel-darwin-x64/MindReel-*.dmg` (Intel)
+- `out/make/MindReel-darwin-arm64/MindReel-*.dmg` (Apple Silicon)
+
+4. **Install the application:**
+- Open the DMG file
+- Drag `MindReel.app` to your `/Applications` folder
+- Or directly copy `MindReel.app` from `out/MindReel-darwin-*/MindReel.app`
+
+#### Publishing (Maintainers Only)
+Publish artifacts to GitHub releases:
 ```bash
-npm run package
-```
-Publish artifacts (requires publisher setup):
-```bash
-npm run publish
+npm run make:all    # Build both architectures first
+npm run publish     # Uploads to GitHub releases
 ```
 
 ### Tailwind CSS v4 Notes
@@ -123,6 +245,9 @@ DEBUG=@electron-forge:plugin-vite*,vite:* npm run start
 | `start` | Launch Electron + Vite in development |
 | `package` | Create a raw packaged application bundle |
 | `make` | Build distributable installers / archives via makers |
+| `make:mac-intel` | Build DMG installer for Intel Macs (x64) |
+| `make:mac-arm` | Build DMG installer for Apple Silicon (arm64) |
+| `make:all` | Build DMG installers for both Intel and Apple Silicon |
 | `publish` | Publish artifacts (requires configuration) |
 | `typecheck` | TypeScript compile check without emitting JS |
 | `lint` | Run Biome lint & analysis |
