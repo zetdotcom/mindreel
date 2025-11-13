@@ -83,9 +83,10 @@ Problems solved:
 3. [Tech Stack](#tech-stack)
 4. [Getting Started Locally](#getting-started-locally)
 5. [Available Scripts](#available-scripts)
-6. [Project Scope](#project-scope)
-7. [Project Status](#project-status)
-8. [License](#license)
+6. [Release Workflow](#release-workflow)
+7. [Project Scope](#project-scope)
+8. [Project Status](#project-status)
+9. [License](#license)
 
 ## Tech Stack
 Implemented / Declared:
@@ -255,6 +256,50 @@ DEBUG=@electron-forge:plugin-vite*,vite:* npm run start
 | `format` | Check formatting |
 | `format:write` | Apply formatting changes |
 | `validate` | Composite: `typecheck` + `lint` |
+| `version:patch` | Manually bump patch version (1.0.0 → 1.0.1) |
+| `version:minor` | Manually bump minor version (1.0.0 → 1.1.0) |
+| `version:major` | Manually bump major version (1.0.0 → 2.0.0) |
+
+## Release Workflow
+
+MindReel uses an automated release workflow that triggers on every merge to `main`. The workflow automatically:
+
+1. ✅ Validates code quality (typecheck + lint)
+2. ✅ Runs tests
+3. 🔢 Bumps version based on commit messages
+4. 🏷️ Creates git tag
+5. 📦 Builds app for macOS (Intel + ARM64)
+6. 🚀 Publishes to GitHub Releases
+
+### Automatic Versioning
+
+Version bumps are determined by your commit message using [Conventional Commits](https://www.conventionalcommits.org/):
+
+| Commit Type | Version Bump | Example |
+|-------------|--------------|---------|
+| `BREAKING CHANGE` or `feat!:` / `fix!:` | **Major** (1.0.0 → 2.0.0) | `feat!: redesign database schema` |
+| `feat:` or `feat(scope):` | **Minor** (1.0.0 → 1.1.0) | `feat: add export functionality` |
+| Any other commit | **Patch** (1.0.0 → 1.0.1) | `fix: resolve crash on startup` |
+
+### Quick Start
+
+```bash
+# Bug fix (creates patch release: 1.0.0 → 1.0.1)
+git commit -m "fix: resolve memory leak in capture window"
+
+# New feature (creates minor release: 1.0.0 → 1.1.0)
+git commit -m "feat: add dark mode support"
+
+# Breaking change (creates major release: 1.0.0 → 2.0.0)
+git commit -m "feat!: migrate to new database schema"
+
+# Merge to main → automatic release! 🎉
+```
+
+**For detailed documentation:**
+- [Quick Release Guide](./docs/QUICK_RELEASE_GUIDE.md) - TL;DR with examples
+- [Full Release Workflow Documentation](./docs/release-workflow.md) - Complete details
+- [CHANGELOG.md](./CHANGELOG.md) - Project history
 
 ## Project Scope
 

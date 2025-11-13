@@ -1,0 +1,102 @@
+name: Release
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  release:
+    # Only run if PR was merged (not just closed)
+    if: github.event.pull_request.merged == true
+    runs-on: macos-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run validation
+        run: npm run validate
+
+      - name: Run tests
+        run: npm run test:run
+
+      - name: Bump version
+        id: version
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          # Get the merge commit message (last commit)
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+
+          # Use PR title if available, otherwise use commit message
+          if [ -n "$PR_TITLE" ]; then
+            MESSAGE="$PR_TITLE"
+            echo "Using PR title: $MESSAGE"
+          else
+            MESSAGE="$COMMIT_MSG"
+            echo "Using commit message: $MESSAGE"
+          fi
+
+          # Also check PR body for BREAKING CHANGE
+          FULL_TEXT="$MESSAGE $PR_BODY"
+
+          # Determine version bump type from message
+          if [[ $FULL_TEXT == *"BREAKING CHANGE"* ]] || [[ $MESSAGE == feat!:* ]] || [[ $MESSAGE == fix!:* ]]; then
+            VERSION_TYPE="major"
+          elif [[ $MESSAGE == feat:* ]] || [[ $MESSAGE == feat\(*)* ]]; then
+            VERSION_TYPE="minor"
+          else
+            VERSION_TYPE="patch"
+          fi
+
+          echo "Version bump type: $VERSION_TYPE"
+
+          # Bump version
+          npm version $VERSION_TYPE -m "chore: bump version to %s [skip ci]"
+
+          # Get new version
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+          # Push version commit and tag
+          git push origin main --follow-tags
+
+      - name: Build and Publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run publish
+
+      - name: Publish Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get the draft release created by electron-forge
+          RELEASE_ID=$(gh release list --limit 1 --json id,isDraft --jq '.[] | select(.isDraft == true) | .id')
+
+          if [ -n "$RELEASE_ID" ]; then
+            # Publish the draft release
+            gh release edit $(gh release list --limit 1 --json tagName,isDraft --jq '.[] | select(.isDraft == true) | .tagName') --draft=false
+            echo "Published release v${{ steps.version.outputs.new_version }}"
+          else
+            echo "No draft release found"
+          fi
