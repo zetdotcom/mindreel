@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Refreshed the macOS app icon with a native-first master asset and reproducible icon generation script
+- Expanded the history view default window from two weeks to four weeks before pagination
 
 ### Deprecated
 

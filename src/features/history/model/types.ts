@@ -121,5 +121,5 @@ export interface DuplicateDetectionResult {
 }
 
 // Constants
-export const PAGE_WEEK_COUNT = 2;
+export const PAGE_WEEK_COUNT = 4;
 export const MAX_ENTRY_LENGTH = 500;

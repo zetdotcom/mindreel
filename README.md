@@ -314,6 +314,7 @@ git commit -m "feat!: migrate to new database schema"
 - Add entry from main window
 - Daily history view:
   - One card per day (date + weekday)
+  - Latest four weeks loaded by default; older weeks available via pagination
   - Timestamped entries
   - Consecutive identical entries compressed with `xN` label (uninterrupted sequences only)
   - Edit / delete entries
