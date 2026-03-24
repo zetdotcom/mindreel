@@ -11,6 +11,7 @@
     "make:mac-intel": "electron-forge make --platform=darwin --arch=x64",
     "make:mac-arm": "electron-forge make --platform=darwin --arch=arm64",
     "make:all": "npm run make:mac-intel && npm run make:mac-arm",
+    "icons:generate": "node scripts/generate-icons.mjs",
     "publish": "electron-forge publish",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",

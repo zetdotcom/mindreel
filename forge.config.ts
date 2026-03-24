@@ -8,7 +8,7 @@ import type { ForgeConfig } from "@electron-forge/shared-types";
 
 const config: ForgeConfig = {
   packagerConfig: {
-    icon: "./assets/icons/icon",
+    icon: "./assets/icon",
     asar: {
       unpack: "*.{node,dll}",
     },
@@ -16,10 +16,10 @@ const config: ForgeConfig = {
   },
   rebuildConfig: {},
   hooks: {
-    packageAfterCopy: async (_config, buildPath, _electronVersion, platform, arch) => {
-      const { execSync } = require("child_process");
-      const fs = require("fs");
-      const path = require("path");
+    packageAfterCopy: async (_config, buildPath, _electronVersion, _platform, _arch) => {
+      const { execSync } = require("node:child_process");
+      const fs = require("node:fs");
+      const path = require("node:path");
 
       const packageJsonPath = path.join(buildPath, "package.json");
       if (!fs.existsSync(packageJsonPath)) {
@@ -46,7 +46,7 @@ const config: ForgeConfig = {
       {
         name: "MindReel",
         background: undefined,
-        icon: "./assets/icons/icon.icns",
+        icon: "./assets/icon.icns",
       },
       ["darwin"],
     ),

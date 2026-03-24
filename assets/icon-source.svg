@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none">
+  <defs>
+    <linearGradient id="bgGradient" x1="512" y1="84" x2="512" y2="940" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#295E97" />
+      <stop offset="0.52" stop-color="#2479B7" />
+      <stop offset="1" stop-color="#39C8D8" />
+    </linearGradient>
+    <radialGradient id="discGradient" cx="0" cy="0" r="1" gradientTransform="translate(420 300) rotate(52.7) scale(646 646)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#64869B" />
+      <stop offset="0.62" stop-color="#4D6A7B" />
+      <stop offset="1" stop-color="#324A58" />
+    </radialGradient>
+    <linearGradient id="discEdge" x1="512" y1="184" x2="512" y2="840" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#86A8B8" />
+      <stop offset="1" stop-color="#567588" />
+    </linearGradient>
+    <linearGradient id="playGradient" x1="512" y1="382" x2="512" y2="646" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" />
+      <stop offset="1" stop-color="#DCE8F1" />
+    </linearGradient>
+    <linearGradient id="holeGradient" x1="512" y1="250" x2="512" y2="774" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#111B23" />
+      <stop offset="1" stop-color="#273640" />
+    </linearGradient>
+    <filter id="iconShadow" x="40" y="56" width="944" height="944" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+      <feOffset dy="28" />
+      <feGaussianBlur stdDeviation="24" />
+      <feColorMatrix type="matrix" values="0 0 0 0 0.0627 0 0 0 0 0.149 0 0 0 0 0.2627 0 0 0 0.26 0" />
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_1" />
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_1" result="shape" />
+    </filter>
+    <filter id="discShadow" x="164" y="164" width="696" height="696" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+      <feOffset dy="16" />
+      <feGaussianBlur stdDeviation="18" />
+      <feColorMatrix type="matrix" values="0 0 0 0 0.0431 0 0 0 0 0.0902 0 0 0 0 0.1451 0 0 0 0.28 0" />
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_1" />
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_1" result="shape" />
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha2" />
+      <feOffset dy="-12" />
+      <feGaussianBlur stdDeviation="14" />
+      <feComposite in2="hardAlpha2" operator="arithmetic" k2="-1" k3="1" />
+      <feColorMatrix type="matrix" values="0 0 0 0 0.93 0 0 0 0 0.98 0 0 0 0 1 0 0 0 0.18 0" />
+      <feBlend mode="screen" in2="shape" result="effect2_innerShadow_1_1" />
+    </filter>
+    <filter id="playShadow" x="400" y="370" width="292" height="324" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+      <feOffset dy="18" />
+      <feGaussianBlur stdDeviation="14" />
+      <feColorMatrix type="matrix" values="0 0 0 0 0.0471 0 0 0 0 0.1412 0 0 0 0 0.2275 0 0 0 0.35 0" />
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_1" />
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_1" result="shape" />
+    </filter>
+    <clipPath id="iconClip">
+      <rect x="84" y="84" width="856" height="856" rx="188" />
+    </clipPath>
+  </defs>
+
+  <g filter="url(#iconShadow)">
+    <rect x="84" y="84" width="856" height="856" rx="188" fill="url(#bgGradient)" />
+    <g clip-path="url(#iconClip)">
+      <path d="M84 372C176 330 286 310 414 310H940V636H84V372Z" fill="#4FC7FB" opacity="0.16" />
+      <path d="M84 154C220 110 420 100 636 138C768 162 868 206 940 254V84H84V154Z" fill="#FFFFFF" opacity="0.11" />
+      <path d="M140 836C262 882 416 900 598 884C748 870 860 834 940 784V940H84V804C100 816 118 826 140 836Z" fill="#FFFFFF" opacity="0.08" />
+    </g>
+    <rect x="90" y="90" width="844" height="844" rx="182" stroke="#FFFFFF" stroke-opacity="0.14" stroke-width="12" />
+  </g>
+
+  <g filter="url(#discShadow)">
+    <circle cx="512" cy="512" r="326" fill="url(#discGradient)" />
+    <circle cx="512" cy="512" r="318" stroke="url(#discEdge)" stroke-width="10" stroke-opacity="0.72" />
+    <circle cx="512" cy="512" r="276" stroke="#C9E8F8" stroke-opacity="0.1" stroke-width="8" />
+  </g>
+
+  <g transform="rotate(-12 512 512)">
+    <g fill="url(#holeGradient)">
+      <circle cx="512" cy="224" r="72" />
+      <circle cx="715.65" cy="308.35" r="72" />
+      <circle cx="800" cy="512" r="72" />
+      <circle cx="715.65" cy="715.65" r="72" />
+      <circle cx="512" cy="800" r="72" />
+      <circle cx="308.35" cy="715.65" r="72" />
+      <circle cx="224" cy="512" r="72" />
+      <circle cx="308.35" cy="308.35" r="72" />
+    </g>
+    <g fill="url(#holeGradient)" opacity="0.92">
+      <circle cx="512" cy="294" r="30" />
+      <circle cx="666.15" cy="357.85" r="30" />
+      <circle cx="730" cy="512" r="30" />
+      <circle cx="666.15" cy="666.15" r="30" />
+      <circle cx="512" cy="730" r="30" />
+      <circle cx="357.85" cy="666.15" r="30" />
+      <circle cx="294" cy="512" r="30" />
+      <circle cx="357.85" cy="357.85" r="30" />
+    </g>
+  </g>
+
+  <circle cx="512" cy="512" r="136" fill="#2F4350" fill-opacity="0.32" />
+  <circle cx="512" cy="512" r="128" stroke="#D5F0FF" stroke-opacity="0.08" stroke-width="4" />
+
+  <g filter="url(#playShadow)">
+    <path d="M458 402C458 382 479.8 369.3 497.4 379.3L650.8 467.4C668.4 477.5 668.4 502.9 650.8 513L497.4 601.1C479.8 611.2 458 598.4 458 578.4V402Z" fill="url(#playGradient)" />
+  </g>
+
+  <path d="M166 170C212 138 275 122 354 122" stroke="#FFFFFF" stroke-opacity="0.34" stroke-linecap="round" stroke-width="18" />
+  <path d="M848 798C824 826 792 850 752 870" stroke="#FFFFFF" stroke-opacity="0.16" stroke-linecap="round" stroke-width="14" />
+</svg>

@@ -249,6 +249,7 @@ DEBUG=@electron-forge:plugin-vite*,vite:* npm run start
 | `make:mac-intel` | Build DMG installer for Intel Macs (x64) |
 | `make:mac-arm` | Build DMG installer for Apple Silicon (arm64) |
 | `make:all` | Build DMG installers for both Intel and Apple Silicon |
+| `icons:generate` | Rebuild `assets/icon.png` and `assets/icon.icns` from `assets/icon-source.svg` |
 | `publish` | Publish artifacts (requires configuration) |
 | `typecheck` | TypeScript compile check without emitting JS |
 | `lint` | Run Biome lint & analysis |
