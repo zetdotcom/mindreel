@@ -11,7 +11,7 @@
  * Get the last N unique entries for quick prefill.
  * Returns distinct content values ordered by most recent timestamp.
  */
-export async function getRecentUniqueEntries(limit = 4): Promise<string[]> {
+export async function getRecentUniqueEntries(limit = 8): Promise<string[]> {
   try {
     const allEntries = await window.appApi.db.getEntries();
 

@@ -13,7 +13,7 @@ import { useCapture } from "../model/useCapture";
  * Ultra-fast entry capture window component.
  * Features:
  *  - Multiline textarea (autofocus)
- *  - Last 4 entries quick prefill buttons
+ *  - Last 8 entries quick prefill buttons
  *  - Character counter (0-500)
  *  - Save button (disabled if empty)
  *  - Close / ESC handling

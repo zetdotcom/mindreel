@@ -18,7 +18,7 @@ export function useCapture() {
     try {
       setLoading(true);
       setError(null);
-      const entries = await getRecentUniqueEntries(4);
+      const entries = await getRecentUniqueEntries(8);
       setRecentEntries(entries);
     } catch (err) {
       console.error("Failed to load recent entries:", err);

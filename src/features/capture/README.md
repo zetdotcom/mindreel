@@ -42,7 +42,7 @@ React hook that manages:
 Main popup component featuring:
 - **Multiline textarea** with autofocus
 - **Character counter** (0-500 characters)
-- **Recent entries prefill buttons** (last 4 unique entries)
+- **Recent entries prefill buttons** (last 8 unique entries)
 - **Save button** (disabled when empty or over limit)
 - **Keyboard navigation**:
   - `ESC` to close
@@ -143,7 +143,7 @@ The capture window is managed by `ipc/captureWindowHandlers.ts`:
   - Red: Over limit (501+ chars)
 
 ### Prefill Buttons
-- Shows last 4 unique entries
+- Shows last 8 unique entries
 - Full-width buttons for easy clicking
 - Truncated text with ellipsis for long entries
 - Clicking prefills the textarea and focuses it
