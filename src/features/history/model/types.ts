@@ -64,6 +64,7 @@ export interface WeekGroupViewModel {
   weekKey: WeekKey;
   start_date: string;
   end_date: string;
+  custom_name: string | null;
   headerLabel: string;
   groupingLabel: string;
   period_weeks: number;
@@ -112,6 +113,7 @@ export interface RawWeekData {
   weekKey: WeekKey;
   start_date: string;
   end_date: string;
+  custom_name: string | null;
   period_weeks: number;
   start_weekday: IsoWeekday;
   effective_start_date: string;

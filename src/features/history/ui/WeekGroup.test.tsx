@@ -1,5 +1,5 @@
-import React from "react";
 import userEvent from "@testing-library/user-event";
+import React from "react";
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@/tests/utils/testUtils";
 import type { WeekGroupViewModel } from "../model/types";
@@ -9,7 +9,8 @@ const baseWeek: WeekGroupViewModel = {
   weekKey: "2026-03-16_2026-03-22",
   start_date: "2026-03-16",
   end_date: "2026-03-22",
-  headerLabel: "Mar 16 - 22, 2026",
+  custom_name: null,
+  headerLabel: "Mar 16 - Mar 22, 2026",
   groupingLabel: "Weekly",
   period_weeks: 1,
   start_weekday: 1,

@@ -359,6 +359,7 @@ const migration004: Migration = {
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               period_weeks INTEGER NOT NULL CHECK (period_weeks >= 1),
               start_weekday INTEGER NOT NULL CHECK (start_weekday BETWEEN 1 AND 7),
+              custom_name TEXT NULL,
               effective_start_date TEXT NOT NULL,
               created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
             )
@@ -449,7 +450,56 @@ const migration004: Migration = {
   },
 };
 
-export const migrations: Migration[] = [migration001, migration002, migration003, migration004];
+/**
+ * Migration 5: Add optional custom sprint/group name to history grouping rules
+ */
+const migration005: Migration = {
+  id: 5,
+  name: "add_history_grouping_custom_name",
+  up: async (db: sqlite3.Database): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      db.all("PRAGMA table_info(history_grouping_rules)", [], (tableErr, rows: ColumnInfoRow[]) => {
+        if (tableErr) {
+          reject(tableErr);
+          return;
+        }
+
+        const hasCustomName = rows.some((row) => row.name === "custom_name");
+        if (hasCustomName) {
+          console.log("Migration 005 skipped: history_grouping_rules.custom_name already exists");
+          resolve();
+          return;
+        }
+
+        db.run("ALTER TABLE history_grouping_rules ADD COLUMN custom_name TEXT", (alterErr) => {
+          if (alterErr) {
+            reject(alterErr);
+            return;
+          }
+
+          console.log("Migration 005 completed: Added custom_name to history_grouping_rules");
+          resolve();
+        });
+      });
+    });
+  },
+  down: async (_db: sqlite3.Database): Promise<void> => {
+    return new Promise((resolve) => {
+      console.log(
+        "Migration 005 rollback: SQLite doesn't support dropping history_grouping_rules.custom_name in-place",
+      );
+      resolve();
+    });
+  },
+};
+
+export const migrations: Migration[] = [
+  migration001,
+  migration002,
+  migration003,
+  migration004,
+  migration005,
+];
 
 export class MigrationRunner {
   private db: sqlite3.Database;

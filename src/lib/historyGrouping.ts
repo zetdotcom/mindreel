@@ -16,6 +16,7 @@ export interface HistoryGroupingRule {
   id?: number;
   period_weeks: number;
   start_weekday: IsoWeekday;
+  custom_name: string | null;
   effective_start_date: string;
   created_at: string;
 }
@@ -28,6 +29,7 @@ export interface HistoryGroupingSettings {
 export interface UpdateHistoryGroupingInput {
   period_weeks: number;
   start_weekday: IsoWeekday;
+  custom_name?: string | null;
 }
 
 export interface HistoryPeriodDescriptor {
@@ -35,16 +37,19 @@ export interface HistoryPeriodDescriptor {
   end_date: string;
   period_weeks: number;
   start_weekday: IsoWeekday;
+  custom_name: string | null;
   effective_start_date: string;
 }
 
 export const MIN_HISTORY_GROUPING_WEEKS = 1;
 export const MAX_HISTORY_GROUPING_WEEKS = 12;
+export const MAX_HISTORY_GROUPING_NAME_LENGTH = 80;
 export const DEFAULT_HISTORY_GROUPING_START_DATE = "1970-01-05";
 
 export const DEFAULT_HISTORY_GROUPING_RULE: HistoryGroupingRule = {
   period_weeks: 1,
   start_weekday: 1,
+  custom_name: null,
   effective_start_date: DEFAULT_HISTORY_GROUPING_START_DATE,
   created_at: "1970-01-05T00:00:00.000Z",
 };
@@ -71,8 +76,28 @@ export function parseDateOnly(date: string): Date {
   return parseISO(date);
 }
 
+export function formatHistoryPeriodLabel(startDateValue: string, endDateValue: string): string {
+  const startDate = parseDateOnly(startDateValue);
+  const endDate = parseDateOnly(endDateValue);
+
+  if (startDate.getFullYear() !== endDate.getFullYear()) {
+    return `${format(startDate, "MMM d, yyyy")} - ${format(endDate, "MMM d, yyyy")}`;
+  }
+
+  return `${format(startDate, "MMM d")} - ${format(endDate, "MMM d, yyyy")}`;
+}
+
 export function isIsoWeekday(value: number): value is IsoWeekday {
   return Number.isInteger(value) && value >= 1 && value <= 7;
+}
+
+export function normalizeHistoryGroupingName(name: string | null | undefined): string | null {
+  if (typeof name !== "string") {
+    return null;
+  }
+
+  const normalized = name.trim();
+  return normalized.length > 0 ? normalized : null;
 }
 
 export function validateHistoryGroupingInput(input: UpdateHistoryGroupingInput): void {
@@ -89,6 +114,13 @@ export function validateHistoryGroupingInput(input: UpdateHistoryGroupingInput):
   if (!isIsoWeekday(input.start_weekday)) {
     throw new Error("History grouping start weekday must be between Monday and Sunday");
   }
+
+  const customName = normalizeHistoryGroupingName(input.custom_name);
+  if (customName && customName.length > MAX_HISTORY_GROUPING_NAME_LENGTH) {
+    throw new Error(
+      `History grouping custom name must be ${MAX_HISTORY_GROUPING_NAME_LENGTH} characters or fewer`,
+    );
+  }
 }
 
 export function getIsoWeekdayLabel(day: IsoWeekday): string {
@@ -99,12 +131,28 @@ export function getIsoWeekdayLabel(day: IsoWeekday): string {
   return option.label;
 }
 
-export function getHistoryGroupingLabel(rule: Pick<HistoryGroupingRule, "period_weeks" | "start_weekday">): string {
+function getHistoryGroupingCadenceLabel(
+  rule: Pick<HistoryGroupingRule, "period_weeks" | "start_weekday">,
+): string {
   const weeksLabel = rule.period_weeks === 1 ? "1 week" : `${rule.period_weeks} weeks`;
   return `${weeksLabel} starting ${getIsoWeekdayLabel(rule.start_weekday)}`;
 }
 
 export function getHistoryGroupingShortLabel(
+  rule: Pick<HistoryGroupingRule, "period_weeks" | "start_weekday" | "custom_name">,
+): string {
+  const shortLabel = getHistoryGroupingShortCadenceLabel(rule);
+  return rule.custom_name ? `${rule.custom_name} • ${shortLabel}` : shortLabel;
+}
+
+export function getHistoryGroupingLabel(
+  rule: Pick<HistoryGroupingRule, "period_weeks" | "start_weekday" | "custom_name">,
+): string {
+  const cadenceLabel = getHistoryGroupingCadenceLabel(rule);
+  return rule.custom_name ? `${rule.custom_name} • ${cadenceLabel}` : cadenceLabel;
+}
+
+export function getHistoryGroupingShortCadenceLabel(
   rule: Pick<HistoryGroupingRule, "period_weeks" | "start_weekday">,
 ): string {
   if (rule.period_weeks === 1 && rule.start_weekday === 1) {
@@ -133,10 +181,13 @@ export function getHistoryGroupKey(startDate: string, endDate: string): string {
   return `${startDate}:${endDate}`;
 }
 
-export function normalizeHistoryGroupingRules(
-  rules: HistoryGroupingRule[],
-): HistoryGroupingRule[] {
-  const sorted = [...rules].sort((left, right) => {
+export function normalizeHistoryGroupingRules(rules: HistoryGroupingRule[]): HistoryGroupingRule[] {
+  const normalizedRules = rules.map((rule) => ({
+    ...rule,
+    custom_name: normalizeHistoryGroupingName(rule.custom_name),
+  }));
+
+  const sorted = [...normalizedRules].sort((left, right) => {
     if (left.effective_start_date !== right.effective_start_date) {
       return left.effective_start_date.localeCompare(right.effective_start_date);
     }
@@ -195,24 +246,30 @@ export function buildHistoryPeriods(
   normalizedRules.forEach((rule, index) => {
     const windowStart = parseDateOnly(rule.effective_start_date);
     const nextRule = normalizedRules[index + 1];
-    const rawWindowEnd = nextRule ? subDays(parseDateOnly(nextRule.effective_start_date), 1) : latest;
-    const windowEnd = isAfter(rawWindowEnd, latest) ? latest : rawWindowEnd;
+    const ruleWindowEnd = nextRule
+      ? subDays(parseDateOnly(nextRule.effective_start_date), 1)
+      : null;
 
-    if (isAfter(windowStart, latest) || isBefore(windowEnd, earliest)) {
+    if (
+      isAfter(windowStart, latest) ||
+      (ruleWindowEnd !== null && isBefore(ruleWindowEnd, earliest))
+    ) {
       return;
     }
 
     let periodStart = windowStart;
 
-    while (
-      isBefore(addDays(addWeeks(periodStart, rule.period_weeks), -1), earliest)
-    ) {
+    while (isBefore(addDays(addWeeks(periodStart, rule.period_weeks), -1), earliest)) {
       periodStart = addWeeks(periodStart, rule.period_weeks);
     }
 
-    while (!isAfter(periodStart, latest) && !isAfter(periodStart, windowEnd)) {
+    while (
+      !isAfter(periodStart, latest) &&
+      (ruleWindowEnd === null || !isAfter(periodStart, ruleWindowEnd))
+    ) {
       const regularEnd = addDays(addWeeks(periodStart, rule.period_weeks), -1);
-      const boundedEnd = isAfter(regularEnd, windowEnd) ? windowEnd : regularEnd;
+      const boundedEnd =
+        ruleWindowEnd !== null && isAfter(regularEnd, ruleWindowEnd) ? ruleWindowEnd : regularEnd;
 
       if (!isBefore(boundedEnd, earliest)) {
         periods.push({
@@ -220,6 +277,7 @@ export function buildHistoryPeriods(
           end_date: formatDateOnly(boundedEnd),
           period_weeks: rule.period_weeks,
           start_weekday: rule.start_weekday,
+          custom_name: rule.custom_name,
           effective_start_date: rule.effective_start_date,
         });
       }

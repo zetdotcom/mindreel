@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { formatDateOnly } from "../../../lib/historyGrouping";
 import { getCurrentWeekRange, getPreviousIsoWeek, getWeekRange } from "../../../sqlite/dateUtils";
 import { HistoryRepository } from "./repository";
 
@@ -33,6 +32,7 @@ describe("HistoryRepository", () => {
       {
         period_weeks: 1,
         start_weekday: 1,
+        custom_name: null,
         effective_start_date: "1970-01-05",
         created_at: "1970-01-05T00:00:00.000Z",
       },
@@ -78,7 +78,7 @@ describe("HistoryRepository", () => {
     ).toEqual([
       {
         start_date: currentWeekRange.start_date,
-        end_date: formatDateOnly(new Date("2025-03-19T12:00:00Z")),
+        end_date: currentWeekRange.end_date,
       },
       previousWeekRange,
       twoWeeksAgoRange,
@@ -94,5 +94,33 @@ describe("HistoryRepository", () => {
       threeWeeksAgoRange.start_date,
       threeWeeksAgoRange.end_date,
     );
+  });
+
+  it("keeps the full configured end date for an in-progress multi-week period", async () => {
+    vi.setSystemTime(new Date("2026-03-25T12:00:00Z"));
+
+    getHistoryGroupingRules.mockResolvedValue([
+      {
+        period_weeks: 2,
+        start_weekday: 3,
+        custom_name: "Sprint Atlas",
+        effective_start_date: "2026-03-25",
+        created_at: "2026-03-25T00:00:00.000Z",
+      },
+    ]);
+    getDatesWithEntries.mockResolvedValue(["2026-03-25"]);
+
+    const repository = new HistoryRepository();
+    const result = await repository.loadWeeks();
+
+    expect(result.rawWeeks).toHaveLength(1);
+    expect(result.rawWeeks[0]).toMatchObject({
+      start_date: "2026-03-25",
+      end_date: "2026-04-07",
+      custom_name: "Sprint Atlas",
+      period_weeks: 2,
+      start_weekday: 3,
+    });
+    expect(getEntriesForDateRange).toHaveBeenCalledWith("2026-03-25", "2026-04-07");
   });
 });

@@ -1,20 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { HistoryGroupingSettings } from "@/lib/historyGrouping";
 import { render, screen } from "@/tests/utils/testUtils";
 import { SettingsView } from "./SettingsView";
 
 const mockUpdatePopupInterval = vi.fn();
 const mockUpdateHistoryGrouping = vi.fn();
 
-const mockHistoryGrouping = {
+const mockHistoryGrouping: HistoryGroupingSettings = {
   active_rule: {
     period_weeks: 1,
     start_weekday: 1,
+    custom_name: null,
     effective_start_date: "1970-01-05",
     created_at: "1970-01-05T00:00:00.000Z",
   },
   configured_rule: {
     period_weeks: 1,
     start_weekday: 1,
+    custom_name: null,
     effective_start_date: "1970-01-05",
     created_at: "1970-01-05T00:00:00.000Z",
   },
@@ -48,12 +51,16 @@ vi.mock("@/features/settings", () => ({
   HistoryGroupingControl: ({
     onSave,
   }: {
-    onSave: (input: { period_weeks: number; start_weekday: 1 | 2 | 3 | 4 | 5 | 6 | 7 }) => void;
+    onSave: (input: {
+      period_weeks: number;
+      start_weekday: 1 | 2 | 3 | 4 | 5 | 6 | 7;
+      custom_name?: string | null;
+    }) => void;
   }) => (
     <div data-testid="history-grouping-control">
       <button
         type="button"
-        onClick={() => onSave({ period_weeks: 2, start_weekday: 3 })}
+        onClick={() => onSave({ period_weeks: 2, start_weekday: 3, custom_name: "Sprint Atlas" })}
         data-testid="change-history-grouping"
       >
         Change grouping
@@ -198,6 +205,7 @@ describe("SettingsView", () => {
         expect(mockUpdateHistoryGrouping).toHaveBeenCalledWith({
           period_weeks: 2,
           start_weekday: 3,
+          custom_name: "Sprint Atlas",
         });
       });
     });

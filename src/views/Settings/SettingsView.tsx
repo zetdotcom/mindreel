@@ -1,5 +1,6 @@
 import { Alert } from "@/components/ui/alert";
 import { HistoryGroupingControl, PopupIntervalControl, useSettings } from "@/features/settings";
+import type { UpdateHistoryGroupingInput } from "@/lib/historyGrouping";
 
 export function SettingsView() {
   const { settings, historyGrouping, loading, error, updatePopupInterval, updateHistoryGrouping } =
@@ -13,10 +14,7 @@ export function SettingsView() {
     }
   };
 
-  const handleHistoryGroupingChange = async (input: {
-    period_weeks: number;
-    start_weekday: 1 | 2 | 3 | 4 | 5 | 6 | 7;
-  }) => {
+  const handleHistoryGroupingChange = async (input: UpdateHistoryGroupingInput) => {
     try {
       await updateHistoryGrouping(input);
     } catch (err) {

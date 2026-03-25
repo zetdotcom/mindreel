@@ -1,5 +1,9 @@
 import { format, parseISO } from "date-fns";
-import { getHistoryGroupingShortLabel, getHistoryGroupKey } from "../../../lib/historyGrouping";
+import {
+  formatHistoryPeriodLabel,
+  getHistoryGroupingShortCadenceLabel,
+  getHistoryGroupKey,
+} from "../../../lib/historyGrouping";
 import type { Entry, Summary } from "../../../sqlite/types";
 import type {
   DayGroupViewModel,
@@ -38,13 +42,13 @@ export function transformWeekData(rawWeek: RawWeekData): WeekGroupViewModel {
   const summaryState = determineSummaryState(summaryViewModel, totalEntries);
 
   // Create period header label
-  const headerLabel = createWeekHeaderLabel(rawWeek);
-  const groupingLabel = getHistoryGroupingShortLabel(rawWeek);
+  const { headerLabel, groupingLabel } = createWeekLabels(rawWeek);
 
   return {
     weekKey,
     start_date: rawWeek.start_date,
     end_date: rawWeek.end_date,
+    custom_name: rawWeek.custom_name,
     headerLabel,
     groupingLabel,
     period_weeks: rawWeek.period_weeks,
@@ -233,27 +237,26 @@ function determineSummaryState(
 }
 
 /**
- * Create period header label
+ * Create display labels for a history period.
  */
-function createWeekHeaderLabel(rawWeek: RawWeekData): string {
-  const startDate = parseISO(rawWeek.start_date);
-  const endDate = parseISO(rawWeek.end_date);
+function createWeekLabels(rawWeek: RawWeekData): {
+  headerLabel: string;
+  groupingLabel: string;
+} {
+  const dateRangeLabel = formatHistoryPeriodLabel(rawWeek.start_date, rawWeek.end_date);
+  const groupingCadenceLabel = getHistoryGroupingShortCadenceLabel(rawWeek);
 
-  const startFormat = format(startDate, "MMM d");
-  const endFormat = format(endDate, "MMM d, yyyy");
-
-  // Handle year boundary
-  if (startDate.getFullYear() !== endDate.getFullYear()) {
-    return `${format(startDate, "MMM d, yyyy")} - ${endFormat}`;
+  if (rawWeek.custom_name) {
+    return {
+      headerLabel: rawWeek.custom_name,
+      groupingLabel: `${dateRangeLabel} • ${groupingCadenceLabel}`,
+    };
   }
 
-  // Handle month boundary
-  if (startDate.getMonth() !== endDate.getMonth()) {
-    return `${startFormat} - ${endFormat}`;
-  }
-
-  // Same month
-  return `${startFormat} - ${format(endDate, "d, yyyy")}`;
+  return {
+    headerLabel: dateRangeLabel,
+    groupingLabel: groupingCadenceLabel,
+  };
 }
 
 /**

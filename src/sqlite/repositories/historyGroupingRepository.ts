@@ -5,9 +5,10 @@ import {
   getActiveHistoryGroupingRule,
   getConfiguredHistoryGroupingRule,
   getNextEffectiveStartDate,
-  normalizeHistoryGroupingRules,
   type HistoryGroupingRule,
   type HistoryGroupingSettings,
+  normalizeHistoryGroupingName,
+  normalizeHistoryGroupingRules,
   type UpdateHistoryGroupingInput,
   validateHistoryGroupingInput,
 } from "../../lib/historyGrouping";
@@ -18,7 +19,7 @@ export class HistoryGroupingRepository {
   async getRules(): Promise<HistoryGroupingRule[]> {
     return new Promise((resolve, reject) => {
       const sql = `
-        SELECT id, period_weeks, start_weekday, effective_start_date, created_at
+        SELECT id, period_weeks, start_weekday, custom_name, effective_start_date, created_at
         FROM history_grouping_rules
         ORDER BY effective_start_date ASC, created_at ASC, id ASC
       `;
@@ -55,10 +56,11 @@ export class HistoryGroupingRepository {
         INSERT INTO history_grouping_rules (
           period_weeks,
           start_weekday,
+          custom_name,
           effective_start_date,
           created_at
         )
-        VALUES (?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?)
       `;
 
       this.db.run(
@@ -66,6 +68,7 @@ export class HistoryGroupingRepository {
         [
           DEFAULT_HISTORY_GROUPING_RULE.period_weeks,
           DEFAULT_HISTORY_GROUPING_RULE.start_weekday,
+          DEFAULT_HISTORY_GROUPING_RULE.custom_name,
           DEFAULT_HISTORY_GROUPING_RULE.effective_start_date,
           DEFAULT_HISTORY_GROUPING_RULE.created_at,
         ],
@@ -103,12 +106,14 @@ export class HistoryGroupingRepository {
 
     const rules = await this.initializeDefaults();
     const today = formatDateOnly(now);
+    const normalizedCustomName = normalizeHistoryGroupingName(input.custom_name);
     const activeRule = getActiveHistoryGroupingRule(rules, today);
     const configuredRule = getConfiguredHistoryGroupingRule(rules);
 
     if (
       configuredRule.period_weeks === input.period_weeks &&
-      configuredRule.start_weekday === input.start_weekday
+      configuredRule.start_weekday === input.start_weekday &&
+      configuredRule.custom_name === normalizedCustomName
     ) {
       return {
         active_rule: activeRule,
@@ -118,15 +123,15 @@ export class HistoryGroupingRepository {
 
     if (
       activeRule.period_weeks === input.period_weeks &&
-      activeRule.start_weekday === input.start_weekday
+      activeRule.start_weekday === input.start_weekday &&
+      activeRule.custom_name === normalizedCustomName
     ) {
       await this.deleteRulesAfterToday(today);
       return this.getGroupingSettings(now);
     }
 
     const effectiveStartDate = getNextEffectiveStartDate(input.start_weekday, now);
-    const deleteFromDate =
-      effectiveStartDate === today ? today : formatDateOnly(now);
+    const deleteFromDate = effectiveStartDate === today ? today : formatDateOnly(now);
 
     if (effectiveStartDate === today) {
       await this.deleteRulesOnOrAfter(deleteFromDate);
@@ -137,6 +142,7 @@ export class HistoryGroupingRepository {
     await this.insertRule({
       period_weeks: input.period_weeks,
       start_weekday: input.start_weekday,
+      custom_name: normalizedCustomName,
       effective_start_date: effectiveStartDate,
       created_at: now.toISOString(),
     });
@@ -150,15 +156,22 @@ export class HistoryGroupingRepository {
         INSERT INTO history_grouping_rules (
           period_weeks,
           start_weekday,
+          custom_name,
           effective_start_date,
           created_at
         )
-        VALUES (?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?)
       `;
 
       this.db.run(
         sql,
-        [rule.period_weeks, rule.start_weekday, rule.effective_start_date, rule.created_at],
+        [
+          rule.period_weeks,
+          rule.start_weekday,
+          rule.custom_name,
+          rule.effective_start_date,
+          rule.created_at,
+        ],
         (err) => {
           if (err) {
             reject(err);

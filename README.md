@@ -68,7 +68,7 @@ Key capabilities:
 - Frictionless capture: periodic lightweight popups & a global shortcut ask "What are you working on?"
 - Structured daily history: entries grouped per day; consecutive identical entries collapsed (`xN`) only when uninterrupted
 - Automatic weekly AI summaries (authenticated + consenting users) every Sunday 23:00
-- Configurable history periods: keep the default Monday-based week or align history summaries to sprint cadences such as 2-week periods starting on Wednesday
+- Configurable history periods: keep the default Monday-based week or align history summaries to named sprint cadences such as 2-week periods starting on Wednesday
 - Local‑first by default: data stays on your machine unless you opt in to summaries
 - Editable history; accidental entries removable (AI summaries are retained but editable)
 
@@ -329,7 +329,7 @@ git commit -m "feat!: migrate to new database schema"
 - Settings:
   - Popup frequency (30 min, 1h, 2h, 4h)
   - Global shortcut customization
-  - History grouping period length and start weekday, applied from the next matching boundary while preserving older history groupings
+  - History grouping period length, start weekday, and optional custom sprint name, applied from the next matching boundary while preserving older history groupings
 - Privacy:
   - Local storage by default
   - External transmission only for summary generation with explicit user consent (during registration)
@@ -352,6 +352,7 @@ Current Implementation:
 - Tooling (Biome, Forge, Vite): Operational
 - History period configuration in settings: Implemented
 - Effective-dated history grouping with per-period summaries: Implemented
+- Explicit history period date ranges with optional named sprint headers: Implemented
 
 Success Metrics Targets (from Product Requirements):
 - >40% authenticated users viewing weekly summary

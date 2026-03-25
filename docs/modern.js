@@ -21,7 +21,7 @@ const translations = {
     "feature1-preview": "Popup window screenshot",
     "feature2-title": "AI-powered summaries",
     "feature2-text":
-      "AI summaries can follow your default week or a custom sprint grouping, creating professional highlights for meetings and reviews.",
+      "AI summaries can follow your default week or a custom, named sprint grouping, creating professional highlights for meetings and reviews.",
     "feature2-preview": "Weekly summary card",
     "feature3-title": "Local & private",
     "feature3-text":
@@ -81,7 +81,7 @@ const translations = {
     "feature1-preview": "Zrzut ekranu okna popup",
     "feature2-title": "Podsumowania napędzane AI",
     "feature2-text":
-      "Podsumowania AI mogą działać według domyślnego tygodnia albo własnego grupowania sprintu, tworząc profesjonalne wyróżnienia na spotkania i oceny.",
+      "Podsumowania AI mogą działać według domyślnego tygodnia albo własnego, nazwanego grupowania sprintu, tworząc profesjonalne wyróżnienia na spotkania i oceny.",
     "feature2-preview": "Karta cotygodniowego podsumowania",
     "feature3-title": "Lokalne i prywatne",
     "feature3-text":

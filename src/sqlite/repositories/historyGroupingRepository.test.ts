@@ -17,6 +17,7 @@ describe("HistoryGroupingRepository", () => {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             period_weeks INTEGER NOT NULL,
             start_weekday INTEGER NOT NULL,
+            custom_name TEXT NULL,
             effective_start_date TEXT NOT NULL,
             created_at TEXT NOT NULL
           )
@@ -42,6 +43,7 @@ describe("HistoryGroupingRepository", () => {
     expect(rules[0]).toMatchObject({
       period_weeks: 1,
       start_weekday: 1,
+      custom_name: null,
       effective_start_date: "1970-01-05",
     });
   });
@@ -51,6 +53,7 @@ describe("HistoryGroupingRepository", () => {
 
     expect(settings.active_rule.period_weeks).toBe(1);
     expect(settings.configured_rule.start_weekday).toBe(1);
+    expect(settings.configured_rule.custom_name).toBeNull();
   });
 
   it("schedules a future rule on the next selected weekday", async () => {
@@ -82,6 +85,20 @@ describe("HistoryGroupingRepository", () => {
       effective_start_date: "2026-03-24",
     });
     expect(settings.configured_rule.effective_start_date).toBe("2026-03-24");
+  });
+
+  it("stores a trimmed custom grouping name with the effective-dated rule", async () => {
+    const settings = await repository.updateGrouping(
+      { period_weeks: 2, start_weekday: 5, custom_name: "  Sprint Atlas  " },
+      new Date("2026-03-24T09:00:00Z"),
+    );
+
+    expect(settings.configured_rule).toMatchObject({
+      period_weeks: 2,
+      start_weekday: 5,
+      custom_name: "Sprint Atlas",
+      effective_start_date: "2026-03-27",
+    });
   });
 
   it("cancels a pending future change when switching back to the active rule", async () => {

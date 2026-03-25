@@ -118,6 +118,7 @@ export class Database {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         period_weeks INTEGER NOT NULL CHECK (period_weeks >= 1),
         start_weekday INTEGER NOT NULL CHECK (start_weekday BETWEEN 1 AND 7),
+        custom_name TEXT NULL,
         effective_start_date TEXT NOT NULL,
         created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
       );

@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - History summary cards now follow the active history period, including multi-week sprint groupings configured in settings
 - Expanded the history view default window from two weeks to four weeks before pagination
 - History period cards now collapse day lists independently from their summary cards
+- History period headers now show explicit start and end dates, and named sprint groupings keep the date range visible under the custom title
 
 ### Deprecated
 
