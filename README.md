@@ -319,6 +319,7 @@ git commit -m "feat!: migrate to new database schema"
   - Timestamped entries
   - Consecutive identical entries compressed with `xN` label (uninterrupted sequences only)
   - Edit / delete entries
+  - History period cards can collapse day lists separately from their summary cards
 - Weekly automatic AI summaries:
   - Generated Sunday 23:00
   - Covers Monday–Sunday

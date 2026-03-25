@@ -53,7 +53,8 @@ export function transformWeekData(rawWeek: RawWeekData): WeekGroupViewModel {
     days,
     summary: summaryViewModel,
     summaryState,
-    collapsed: false, // Default to expanded
+    daysCollapsed: false,
+    summaryCollapsed: false,
     totalEntries,
     orderIndex: 0, // Will be set by caller based on sort order
   };

@@ -1,10 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getCurrentWeekRange, getPreviousIsoWeek } from "../../../sqlite/dateUtils";
+import { formatDateOnly } from "../../../lib/historyGrouping";
+import { getCurrentWeekRange, getPreviousIsoWeek, getWeekRange } from "../../../sqlite/dateUtils";
 import { HistoryRepository } from "./repository";
 
 describe("HistoryRepository", () => {
-  const getEntriesForIsoWeek = vi.fn();
-  const getSummaryForIsoWeek = vi.fn();
+  const getEntriesForDateRange = vi.fn();
+  const getHistoryGroupingRules = vi.fn();
+  const getDatesWithEntries = vi.fn();
+  const getAllSummaries = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -16,14 +19,24 @@ describe("HistoryRepository", () => {
       writable: true,
       value: {
         db: {
-          getEntriesForIsoWeek,
-          getSummaryForIsoWeek,
+          getEntriesForDateRange,
+          getHistoryGroupingRules,
+          getDatesWithEntries,
+          getAllSummaries,
         },
       },
     });
 
-    getEntriesForIsoWeek.mockResolvedValue([]);
-    getSummaryForIsoWeek.mockResolvedValue(null);
+    getEntriesForDateRange.mockResolvedValue([]);
+    getAllSummaries.mockResolvedValue([]);
+    getHistoryGroupingRules.mockResolvedValue([
+      {
+        period_weeks: 1,
+        start_weekday: 1,
+        effective_start_date: "1970-01-05",
+        created_at: "1970-01-05T00:00:00.000Z",
+      },
+    ]);
   });
 
   afterEach(() => {
@@ -32,9 +45,6 @@ describe("HistoryRepository", () => {
 
   it("loads the latest four weeks by default", async () => {
     const repository = new HistoryRepository();
-
-    const result = await repository.loadWeeks();
-
     const currentWeekRange = getCurrentWeekRange();
     const currentWeek = {
       iso_year: currentWeekRange.iso_year,
@@ -44,21 +54,45 @@ describe("HistoryRepository", () => {
     const twoWeeksAgo = getPreviousIsoWeek(previousWeek);
     const threeWeeksAgo = getPreviousIsoWeek(twoWeeksAgo);
     const fourWeeksAgo = getPreviousIsoWeek(threeWeeksAgo);
+    const previousWeekRange = getWeekRange(previousWeek.week_of_year, previousWeek.iso_year);
+    const twoWeeksAgoRange = getWeekRange(twoWeeksAgo.week_of_year, twoWeeksAgo.iso_year);
+    const threeWeeksAgoRange = getWeekRange(threeWeeksAgo.week_of_year, threeWeeksAgo.iso_year);
+    const fourWeeksAgoRange = getWeekRange(fourWeeksAgo.week_of_year, fourWeeksAgo.iso_year);
+
+    getDatesWithEntries.mockResolvedValue([
+      currentWeekRange.start_date,
+      previousWeekRange.start_date,
+      twoWeeksAgoRange.start_date,
+      threeWeeksAgoRange.start_date,
+      fourWeeksAgoRange.start_date,
+    ]);
+
+    const result = await repository.loadWeeks();
 
     expect(result.rawWeeks).toHaveLength(4);
     expect(
-      result.rawWeeks.map(({ iso_year, week_of_year }) => ({
-        iso_year,
-        week_of_year,
+      result.rawWeeks.map(({ start_date, end_date }) => ({
+        start_date,
+        end_date,
       })),
-    ).toEqual([currentWeek, previousWeek, twoWeeksAgo, threeWeeksAgo]);
-    expect(result.hasMore).toBe(false);
-    expect(getEntriesForIsoWeek).toHaveBeenCalledTimes(5);
-    expect(getSummaryForIsoWeek).toHaveBeenCalledTimes(4);
-    expect(getEntriesForIsoWeek).toHaveBeenNthCalledWith(
-      5,
-      fourWeeksAgo.iso_year,
-      fourWeeksAgo.week_of_year,
+    ).toEqual([
+      {
+        start_date: currentWeekRange.start_date,
+        end_date: formatDateOnly(new Date("2025-03-19T12:00:00Z")),
+      },
+      previousWeekRange,
+      twoWeeksAgoRange,
+      threeWeeksAgoRange,
+    ]);
+    expect(result.hasMore).toBe(true);
+    expect(getHistoryGroupingRules).toHaveBeenCalledTimes(1);
+    expect(getDatesWithEntries).toHaveBeenCalledTimes(1);
+    expect(getAllSummaries).toHaveBeenCalledTimes(1);
+    expect(getEntriesForDateRange).toHaveBeenCalledTimes(4);
+    expect(getEntriesForDateRange).toHaveBeenNthCalledWith(
+      4,
+      threeWeeksAgoRange.start_date,
+      threeWeeksAgoRange.end_date,
     );
   });
 });

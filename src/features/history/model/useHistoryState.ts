@@ -188,13 +188,13 @@ export function useHistoryState() {
   }, [state.weeks.length, processWeeksData, addToast]);
 
   /**
-   * Toggle week collapsed state
+   * Toggle week day list collapsed state
    */
-  const toggleWeekCollapsed = useCallback((weekKey: string) => {
+  const toggleWeekDaysCollapsed = useCallback((weekKey: string) => {
     setState((prev) => ({
       ...prev,
       weeks: prev.weeks.map((week) =>
-        week.weekKey === weekKey ? { ...week, collapsed: !week.collapsed } : week,
+        week.weekKey === weekKey ? { ...week, daysCollapsed: !week.daysCollapsed } : week,
       ),
     }));
   }, []);
@@ -260,7 +260,7 @@ export function useHistoryState() {
     // Actions
     loadMoreWeeks,
     refreshWeeks,
-    toggleWeekCollapsed,
+    toggleWeekDaysCollapsed,
     showDeleteModal,
     hideDeleteModal,
     updateWeek,

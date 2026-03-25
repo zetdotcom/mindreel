@@ -1,5 +1,17 @@
 import { format, parseISO } from "date-fns";
-import { AlertCircle, Calendar, Check, Edit2, Loader2, Lock, Sparkles, X, Zap } from "lucide-react";
+import {
+  AlertCircle,
+  Calendar,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Edit2,
+  Loader2,
+  Lock,
+  Sparkles,
+  X,
+  Zap,
+} from "lucide-react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -23,6 +35,8 @@ interface SummaryCardProps {
   onUpdate?: (summaryId: number, content: string) => void;
   onGenerate?: (periodRange: HistoryPeriodRange) => Promise<void>;
   periodPassed: boolean;
+  collapsed?: boolean;
+  onToggleCollapsed?: () => void;
   onStateChange?: (newState: SummaryCardState) => void;
   onLoginRequest?: () => void; // Trigger auth modal from unauthorized state
   className?: string;
@@ -43,6 +57,8 @@ export function SummaryCard({
   onUpdate,
   onGenerate,
   periodPassed,
+  collapsed = false,
+  onToggleCollapsed,
   onStateChange,
   onLoginRequest,
   className,
@@ -444,37 +460,41 @@ export function SummaryCard({
         className,
       )}
     >
-      <CardHeader className="pb-4">
+      <CardHeader className={cn("pb-4", collapsed && "pb-3")}>
         <CardTitle className="flex items-center justify-between text-base">
           <div className="flex items-center space-x-2">
             {getStateIcon()}
             <span>{getStateTitle()}</span>
           </div>
 
-          {summaryState === "success" && (
-            <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3">
+            {summaryState === "success" && (
               <div className="text-xs text-muted-foreground font-normal">
                 {formatSummaryDate(periodRange.start_date)} -{" "}
                 {formatSummaryDate(periodRange.end_date)}
               </div>
-              {/* Duplicate clear button in header (optional). Commented out.
+            )}
+            {onToggleCollapsed && (
               <Button
-                data-testid="clear-summary-test-button-header"
-                variant="destructive"
+                variant="ghost"
                 size="sm"
-                className="gap-1"
-                onClick={handleClearSummary}
+                onClick={onToggleCollapsed}
+                aria-label={collapsed ? "Expand summary" : "Collapse summary"}
+                aria-expanded={!collapsed}
+                className="h-8 w-8 p-0"
               >
-                <X className="h-3 w-3" />
-                Clear (TEST)
+                {collapsed ? (
+                  <ChevronRight className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
               </Button>
-              */}
-            </div>
-          )}
+            )}
+          </div>
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="pt-0">{renderContent()}</CardContent>
+      {!collapsed && <CardContent className="pt-0">{renderContent()}</CardContent>}
     </Card>
   );
 }

@@ -3,10 +3,7 @@
 import path from "node:path";
 import { app, BrowserWindow } from "electron";
 import started from "electron-squirrel-startup";
-import {
-  cleanupCaptureTimer,
-  initializeCaptureTimer,
-} from "./ipc/captureTimerManager";
+import { cleanupCaptureTimer, initializeCaptureTimer } from "./ipc/captureTimerManager";
 import {
   cleanupCaptureWindow,
   createCaptureWindow,
@@ -29,6 +26,9 @@ if (started) {
   app.quit();
 }
 
+let servicesInitializationPromise: Promise<void> | null = null;
+let captureTimerInitializationPromise: Promise<void> | null = null;
+
 const createWindow = () => {
   const mainWindow = new BrowserWindow({
     width: 800,
@@ -41,10 +41,7 @@ const createWindow = () => {
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
-    const prodMainPath = path.join(
-      __dirname,
-      `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`,
-    );
+    const prodMainPath = path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`);
     mainWindow.loadFile(prodMainPath);
   }
 
@@ -54,11 +51,12 @@ const createWindow = () => {
   }
 };
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.on("ready", async () => {
-  try {
+async function initializeMainServices(): Promise<void> {
+  if (servicesInitializationPromise) {
+    return servicesInitializationPromise;
+  }
+
+  servicesInitializationPromise = (async () => {
     console.log("=== MindReel App Starting ===");
 
     // Initialize database first
@@ -83,26 +81,54 @@ app.on("ready", async () => {
         createCaptureWindow();
         console.log("[SHORTCUT PRESSED] Capture window opened successfully");
       } catch (error) {
-        console.error(
-          "[SHORTCUT PRESSED] Error opening capture window:",
-          error,
-        );
+        console.error("[SHORTCUT PRESSED] Error opening capture window:", error);
       }
     };
 
     registerGlobalShortcutHandlers(shortcutCallback);
     await initializeGlobalShortcut(shortcutCallback);
     console.log("Global shortcuts initialized");
+  })().catch((error) => {
+    servicesInitializationPromise = null;
+    throw error;
+  });
 
-    // Create the main window
-    console.log("Creating main window...");
-    createWindow();
+  return servicesInitializationPromise;
+}
 
-    // Initialize capture timer (opens popup immediately, then at intervals)
+async function initializeCaptureTimerOnce(): Promise<void> {
+  if (captureTimerInitializationPromise) {
+    return captureTimerInitializationPromise;
+  }
+
+  captureTimerInitializationPromise = (async () => {
     console.log("Initializing capture timer...");
     await initializeCaptureTimer();
     console.log("Capture timer initialized");
+  })().catch((error) => {
+    captureTimerInitializationPromise = null;
+    throw error;
+  });
 
+  return captureTimerInitializationPromise;
+}
+
+async function ensureMainWindow(): Promise<void> {
+  await initializeMainServices();
+
+  if (BrowserWindow.getAllWindows().length === 0) {
+    console.log("Creating main window...");
+    createWindow();
+  }
+}
+
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
+// Some APIs can only be used after this event occurs.
+app.on("ready", async () => {
+  try {
+    await ensureMainWindow();
+    await initializeCaptureTimerOnce();
     console.log("=== MindReel App Started Successfully ===");
   } catch (error) {
     console.error("Failed to initialize app:", error);
@@ -127,16 +153,18 @@ app.on("window-all-closed", async () => {
   }
 });
 
-app.on("activate", () => {
+app.on("activate", async () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
+  try {
+    await ensureMainWindow();
+  } catch (error) {
+    console.error("Failed to activate app window:", error);
   }
 });
 
 // Handle app quit to ensure database is closed properly
-app.on("before-quit", async (event) => {
+app.on("before-quit", async (_event) => {
   try {
     cleanupGlobalShortcuts();
     cleanupCaptureTimer();

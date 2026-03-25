@@ -72,7 +72,8 @@ export interface WeekGroupViewModel {
   days: DayGroupViewModel[];
   summary?: SummaryViewModel;
   summaryState: SummaryCardState;
-  collapsed: boolean;
+  daysCollapsed: boolean;
+  summaryCollapsed: boolean;
   totalEntries: number;
   orderIndex: number; // purely positional after sort
 }

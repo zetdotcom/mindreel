@@ -9,7 +9,7 @@ import { SummaryCard } from "./SummaryCard";
 
 interface WeekGroupProps {
   week: WeekGroupViewModel;
-  onToggleCollapsed: () => void;
+  onToggleDaysCollapsed: () => void;
   onEntryEdit?: (entryId: number, content: string) => void;
   onEntryDelete?: (entryId: number) => void;
   onSummaryUpdate?: (summaryId: number, content: string) => void;
@@ -20,11 +20,11 @@ interface WeekGroupProps {
 
 /**
  * WeekGroup component displays a history period and summary
- * Supports collapsing/expanding and contains DayGroup and SummaryCard
+ * Supports independent day-list and summary collapsing within each history period
  */
 export function WeekGroup({
   week,
-  onToggleCollapsed,
+  onToggleDaysCollapsed,
   onEntryEdit,
   onEntryDelete,
   onSummaryUpdate,
@@ -53,10 +53,12 @@ export function WeekGroup({
             <Button
               variant="ghost"
               size="sm"
-              onClick={onToggleCollapsed}
+              onClick={onToggleDaysCollapsed}
+              aria-label={week.daysCollapsed ? "Expand days" : "Collapse days"}
+              aria-expanded={!week.daysCollapsed}
               className="h-8 w-8 p-0 hover:bg-muted"
             >
-              {week.collapsed ? (
+              {week.daysCollapsed ? (
                 <ChevronRight className="h-4 w-4" />
               ) : (
                 <ChevronDown className="h-4 w-4" />
@@ -82,127 +84,126 @@ export function WeekGroup({
       </div>
 
       {/* Group Content */}
-      {!week.collapsed && (
-        <div className="p-4 space-y-6">
-          {/* Days */}
-          {week.days.length > 0 && (
-            <div className="space-y-4">
-              {week.days.map((day) => (
-                <DayGroup
-                  key={day.date}
-                  day={day}
-                  onEntryEdit={onEntryEdit}
-                  onEntryDelete={onEntryDelete}
-                  // Pass per-day collapsed state and handler from the week so days can be collapsed individually
-                  collapsed={day.collapsed}
-                  onToggleCollapsed={() => {
-                    if (!onWeekUpdate) return;
-                    // Toggle the collapsed flag for the specific day and propagate via onWeekUpdate
-                    const updatedDays = week.days.map((d) =>
-                      d.date === day.date ? { ...d, collapsed: !d.collapsed } : d,
-                    );
-                    onWeekUpdate({ days: updatedDays });
-                  }}
-                />
-              ))}
-            </div>
-          )}
+      <div className="p-4 space-y-6">
+        {/* Days */}
+        {!week.daysCollapsed && week.days.length > 0 && (
+          <div className="space-y-4">
+            {week.days.map((day) => (
+              <DayGroup
+                key={day.date}
+                day={day}
+                onEntryEdit={onEntryEdit}
+                onEntryDelete={onEntryDelete}
+                collapsed={day.collapsed}
+                onToggleCollapsed={() => {
+                  if (!onWeekUpdate) return;
+                  const updatedDays = week.days.map((d) =>
+                    d.date === day.date ? { ...d, collapsed: !d.collapsed } : d,
+                  );
+                  onWeekUpdate({ days: updatedDays });
+                }}
+              />
+            ))}
+          </div>
+        )}
 
-          {/* Weekly Summary */}
-          <SummaryCard
-            summary={week.summary}
-            summaryState={week.summaryState}
-            periodRange={{
-              start_date: week.start_date,
-              end_date: week.end_date,
-            }}
-            totalEntries={week.totalEntries}
-            onUpdate={onSummaryUpdate}
-            onStateChange={(newState) => {
-              if (onWeekUpdate) {
-                onWeekUpdate({ summaryState: newState });
-              }
-            }}
-            onLoginRequest={onLoginRequest}
-            periodPassed={periodPassed}
-            onGenerate={async (range) => {
-              if (!onWeekUpdate) return;
-              onWeekUpdate({ summaryState: "generating" });
-              const result = await (
-                await import("../../summaries/model/aiGeneration")
-              ).generateWeeklySummary({
-                start_date: range.start_date,
-                end_date: range.end_date,
+        {week.daysCollapsed && week.totalEntries > 0 && (
+          <div className="rounded-md border border-border/60 bg-muted/20 px-4 py-2 text-sm text-muted-foreground">
+            <span>
+              {week.totalEntries} entries across {week.days.length} days
+            </span>
+          </div>
+        )}
+
+        {/* Weekly Summary */}
+        <SummaryCard
+          summary={week.summary}
+          summaryState={week.summaryState}
+          periodRange={{
+            start_date: week.start_date,
+            end_date: week.end_date,
+          }}
+          totalEntries={week.totalEntries}
+          collapsed={week.summaryCollapsed}
+          onToggleCollapsed={() => {
+            if (!onWeekUpdate) return;
+            onWeekUpdate({ summaryCollapsed: !week.summaryCollapsed });
+          }}
+          onUpdate={onSummaryUpdate}
+          onStateChange={(newState) => {
+            if (onWeekUpdate) {
+              onWeekUpdate({ summaryState: newState });
+            }
+          }}
+          onLoginRequest={onLoginRequest}
+          periodPassed={periodPassed}
+          onGenerate={async (range) => {
+            if (!onWeekUpdate) return;
+            onWeekUpdate({ summaryState: "generating" });
+            const result = await (
+              await import("../../summaries/model/aiGeneration")
+            ).generateWeeklySummary({
+              start_date: range.start_date,
+              end_date: range.end_date,
+            });
+
+            if (result.ok) {
+              onWeekUpdate({
+                summary: {
+                  ...result.summary,
+                  isEditing: false,
+                  isSaving: false,
+                  draftContent: result.summary.content,
+                  state: "success",
+                  weekKey: week.weekKey,
+                },
+                summaryState: "success",
               });
-
-              if (result.ok) {
-                onWeekUpdate({
-                  summary: {
-                    ...result.summary,
-                    isEditing: false,
-                    isSaving: false,
-                    draftContent: result.summary.content,
-                    state: "success",
-                    weekKey: week.weekKey,
-                  },
-                  summaryState: "success",
-                });
-              } else {
-                // result is the error union (ok: false)
-                const err = result as Extract<typeof result, { ok: false }>;
-                if (err.state === "alreadyExists") {
-                  try {
-                    const { summariesRepository } = await import(
-                      "../../summaries/model/repository"
-                    );
-                    const existing = await summariesRepository.getByDateRange(
-                      week.start_date,
-                      week.end_date,
-                    );
-                    if (existing) {
-                      onWeekUpdate({
-                        summary: {
-                          ...existing,
-                          isEditing: false,
-                          isSaving: false,
-                          draftContent: existing.content,
-                          state: "success",
-                          weekKey: week.weekKey,
-                        } as SummaryViewModel,
-                        summaryState: "success",
-                      });
-                    } else {
-                      onWeekUpdate({ summaryState: "success" });
-                    }
-                  } catch {
+            } else {
+              // result is the error union (ok: false)
+              const err = result as Extract<typeof result, { ok: false }>;
+              if (err.state === "alreadyExists") {
+                try {
+                  const { summariesRepository } = await import(
+                    "../../summaries/model/repository"
+                  );
+                  const existing = await summariesRepository.getByDateRange(
+                    week.start_date,
+                    week.end_date,
+                  );
+                  if (existing) {
+                    onWeekUpdate({
+                      summary: {
+                        ...existing,
+                        isEditing: false,
+                        isSaving: false,
+                        draftContent: existing.content,
+                        state: "success",
+                        weekKey: week.weekKey,
+                      } as SummaryViewModel,
+                      summaryState: "success",
+                    });
+                  } else {
                     onWeekUpdate({ summaryState: "success" });
                   }
-                  return;
+                } catch {
+                  onWeekUpdate({ summaryState: "success" });
                 }
-                const stateMap: Record<string, typeof week.summaryState> = {
-                  unauthorized: "unauthorized",
-                  limitReached: "limitReached",
-                  failed: "failed",
-                  unsupported: "unsupported",
-                  alreadyExists: "success",
-                } as const;
-                const mapped = stateMap[err.state] || "failed";
-                onWeekUpdate({ summaryState: mapped });
+                return;
               }
-            }}
-          />
-        </div>
-      )}
-
-      {/* Collapsed State Preview */}
-      {week.collapsed && week.totalEntries > 0 && (
-        <div className="px-4 py-2 text-sm text-muted-foreground border-t bg-muted/20">
-          <span>
-            {week.totalEntries} entries across {week.days.length} days
-            {week.summary && " • Summary available"}
-          </span>
-        </div>
-      )}
+              const stateMap: Record<string, typeof week.summaryState> = {
+                unauthorized: "unauthorized",
+                limitReached: "limitReached",
+                failed: "failed",
+                unsupported: "unsupported",
+                alreadyExists: "success",
+              } as const;
+              const mapped = stateMap[err.state] || "failed";
+              onWeekUpdate({ summaryState: mapped });
+            }
+          }}
+        />
+      </div>
     </div>
   );
 }

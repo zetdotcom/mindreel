@@ -23,7 +23,7 @@ export function HistoryView() {
     toasts,
     loadMoreWeeks,
     refreshWeeks,
-    toggleWeekCollapsed,
+    toggleWeekDaysCollapsed,
     showDeleteModal,
     hideDeleteModal,
     updateWeek,
@@ -143,7 +143,7 @@ export function HistoryView() {
           <WeekGroup
             key={week.weekKey}
             week={week}
-            onToggleCollapsed={() => toggleWeekCollapsed(week.weekKey)}
+            onToggleDaysCollapsed={() => toggleWeekDaysCollapsed(week.weekKey)}
             onEntryEdit={(entryId, content) => {
               // Entry edit will be handled by individual EntryRow components
               // This is for coordination if needed
