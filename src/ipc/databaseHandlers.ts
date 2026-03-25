@@ -1,6 +1,6 @@
 import { BrowserWindow, ipcMain } from "electron";
+import type { UpdateHistoryGroupingInput } from "../lib/historyGrouping";
 import { databaseService } from "../sqlite/databaseService";
-import { IsoWeekIdentifier } from "../sqlite/dateUtils";
 import type {
   CreateEntryInput,
   CreateSummaryInput,
@@ -18,7 +18,7 @@ export function registerDatabaseHandlers(): void {
   // ENTRIES HANDLERS
   // =============================================================================
 
-  ipcMain.handle("db:createEntry", async (event, input: CreateEntryInput) => {
+  ipcMain.handle("db:createEntry", async (_event, input: CreateEntryInput) => {
     try {
       const entry = await databaseService.createEntry(input);
 
@@ -208,6 +208,18 @@ export function registerDatabaseHandlers(): void {
     },
   );
 
+  ipcMain.handle(
+    "db:getSummaryForDateRange",
+    async (_event, startDate: string, endDate: string) => {
+      try {
+        return await databaseService.getSummaryForDateRange(startDate, endDate);
+      } catch (error) {
+        console.error("Error getting summary for date range:", error);
+        throw error;
+      }
+    },
+  );
+
   ipcMain.handle("db:getCurrentWeekSummary", async (_event) => {
     try {
       return await databaseService.getCurrentWeekSummary();
@@ -269,6 +281,18 @@ export function registerDatabaseHandlers(): void {
         return await databaseService.summaryExistsForIsoWeek(iso_year, week_of_year);
       } catch (error) {
         console.error("Error checking if summary exists for ISO week:", error);
+        throw error;
+      }
+    },
+  );
+
+  ipcMain.handle(
+    "db:summaryExistsForDateRange",
+    async (_event, startDate: string, endDate: string) => {
+      try {
+        return await databaseService.summaryExistsForDateRange(startDate, endDate);
+      } catch (error) {
+        console.error("Error checking if summary exists for date range:", error);
         throw error;
       }
     },
@@ -342,6 +366,33 @@ export function registerDatabaseHandlers(): void {
       return await databaseService.resetSettings();
     } catch (error) {
       console.error("Error resetting settings:", error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle("db:getHistoryGroupingRules", async (_event) => {
+    try {
+      return await databaseService.getHistoryGroupingRules();
+    } catch (error) {
+      console.error("Error getting history grouping rules:", error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle("db:getHistoryGroupingSettings", async (_event) => {
+    try {
+      return await databaseService.getHistoryGroupingSettings();
+    } catch (error) {
+      console.error("Error getting history grouping settings:", error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle("db:updateHistoryGrouping", async (_event, input: UpdateHistoryGroupingInput) => {
+    try {
+      return await databaseService.updateHistoryGrouping(input);
+    } catch (error) {
+      console.error("Error updating history grouping:", error);
       throw error;
     }
   });

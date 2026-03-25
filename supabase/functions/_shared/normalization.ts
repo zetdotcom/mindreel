@@ -28,7 +28,7 @@ export function normalizeEntries(
 
     // Apply truncation if needed
     if (processedText.length > truncationLimit) {
-      processedText = processedText.substring(0, truncationLimit) + "… [truncated]";
+      processedText = `${processedText.substring(0, truncationLimit)}… [truncated]`;
       truncated = true;
     }
 
@@ -147,7 +147,7 @@ export function truncateToLimit(
 /**
  * Builds system prompt based on language
  */
-export function buildSystemPrompt(language: SupportedLanguage): string {
+export function buildSystemPrompt(_language: SupportedLanguage): string {
   //   if (language === "pl") {
   //     return `Jesteś asystentem AI specjalizującym się w tworzeniu streszczeń działań zawodowych. Twoim zadaniem jest przeanalizowanie listy aktywności z danego tygodnia i utworzenie zwięzłego, wartościowego streszczenia w języku polskim.
 
@@ -166,6 +166,7 @@ export function buildSystemPrompt(language: SupportedLanguage): string {
   //   }
 
   return `You are an AI assistant specialized in creating professional work activity summaries. Your task is to analyze a list of activities from a given week and create a concise, valuable summary in English. Do not add assume reason for activities.
+  The date range may span a full week or a longer sprint-style period.
 
   User tasks may be marked with project tags (e.g., #mindreel, #aw-web). Group activities by these tags. If no tag is present, categorize under #other
 
@@ -248,7 +249,7 @@ export function buildPromptData(
 /**
  * Formats AI response to ensure proper bullet point format
  */
-export function formatSummary(rawSummary: string, language: SupportedLanguage): string {
+export function formatSummary(rawSummary: string, _language: SupportedLanguage): string {
   const lines = rawSummary
     .split("\n")
     .map((line) => line.trim())

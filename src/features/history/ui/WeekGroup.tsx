@@ -1,8 +1,9 @@
+import { endOfDay, parseISO } from "date-fns";
 import { Calendar, ChevronDown, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { WeekGroupViewModel, SummaryViewModel } from "../model/types";
+import type { SummaryViewModel, WeekGroupViewModel } from "../model/types";
 import { DayGroup } from "./DayGroup";
 import { SummaryCard } from "./SummaryCard";
 
@@ -18,7 +19,7 @@ interface WeekGroupProps {
 }
 
 /**
- * WeekGroup component displays a week's worth of entries and summary
+ * WeekGroup component displays a history period and summary
  * Supports collapsing/expanding and contains DayGroup and SummaryCard
  */
 export function WeekGroup({
@@ -33,10 +34,10 @@ export function WeekGroup({
 }: WeekGroupProps) {
   const hasContent = week.totalEntries > 0 || week.summary;
 
-  // Determine if the current date is past the week's end_date and expose as weekPassed
+  // Determine if the current date is past the group's end_date.
   const now = new Date();
-  const weekEndDate = week.end_date ? new Date(week.end_date) : null;
-  const weekPassed = weekEndDate ? now > weekEndDate : false;
+  const weekEndDate = week.end_date ? endOfDay(parseISO(week.end_date)) : null;
+  const periodPassed = weekEndDate ? now > weekEndDate : false;
 
   if (!hasContent) {
     return null; // Don't render empty weeks
@@ -44,7 +45,7 @@ export function WeekGroup({
 
   return (
     <div className={cn("border rounded-lg bg-card", className)}>
-      {/* Week Header */}
+      {/* Group Header */}
       <div className="border-b bg-muted/50 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -62,26 +63,25 @@ export function WeekGroup({
               )}
             </Button>
 
-            {/* Week Title */}
-            <div className="flex items-center space-x-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <h2 className="font-semibold text-foreground">
-                {week.headerLabel}
-              </h2>
+            {/* Group Title */}
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center space-x-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <h2 className="font-semibold text-foreground">{week.headerLabel}</h2>
+              </div>
+              <div className="pl-6 text-xs text-muted-foreground">{week.groupingLabel}</div>
             </div>
           </div>
 
-          {/* Week Stats */}
+          {/* Group Stats */}
           <div className="flex items-center space-x-4 text-sm text-muted-foreground">
             <span>{week.totalEntries} entries</span>
-            {week.summary && (
-              <span className="text-primary">Summary available</span>
-            )}
+            {week.summary && <span className="text-primary">Summary available</span>}
           </div>
         </div>
       </div>
 
-      {/* Week Content */}
+      {/* Group Content */}
       {!week.collapsed && (
         <div className="p-4 space-y-6">
           {/* Days */}
@@ -99,9 +99,7 @@ export function WeekGroup({
                     if (!onWeekUpdate) return;
                     // Toggle the collapsed flag for the specific day and propagate via onWeekUpdate
                     const updatedDays = week.days.map((d) =>
-                      d.date === day.date
-                        ? { ...d, collapsed: !d.collapsed }
-                        : d,
+                      d.date === day.date ? { ...d, collapsed: !d.collapsed } : d,
                     );
                     onWeekUpdate({ days: updatedDays });
                   }}
@@ -114,10 +112,9 @@ export function WeekGroup({
           <SummaryCard
             summary={week.summary}
             summaryState={week.summaryState}
-            weekKey={week.weekKey}
-            weekIdentifier={{
-              iso_year: week.iso_year,
-              week_of_year: week.week_of_year,
+            periodRange={{
+              start_date: week.start_date,
+              end_date: week.end_date,
             }}
             totalEntries={week.totalEntries}
             onUpdate={onSummaryUpdate}
@@ -127,19 +124,16 @@ export function WeekGroup({
               }
             }}
             onLoginRequest={onLoginRequest}
-            weekPassed={weekPassed}
-            onGenerate={async (ident) => {
+            periodPassed={periodPassed}
+            onGenerate={async (range) => {
               if (!onWeekUpdate) return;
               onWeekUpdate({ summaryState: "generating" });
               const result = await (
                 await import("../../summaries/model/aiGeneration")
               ).generateWeeklySummary({
-                iso_year: ident.iso_year,
-                week_of_year: ident.week_of_year,
-                start_date: week.start_date,
-                end_date: week.end_date,
+                start_date: range.start_date,
+                end_date: range.end_date,
               });
-              console.log("🚀 ~ result:", result);
 
               if (result.ok) {
                 onWeekUpdate({
@@ -161,9 +155,9 @@ export function WeekGroup({
                     const { summariesRepository } = await import(
                       "../../summaries/model/repository"
                     );
-                    const existing = await summariesRepository.getByIsoWeek(
-                      week.iso_year,
-                      week.week_of_year,
+                    const existing = await summariesRepository.getByDateRange(
+                      week.start_date,
+                      week.end_date,
                     );
                     if (existing) {
                       onWeekUpdate({
@@ -194,15 +188,6 @@ export function WeekGroup({
                 } as const;
                 const mapped = stateMap[err.state] || "failed";
                 onWeekUpdate({ summaryState: mapped });
-              }
-            }}
-            onClearSummary={async (summaryId) => {
-              const { summariesRepository } = await import(
-                "../../summaries/model/repository"
-              );
-              await summariesRepository.delete(summaryId);
-              if (onWeekUpdate) {
-                onWeekUpdate({ summary: undefined, summaryState: "pending" });
               }
             }}
           />

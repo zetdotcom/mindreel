@@ -189,6 +189,27 @@ describe("SummariesRepository", () => {
     });
   });
 
+  describe("getSummaryForDateRange", () => {
+    it("should return summary for an exact date range", async () => {
+      await repository.createSummary({
+        content: "Sprint summary",
+        start_date: "2024-03-01",
+        end_date: "2024-03-14",
+        week_of_year: 9,
+        iso_year: 2024,
+      });
+
+      const summary = await repository.getSummaryForDateRange("2024-03-01", "2024-03-14");
+
+      expect(summary?.content).toBe("Sprint summary");
+    });
+
+    it("should return null when the exact date range does not exist", async () => {
+      const summary = await repository.getSummaryForDateRange("2024-03-01", "2024-03-14");
+      expect(summary).toBeNull();
+    });
+  });
+
   describe("getAllSummaries", () => {
     it("should return all summaries ordered by ISO year and week DESC", async () => {
       await repository.createSummary({
@@ -409,6 +430,26 @@ describe("SummariesRepository", () => {
 
       expect(exists2024).toBe(true);
       expect(exists2025).toBe(false);
+    });
+  });
+
+  describe("summaryExistsForDateRange", () => {
+    it("should return true when summary exists for exact date range", async () => {
+      await repository.createSummary({
+        content: "Sprint summary",
+        start_date: "2024-03-01",
+        end_date: "2024-03-14",
+        week_of_year: 9,
+        iso_year: 2024,
+      });
+
+      const exists = await repository.summaryExistsForDateRange("2024-03-01", "2024-03-14");
+      expect(exists).toBe(true);
+    });
+
+    it("should return false when summary does not exist for exact date range", async () => {
+      const exists = await repository.summaryExistsForDateRange("2024-03-01", "2024-03-14");
+      expect(exists).toBe(false);
     });
   });
 

@@ -7,7 +7,7 @@ const MAX_ENTRIES = 1000; // Prevent abuse
 const MAX_ENTRY_LENGTH = 10000; // Per entry character limit
 
 /**
- * Validates the week range (Monday to Sunday) and ensures it's not too far in the future
+ * Validates the requested summary period and ensures it is not too far in the future.
  */
 export function validateWeekRange(
   weekStart: string,
@@ -15,26 +15,16 @@ export function validateWeekRange(
   serverNow: Date,
 ): string | null {
   // Parse dates as UTC
-  const startDate = new Date(weekStart + "T00:00:00.000Z");
-  const endDate = new Date(weekEnd + "T23:59:59.999Z");
+  const startDate = new Date(`${weekStart}T00:00:00.000Z`);
+  const endDate = new Date(`${weekEnd}T23:59:59.999Z`);
 
   // Check if dates are valid
-  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
     return "Invalid date format. Use YYYY-MM-DD";
   }
 
-  // Check if week_start is Monday (1) and week_end is Sunday (0)
-  if (startDate.getUTCDay() !== 1) {
-    return "week_start must be a Monday";
-  }
-  if (endDate.getUTCDay() !== 0) {
-    return "week_end must be a Sunday";
-  }
-
-  // Check if the range is exactly 6 days (Monday to Sunday)
-  const daysDiff = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-  if (daysDiff !== 6) {
-    return "Week range must be exactly 7 days (Monday to Sunday)";
+  if (startDate > endDate) {
+    return "week_start must be on or before week_end";
   }
 
   // Check if week_start is not more than 1 day in the future
@@ -62,8 +52,8 @@ export function validateEntries(
     return `Too many entries. Maximum allowed: ${MAX_ENTRIES}`;
   }
 
-  const weekStartTime = new Date(weekStart + "T00:00:00.000Z").getTime();
-  const weekEndTime = new Date(weekEnd + "T23:59:59.999Z").getTime();
+  const weekStartTime = new Date(`${weekStart}T00:00:00.000Z`).getTime();
+  const weekEndTime = new Date(`${weekEnd}T23:59:59.999Z`).getTime();
 
   for (let i = 0; i < entries.length; i++) {
     const entry = entries[i];
@@ -83,7 +73,7 @@ export function validateEntries(
 
     // Validate timestamp format and range
     const entryTime = new Date(entry.timestamp);
-    if (isNaN(entryTime.getTime())) {
+    if (Number.isNaN(entryTime.getTime())) {
       return `Entry ${i + 1}: invalid timestamp format`;
     }
 

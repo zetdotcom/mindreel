@@ -1,5 +1,23 @@
-import { getISOWeek, getISOWeekYear } from "date-fns";
+import { getISOWeekYear } from "date-fns";
 import type sqlite3 from "sqlite3";
+
+interface ColumnInfoRow {
+  name: string;
+}
+
+interface EntryBackfillRow {
+  id: number;
+  date: string;
+}
+
+interface SummaryBackfillRow {
+  id: number;
+  start_date: string;
+}
+
+interface AppliedMigrationRow {
+  id: number;
+}
 
 export interface Migration {
   id: number;
@@ -21,7 +39,7 @@ const migration001: Migration = {
         // Helper function to check if column exists
         const checkColumnExists = (tableName: string, columnName: string): Promise<boolean> => {
           return new Promise((resolve, reject) => {
-            db.all(`PRAGMA table_info(${tableName})`, [], (err, rows: any[]) => {
+            db.all(`PRAGMA table_info(${tableName})`, [], (err, rows: ColumnInfoRow[]) => {
               if (err) {
                 reject(err);
                 return;
@@ -72,7 +90,7 @@ const migration001: Migration = {
             db.all(
               "SELECT id, date FROM entries WHERE iso_year IS NULL",
               [],
-              (err, rows: any[]) => {
+              (err, rows: EntryBackfillRow[]) => {
                 if (err) {
                   reject(err);
                   return;
@@ -110,7 +128,7 @@ const migration001: Migration = {
                         }
                       },
                     );
-                  } catch (dateErr) {
+                  } catch (_dateErr) {
                     reject(new Error(`Invalid date format for entry ${row.id}: ${row.date}`));
                     return;
                   }
@@ -123,7 +141,7 @@ const migration001: Migration = {
               db.all(
                 "SELECT id, start_date FROM summaries WHERE iso_year IS NULL",
                 [],
-                (err, rows: any[]) => {
+                (err, rows: SummaryBackfillRow[]) => {
                   if (err) {
                     reject(err);
                     return;
@@ -161,7 +179,7 @@ const migration001: Migration = {
                           }
                         },
                       );
-                    } catch (dateErr) {
+                    } catch (_dateErr) {
                       reject(
                         new Error(`Invalid date format for summary ${row.id}: ${row.start_date}`),
                       );
@@ -279,7 +297,7 @@ const migration003: Migration = {
       db.serialize(() => {
         const checkColumnExists = (): Promise<boolean> => {
           return new Promise((resolve, reject) => {
-            db.all(`PRAGMA table_info(settings)`, [], (err, rows: any[]) => {
+            db.all(`PRAGMA table_info(settings)`, [], (err, rows: ColumnInfoRow[]) => {
               if (err) {
                 reject(err);
                 return;
@@ -318,15 +336,120 @@ const migration003: Migration = {
       });
     });
   },
-  down: async (db: sqlite3.Database): Promise<void> => {
-    return new Promise((resolve, reject) => {
+  down: async (_db: sqlite3.Database): Promise<void> => {
+    return new Promise((resolve, _reject) => {
       console.log("Migration 003 rollback: SQLite doesn't support DROP COLUMN - skipping rollback");
       resolve();
     });
   },
 };
 
-export const migrations: Migration[] = [migration001, migration002, migration003];
+/**
+ * Migration 4: Add effective-dated history grouping rules and date range summary index
+ */
+const migration004: Migration = {
+  id: 4,
+  name: "add_history_grouping_rules",
+  up: async (db: sqlite3.Database): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      db.serialize(() => {
+        db.run(
+          `
+            CREATE TABLE IF NOT EXISTS history_grouping_rules (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              period_weeks INTEGER NOT NULL CHECK (period_weeks >= 1),
+              start_weekday INTEGER NOT NULL CHECK (start_weekday BETWEEN 1 AND 7),
+              effective_start_date TEXT NOT NULL,
+              created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+            )
+          `,
+          (createErr) => {
+            if (createErr) {
+              reject(createErr);
+              return;
+            }
+
+            db.run(
+              `
+                INSERT INTO history_grouping_rules (
+                  period_weeks,
+                  start_weekday,
+                  effective_start_date,
+                  created_at
+                )
+                SELECT 1, 1, '1970-01-05', '1970-01-05T00:00:00.000Z'
+                WHERE NOT EXISTS (SELECT 1 FROM history_grouping_rules)
+              `,
+              (seedErr) => {
+                if (seedErr) {
+                  reject(seedErr);
+                  return;
+                }
+
+                db.run(
+                  `
+                    CREATE INDEX IF NOT EXISTS idx_history_grouping_rules_effective_start
+                    ON history_grouping_rules(effective_start_date, created_at)
+                  `,
+                  (indexErr) => {
+                    if (indexErr) {
+                      reject(indexErr);
+                      return;
+                    }
+
+                    db.run(
+                      `
+                        CREATE INDEX IF NOT EXISTS idx_summaries_date_range
+                        ON summaries(start_date, end_date)
+                      `,
+                      (summaryIndexErr) => {
+                        if (summaryIndexErr) {
+                          reject(summaryIndexErr);
+                          return;
+                        }
+
+                        console.log(
+                          "Migration 004 completed: Added history grouping rules and summary date range index",
+                        );
+                        resolve();
+                      },
+                    );
+                  },
+                );
+              },
+            );
+          },
+        );
+      });
+    });
+  },
+  down: async (db: sqlite3.Database): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      db.serialize(() => {
+        db.run("DROP INDEX IF EXISTS idx_history_grouping_rules_effective_start", (indexErr) => {
+          if (indexErr) {
+            reject(indexErr);
+            return;
+          }
+
+          db.run("DROP INDEX IF EXISTS idx_summaries_date_range", (summaryIndexErr) => {
+            if (summaryIndexErr) {
+              reject(summaryIndexErr);
+              return;
+            }
+
+            console.log(
+              "Migration 004 rollback: SQLite doesn't support dropping history_grouping_rules table safely in-place",
+            );
+            resolve();
+          });
+        });
+      });
+    });
+  },
+};
+
+export const migrations: Migration[] = [migration001, migration002, migration003, migration004];
 
 export class MigrationRunner {
   private db: sqlite3.Database;
@@ -358,13 +481,17 @@ export class MigrationRunner {
 
   async getAppliedMigrations(): Promise<number[]> {
     return new Promise((resolve, reject) => {
-      this.db.all("SELECT id FROM migrations ORDER BY id", [], (err, rows: any[]) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(rows.map((row) => row.id));
-        }
-      });
+      this.db.all(
+        "SELECT id FROM migrations ORDER BY id",
+        [],
+        (err, rows: AppliedMigrationRow[]) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(rows.map((row) => row.id));
+          }
+        },
+      );
     });
   }
 

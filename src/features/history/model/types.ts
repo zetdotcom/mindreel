@@ -1,9 +1,10 @@
 // Types for the History View feature based on the implementation plan
 
+import type { IsoWeekday } from "../../../lib/historyGrouping";
 import type { Entry, Summary } from "../../../sqlite/types";
 
 // Utility types from implementation plan
-export type WeekKey = `${number}-W${string}`; // e.g. "2025-W01"
+export type WeekKey = string;
 
 export interface IsoWeekIdentifier {
   iso_year: number;
@@ -59,11 +60,15 @@ export interface SummaryViewModel extends Summary {
   weekKey: WeekKey;
 }
 
-export interface WeekGroupViewModel extends IsoWeekIdentifier {
+export interface WeekGroupViewModel {
   weekKey: WeekKey;
   start_date: string;
   end_date: string;
   headerLabel: string;
+  groupingLabel: string;
+  period_weeks: number;
+  start_weekday: IsoWeekday;
+  effective_start_date: string;
   days: DayGroupViewModel[];
   summary?: SummaryViewModel;
   summaryState: SummaryCardState;
@@ -76,7 +81,6 @@ export interface PaginationState {
   loading: boolean;
   loadedWeekKeys: WeekKey[];
   hasMore: boolean;
-  earliestLoaded?: IsoWeekIdentifier;
 }
 
 export interface AuthState {
@@ -103,10 +107,13 @@ export interface ToastMessage {
   text: string;
 }
 
-export interface RawWeekData extends IsoWeekIdentifier {
+export interface RawWeekData {
   weekKey: WeekKey;
   start_date: string;
   end_date: string;
+  period_weeks: number;
+  start_weekday: IsoWeekday;
+  effective_start_date: string;
   entries: Entry[];
   summary?: Summary;
 }

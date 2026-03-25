@@ -9,9 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Initial release preparation
+- Configurable history grouping with effective-dated rules so new sprint-style periods start on the selected boundary without regrouping older history
 
 ### Changed
 - Refreshed the macOS app icon with a native-first master asset and reproducible icon generation script
+- History summary cards now follow the active history period, including multi-week sprint groupings configured in settings
 
 ### Deprecated
 

@@ -1,15 +1,26 @@
 import { Alert } from "@/components/ui/alert";
-import { PopupIntervalControl, useSettings } from "@/features/settings";
+import { HistoryGroupingControl, PopupIntervalControl, useSettings } from "@/features/settings";
 
 export function SettingsView() {
-  const { settings, loading, error, updatePopupInterval } = useSettings();
+  const { settings, historyGrouping, loading, error, updatePopupInterval, updateHistoryGrouping } =
+    useSettings();
 
   const handleIntervalChange = async (minutes: number) => {
     try {
       await updatePopupInterval(minutes);
-      console.log(`Popup interval updated to ${minutes} minutes`);
     } catch (err) {
       console.error("Failed to update popup interval:", err);
+    }
+  };
+
+  const handleHistoryGroupingChange = async (input: {
+    period_weeks: number;
+    start_weekday: 1 | 2 | 3 | 4 | 5 | 6 | 7;
+  }) => {
+    try {
+      await updateHistoryGrouping(input);
+    } catch (err) {
+      console.error("Failed to update history grouping:", err);
     }
   };
 
@@ -50,6 +61,16 @@ export function SettingsView() {
                 </p>
               </div>
             </div>
+          )}
+        </section>
+
+        <section className="rounded-lg border border-border bg-card p-6">
+          <h2 className="text-lg font-semibold mb-4">History</h2>
+
+          {loading || !historyGrouping ? (
+            <p className="text-sm text-muted-foreground">Loading history settings...</p>
+          ) : (
+            <HistoryGroupingControl value={historyGrouping} onSave={handleHistoryGroupingChange} />
           )}
         </section>
 

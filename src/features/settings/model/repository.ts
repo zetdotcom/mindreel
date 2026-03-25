@@ -1,3 +1,8 @@
+import type {
+  HistoryGroupingRule,
+  HistoryGroupingSettings,
+  UpdateHistoryGroupingInput,
+} from "@/lib/historyGrouping";
 import type { Settings, UpdateSettingsInput } from "@/sqlite/types";
 
 export async function getSettings(): Promise<Settings | null> {
@@ -18,4 +23,18 @@ export async function updateGlobalShortcut(shortcut: string | null): Promise<Set
 
 export async function resetSettings(): Promise<Settings> {
   return window.appApi.db.resetSettings();
+}
+
+export async function getHistoryGroupingRules(): Promise<HistoryGroupingRule[]> {
+  return window.appApi.db.getHistoryGroupingRules();
+}
+
+export async function getHistoryGroupingSettings(): Promise<HistoryGroupingSettings> {
+  return window.appApi.db.getHistoryGroupingSettings();
+}
+
+export async function updateHistoryGrouping(
+  input: UpdateHistoryGroupingInput,
+): Promise<HistoryGroupingSettings> {
+  return window.appApi.db.updateHistoryGrouping(input);
 }

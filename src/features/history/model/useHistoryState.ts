@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { getCurrentWeekRange, getPreviousIsoWeek } from "../../../sqlite/dateUtils";
 import { filterWeeksWithContent, sortWeeksDescending, transformWeekData } from "./lib";
 import { historyRepository } from "./repository";
 import {
   type HistoryState,
-  type IsoWeekIdentifier,
   PAGE_WEEK_COUNT,
   type PaginationState,
   type RawWeekData,
@@ -30,24 +28,6 @@ export function useHistoryState() {
   });
 
   /**
-   * Add a toast message
-   */
-  const addToast = useCallback((toast: Omit<ToastMessage, "id">) => {
-    const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const newToast: ToastMessage = { ...toast, id };
-
-    setState((prev) => ({
-      ...prev,
-      toasts: [...prev.toasts, newToast],
-    }));
-
-    // Auto-remove toast after 5 seconds
-    setTimeout(() => {
-      removeToast(id);
-    }, 5000);
-  }, []);
-
-  /**
    * Remove a toast message
    */
   const removeToast = useCallback((id: string) => {
@@ -56,6 +36,27 @@ export function useHistoryState() {
       toasts: prev.toasts.filter((toast) => toast.id !== id),
     }));
   }, []);
+
+  /**
+   * Add a toast message
+   */
+  const addToast = useCallback(
+    (toast: Omit<ToastMessage, "id">) => {
+      const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const newToast: ToastMessage = { ...toast, id };
+
+      setState((prev) => ({
+        ...prev,
+        toasts: [...prev.toasts, newToast],
+      }));
+
+      // Auto-remove toast after 5 seconds
+      setTimeout(() => {
+        removeToast(id);
+      }, 5000);
+    },
+    [removeToast],
+  );
 
   /**
    * Update pagination state
@@ -86,7 +87,7 @@ export function useHistoryState() {
     try {
       setState((prev) => ({ ...prev, loadingInitial: true, error: undefined }));
 
-      const result = await historyRepository.loadWeeks();
+      const result = await historyRepository.loadWeeks(0, PAGE_WEEK_COUNT);
       const processedWeeks = processWeeksData(result.rawWeeks);
 
       setState((prev) => ({
@@ -125,21 +126,7 @@ export function useHistoryState() {
       updatePagination({ loading: true });
 
       // Determine the starting point for pagination
-      let startingFrom: IsoWeekIdentifier | undefined;
-
-      if (state.pagination.earliestLoaded) {
-        // Continue from the earliest loaded week
-        startingFrom = getPreviousIsoWeek(state.pagination.earliestLoaded);
-      } else if (state.weeks.length > 0) {
-        // Use the last week in current state
-        const lastWeek = state.weeks[state.weeks.length - 1];
-        startingFrom = getPreviousIsoWeek({
-          iso_year: lastWeek.iso_year,
-          week_of_year: lastWeek.week_of_year,
-        });
-      }
-
-      const result = await historyRepository.loadWeeks(startingFrom, PAGE_WEEK_COUNT);
+      const result = await historyRepository.loadWeeks(state.weeks.length, PAGE_WEEK_COUNT);
       const newWeeks = processWeeksData(result.rawWeeks);
 
       setState((prev) => ({
@@ -153,10 +140,6 @@ export function useHistoryState() {
             ...result.rawWeeks.map((w) => w.weekKey),
           ],
           hasMore: result.hasMore,
-          earliestLoaded:
-            result.rawWeeks.length > 0
-              ? result.rawWeeks[result.rawWeeks.length - 1]
-              : prev.pagination.earliestLoaded,
         },
       }));
     } catch (error) {
@@ -178,7 +161,7 @@ export function useHistoryState() {
 
       // Reload from the beginning with the same count as currently loaded
       const weekCount = Math.max(state.weeks.length, PAGE_WEEK_COUNT);
-      const result = await historyRepository.loadWeeks(undefined, weekCount);
+      const result = await historyRepository.loadWeeks(0, weekCount);
       const processedWeeks = processWeeksData(result.rawWeeks);
 
       setState((prev) => ({
@@ -188,8 +171,6 @@ export function useHistoryState() {
           ...prev.pagination,
           loadedWeekKeys: result.rawWeeks.map((w) => w.weekKey),
           hasMore: result.hasMore,
-          earliestLoaded:
-            result.rawWeeks.length > 0 ? result.rawWeeks[result.rawWeeks.length - 1] : undefined,
         },
       }));
 

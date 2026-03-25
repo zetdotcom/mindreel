@@ -1,7 +1,6 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import {
   getCurrentWeekRange,
-  getNextIsoWeek,
   getPreviousIsoWeek,
   getWeekRange,
   getWeekRangeForDate,
@@ -70,7 +69,7 @@ export function useIsoWeekNavigation() {
    * Parse a week key into ISO week identifier
    */
   const parseWeekKeyToIdentifier = useCallback((weekKey: WeekKey): IsoWeekIdentifier => {
-    return parseWeekKey(weekKey);
+    return parseWeekKey(weekKey as `${number}-W${string}`);
   }, []);
 
   /**

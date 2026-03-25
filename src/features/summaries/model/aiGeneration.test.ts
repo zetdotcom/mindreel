@@ -24,6 +24,55 @@ vi.mock("./repository", () => ({
 import { supabaseRendererClient } from "../../../supabase/rendererClient";
 import { summariesRepository } from "./repository";
 
+type SessionResponse = Awaited<ReturnType<typeof supabaseRendererClient.auth.getSession>>;
+type MockGetEntriesForIsoWeek = ReturnType<
+  typeof vi.fn<(iso_year: number, week_of_year: number) => Promise<Entry[]>>
+>;
+type MockFetch = ReturnType<
+  typeof vi.fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>
+>;
+
+function getMockDb(): { getEntriesForIsoWeek: MockGetEntriesForIsoWeek } {
+  return globalThis.window.appApi.db as unknown as {
+    getEntriesForIsoWeek: MockGetEntriesForIsoWeek;
+  };
+}
+
+function getFetchMock(): MockFetch {
+  return global.fetch as unknown as MockFetch;
+}
+
+function setSession(accessToken: string | null) {
+  const response = {
+    data: {
+      session:
+        accessToken === null
+          ? null
+          : ({
+              access_token: accessToken,
+            } as unknown as NonNullable<SessionResponse["data"]["session"]>),
+    },
+  } as SessionResponse;
+
+  vi.mocked(supabaseRendererClient.auth.getSession).mockResolvedValue(response);
+}
+
+function mockFetchJson(payload: unknown) {
+  getFetchMock().mockResolvedValue({
+    json: async () => payload,
+  } as unknown as Response);
+}
+
+function getFetchPayload(callIndex = 0) {
+  const body = getFetchMock().mock.calls[callIndex]?.[1]?.body;
+
+  if (typeof body !== "string") {
+    throw new Error("Expected fetch body to be a JSON string");
+  }
+
+  return JSON.parse(body);
+}
+
 describe("generateWeeklySummary", () => {
   const validArgs: GenerateWeeklySummaryArgs = {
     iso_year: 2025,
@@ -66,21 +115,24 @@ describe("generateWeeklySummary", () => {
     vi.clearAllMocks();
 
     // Setup default window.appApi mock
-    (global as any).window = {
+    globalThis.window = {
       appApi: {
         db: {
-          getEntriesForIsoWeek: vi.fn(),
+          getEntriesForIsoWeek:
+            vi.fn<(iso_year: number, week_of_year: number) => Promise<Entry[]>>(),
         },
       },
-    };
+    } as unknown as Window & typeof globalThis;
 
     // Mock fetch globally
-    global.fetch = vi.fn();
+    global.fetch = vi.fn<
+      (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
+    >() as unknown as typeof fetch;
 
     // Mock import.meta.env and process.env
-    (import.meta as any).env = {
+    Object.assign(import.meta.env, {
       VITE_SUPABASE_URL: "https://test.supabase.co",
-    };
+    });
     process.env.VITE_SUPABASE_URL = "https://test.supabase.co";
   });
 
@@ -112,15 +164,10 @@ describe("generateWeeklySummary", () => {
       yesterday.setDate(yesterday.getDate() - 2);
       const pastDate = yesterday.toISOString().split("T")[0];
 
-      vi.mocked(supabaseRendererClient.auth.getSession).mockResolvedValue({
-        data: { session: { access_token: "test-token" } },
-      } as any);
-
-      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(mockEntries);
+      setSession("test-token");
+      getMockDb().getEntriesForIsoWeek.mockResolvedValue(mockEntries);
       vi.mocked(summariesRepository.existsForIsoWeek).mockResolvedValue(false);
-      (global.fetch as any).mockResolvedValue({
-        json: async () => ({ ok: true, summary: "Test summary" }),
-      });
+      mockFetchJson({ ok: true, summary: "Test summary" });
       vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(mockSummary);
 
       const result = await generateWeeklySummary({
@@ -134,9 +181,7 @@ describe("generateWeeklySummary", () => {
 
   describe("authentication", () => {
     it("should return unauthorized when no session", async () => {
-      vi.mocked(supabaseRendererClient.auth.getSession).mockResolvedValue({
-        data: { session: null },
-      } as any);
+      setSession(null);
 
       const result = await generateWeeklySummary(validArgs);
 
@@ -148,9 +193,7 @@ describe("generateWeeklySummary", () => {
     });
 
     it("should return unauthorized when no access token", async () => {
-      vi.mocked(supabaseRendererClient.auth.getSession).mockResolvedValue({
-        data: { session: { access_token: null } },
-      } as any);
+      setSession(null);
 
       const result = await generateWeeklySummary(validArgs);
 
@@ -174,14 +217,10 @@ describe("generateWeeklySummary", () => {
     });
 
     it("should proceed with valid token", async () => {
-      vi.mocked(supabaseRendererClient.auth.getSession).mockResolvedValue({
-        data: { session: { access_token: "valid-token" } },
-      } as any);
-      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(mockEntries);
+      setSession("valid-token");
+      getMockDb().getEntriesForIsoWeek.mockResolvedValue(mockEntries);
       vi.mocked(summariesRepository.existsForIsoWeek).mockResolvedValue(false);
-      (global.fetch as any).mockResolvedValue({
-        json: async () => ({ ok: true, summary: "Test summary" }),
-      });
+      mockFetchJson({ ok: true, summary: "Test summary" });
       vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(mockSummary);
 
       const result = await generateWeeklySummary(validArgs);
@@ -192,26 +231,22 @@ describe("generateWeeklySummary", () => {
 
   describe("entry fetching", () => {
     beforeEach(() => {
-      vi.mocked(supabaseRendererClient.auth.getSession).mockResolvedValue({
-        data: { session: { access_token: "test-token" } },
-      } as any);
+      setSession("test-token");
     });
 
     it("should fetch entries for correct ISO week", async () => {
-      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(mockEntries);
+      getMockDb().getEntriesForIsoWeek.mockResolvedValue(mockEntries);
       vi.mocked(summariesRepository.existsForIsoWeek).mockResolvedValue(false);
-      (global.fetch as any).mockResolvedValue({
-        json: async () => ({ ok: true, summary: "Test" }),
-      });
+      mockFetchJson({ ok: true, summary: "Test" });
       vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(mockSummary);
 
       await generateWeeklySummary(validArgs);
 
-      expect((global.window as any).appApi.db.getEntriesForIsoWeek).toHaveBeenCalledWith(2025, 1);
+      expect(getMockDb().getEntriesForIsoWeek).toHaveBeenCalledWith(2025, 1);
     });
 
     it("should return failed when no entries found", async () => {
-      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue([]);
+      getMockDb().getEntriesForIsoWeek.mockResolvedValue([]);
 
       const result = await generateWeeklySummary(validArgs);
 
@@ -223,7 +258,11 @@ describe("generateWeeklySummary", () => {
     });
 
     it("should return failed when DB API unavailable", async () => {
-      (global.window as any).appApi = null;
+      Object.defineProperty(globalThis.window, "appApi", {
+        configurable: true,
+        value: null,
+        writable: true,
+      });
 
       const result = await generateWeeklySummary(validArgs);
 
@@ -235,7 +274,7 @@ describe("generateWeeklySummary", () => {
     });
 
     it("should return failed when getEntriesForIsoWeek is not a function", async () => {
-      (global.window as any).appApi.db.getEntriesForIsoWeek = undefined;
+      Reflect.set(getMockDb() as unknown as object, "getEntriesForIsoWeek", undefined);
 
       const result = await generateWeeklySummary(validArgs);
 
@@ -249,10 +288,8 @@ describe("generateWeeklySummary", () => {
 
   describe("duplicate check", () => {
     beforeEach(() => {
-      vi.mocked(supabaseRendererClient.auth.getSession).mockResolvedValue({
-        data: { session: { access_token: "test-token" } },
-      } as any);
-      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(mockEntries);
+      setSession("test-token");
+      getMockDb().getEntriesForIsoWeek.mockResolvedValue(mockEntries);
     });
 
     it("should return alreadyExists when summary exists", async () => {
@@ -269,9 +306,7 @@ describe("generateWeeklySummary", () => {
 
     it("should proceed when summary does not exist", async () => {
       vi.mocked(summariesRepository.existsForIsoWeek).mockResolvedValue(false);
-      (global.fetch as any).mockResolvedValue({
-        json: async () => ({ ok: true, summary: "Test" }),
-      });
+      mockFetchJson({ ok: true, summary: "Test" });
       vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(mockSummary);
 
       const result = await generateWeeklySummary(validArgs);
@@ -281,9 +316,7 @@ describe("generateWeeklySummary", () => {
 
     it("should continue on duplicate check error (non-fatal)", async () => {
       vi.mocked(summariesRepository.existsForIsoWeek).mockRejectedValue(new Error("DB error"));
-      (global.fetch as any).mockResolvedValue({
-        json: async () => ({ ok: true, summary: "Test" }),
-      });
+      mockFetchJson({ ok: true, summary: "Test" });
       vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(mockSummary);
 
       const result = await generateWeeklySummary(validArgs);
@@ -294,17 +327,13 @@ describe("generateWeeklySummary", () => {
 
   describe("edge function call", () => {
     beforeEach(() => {
-      vi.mocked(supabaseRendererClient.auth.getSession).mockResolvedValue({
-        data: { session: { access_token: "test-token" } },
-      } as any);
-      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(mockEntries);
+      setSession("test-token");
+      getMockDb().getEntriesForIsoWeek.mockResolvedValue(mockEntries);
       vi.mocked(summariesRepository.existsForIsoWeek).mockResolvedValue(false);
     });
 
     it("should call edge function with correct URL", async () => {
-      (global.fetch as any).mockResolvedValue({
-        json: async () => ({ ok: true, summary: "Test" }),
-      });
+      mockFetchJson({ ok: true, summary: "Test" });
       vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(mockSummary);
 
       await generateWeeklySummary(validArgs);
@@ -316,9 +345,7 @@ describe("generateWeeklySummary", () => {
     });
 
     it("should include auth token in headers", async () => {
-      (global.fetch as any).mockResolvedValue({
-        json: async () => ({ ok: true, summary: "Test" }),
-      });
+      mockFetchJson({ ok: true, summary: "Test" });
       vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(mockSummary);
 
       await generateWeeklySummary(validArgs);
@@ -334,15 +361,12 @@ describe("generateWeeklySummary", () => {
     });
 
     it("should send correctly formatted payload", async () => {
-      (global.fetch as any).mockResolvedValue({
-        json: async () => ({ ok: true, summary: "Test" }),
-      });
+      mockFetchJson({ ok: true, summary: "Test" });
       vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(mockSummary);
 
       await generateWeeklySummary(validArgs);
 
-      const fetchCall = (global.fetch as any).mock.calls[0];
-      const payload = JSON.parse(fetchCall[1].body);
+      const payload = getFetchPayload();
 
       expect(payload).toEqual({
         week_start: "2024-12-30",
@@ -362,9 +386,7 @@ describe("generateWeeklySummary", () => {
     });
 
     it("should default language to en when not provided", async () => {
-      (global.fetch as any).mockResolvedValue({
-        json: async () => ({ ok: true, summary: "Test" }),
-      });
+      mockFetchJson({ ok: true, summary: "Test" });
       vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(mockSummary);
 
       await generateWeeklySummary({
@@ -372,8 +394,7 @@ describe("generateWeeklySummary", () => {
         language: undefined,
       });
 
-      const fetchCall = (global.fetch as any).mock.calls[0];
-      const payload = JSON.parse(fetchCall[1].body);
+      const payload = getFetchPayload();
 
       expect(payload.language).toBe("en");
     });
@@ -381,20 +402,16 @@ describe("generateWeeklySummary", () => {
 
   describe("edge function error mapping", () => {
     beforeEach(() => {
-      vi.mocked(supabaseRendererClient.auth.getSession).mockResolvedValue({
-        data: { session: { access_token: "test-token" } },
-      } as any);
-      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(mockEntries);
+      setSession("test-token");
+      getMockDb().getEntriesForIsoWeek.mockResolvedValue(mockEntries);
       vi.mocked(summariesRepository.existsForIsoWeek).mockResolvedValue(false);
     });
 
     it("should map auth_error to unauthorized", async () => {
-      (global.fetch as any).mockResolvedValue({
-        json: async () => ({
-          ok: false,
-          reason: "auth_error",
-          message: "Invalid token",
-        }),
+      mockFetchJson({
+        ok: false,
+        reason: "auth_error",
+        message: "Invalid token",
       });
 
       const result = await generateWeeklySummary(validArgs);
@@ -407,12 +424,10 @@ describe("generateWeeklySummary", () => {
     });
 
     it("should map quota_exceeded to limitReached", async () => {
-      (global.fetch as any).mockResolvedValue({
-        json: async () => ({
-          ok: false,
-          reason: "quota_exceeded",
-          message: "Monthly limit reached",
-        }),
+      mockFetchJson({
+        ok: false,
+        reason: "quota_exceeded",
+        message: "Monthly limit reached",
       });
 
       const result = await generateWeeklySummary(validArgs);
@@ -425,12 +440,10 @@ describe("generateWeeklySummary", () => {
     });
 
     it("should map provider_error to failed", async () => {
-      (global.fetch as any).mockResolvedValue({
-        json: async () => ({
-          ok: false,
-          reason: "provider_error",
-          message: "AI service unavailable",
-        }),
+      mockFetchJson({
+        ok: false,
+        reason: "provider_error",
+        message: "AI service unavailable",
       });
 
       const result = await generateWeeklySummary(validArgs);
@@ -443,12 +456,10 @@ describe("generateWeeklySummary", () => {
     });
 
     it("should map validation_error to failed", async () => {
-      (global.fetch as any).mockResolvedValue({
-        json: async () => ({
-          ok: false,
-          reason: "validation_error",
-          message: "Invalid entries",
-        }),
+      mockFetchJson({
+        ok: false,
+        reason: "validation_error",
+        message: "Invalid entries",
       });
 
       const result = await generateWeeklySummary(validArgs);
@@ -461,11 +472,11 @@ describe("generateWeeklySummary", () => {
     });
 
     it("should handle invalid JSON response", async () => {
-      (global.fetch as any).mockResolvedValue({
+      getFetchMock().mockResolvedValue({
         json: async () => {
           throw new Error("Invalid JSON");
         },
-      });
+      } as unknown as Response);
 
       const result = await generateWeeklySummary(validArgs);
 
@@ -477,9 +488,7 @@ describe("generateWeeklySummary", () => {
     });
 
     it("should handle missing summary content in success response", async () => {
-      (global.fetch as any).mockResolvedValue({
-        json: async () => ({ ok: true, summary: undefined }),
-      });
+      mockFetchJson({ ok: true, summary: undefined as string | undefined });
 
       const result = await generateWeeklySummary(validArgs);
 
@@ -493,14 +502,10 @@ describe("generateWeeklySummary", () => {
 
   describe("summary persistence", () => {
     beforeEach(() => {
-      vi.mocked(supabaseRendererClient.auth.getSession).mockResolvedValue({
-        data: { session: { access_token: "test-token" } },
-      } as any);
-      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(mockEntries);
+      setSession("test-token");
+      getMockDb().getEntriesForIsoWeek.mockResolvedValue(mockEntries);
       vi.mocked(summariesRepository.existsForIsoWeek).mockResolvedValue(false);
-      (global.fetch as any).mockResolvedValue({
-        json: async () => ({ ok: true, summary: "Test summary content" }),
-      });
+      mockFetchJson({ ok: true, summary: "Test summary content" });
     });
 
     it("should persist summary with correct data", async () => {
@@ -570,12 +575,10 @@ describe("generateWeeklySummary", () => {
     });
 
     it("should handle network errors during fetch", async () => {
-      vi.mocked(supabaseRendererClient.auth.getSession).mockResolvedValue({
-        data: { session: { access_token: "test-token" } },
-      } as any);
-      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(mockEntries);
+      setSession("test-token");
+      getMockDb().getEntriesForIsoWeek.mockResolvedValue(mockEntries);
       vi.mocked(summariesRepository.existsForIsoWeek).mockResolvedValue(false);
-      (global.fetch as any).mockRejectedValue(new Error("Network error"));
+      getFetchMock().mockRejectedValue(new Error("Network error"));
 
       const result = await generateWeeklySummary(validArgs);
 
@@ -588,22 +591,17 @@ describe("generateWeeklySummary", () => {
 
   describe("language parameter", () => {
     beforeEach(() => {
-      vi.mocked(supabaseRendererClient.auth.getSession).mockResolvedValue({
-        data: { session: { access_token: "test-token" } },
-      } as any);
-      (global.window as any).appApi.db.getEntriesForIsoWeek.mockResolvedValue(mockEntries);
+      setSession("test-token");
+      getMockDb().getEntriesForIsoWeek.mockResolvedValue(mockEntries);
       vi.mocked(summariesRepository.existsForIsoWeek).mockResolvedValue(false);
-      (global.fetch as any).mockResolvedValue({
-        json: async () => ({ ok: true, summary: "Test" }),
-      });
+      mockFetchJson({ ok: true, summary: "Test" });
       vi.mocked(summariesRepository.createForIsoWeek).mockResolvedValue(mockSummary);
     });
 
     it("should support Polish language", async () => {
       await generateWeeklySummary({ ...validArgs, language: "pl" });
 
-      const fetchCall = (global.fetch as any).mock.calls[0];
-      const payload = JSON.parse(fetchCall[1].body);
+      const payload = getFetchPayload();
 
       expect(payload.language).toBe("pl");
     });
@@ -611,8 +609,7 @@ describe("generateWeeklySummary", () => {
     it("should support English language", async () => {
       await generateWeeklySummary({ ...validArgs, language: "en" });
 
-      const fetchCall = (global.fetch as any).mock.calls[0];
-      const payload = JSON.parse(fetchCall[1].body);
+      const payload = getFetchPayload();
 
       expect(payload.language).toBe("en");
     });

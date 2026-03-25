@@ -68,6 +68,7 @@ Key capabilities:
 - Frictionless capture: periodic lightweight popups & a global shortcut ask "What are you working on?"
 - Structured daily history: entries grouped per day; consecutive identical entries collapsed (`xN`) only when uninterrupted
 - Automatic weekly AI summaries (authenticated + consenting users) every Sunday 23:00
+- Configurable history periods: keep the default Monday-based week or align history summaries to sprint cadences such as 2-week periods starting on Wednesday
 - Local‑first by default: data stays on your machine unless you opt in to summaries
 - Editable history; accidental entries removable (AI summaries are retained but editable)
 
@@ -326,13 +327,14 @@ git commit -m "feat!: migrate to new database schema"
 - Settings:
   - Popup frequency (30 min, 1h, 2h, 4h)
   - Global shortcut customization
+  - History grouping period length and start weekday, applied from the next matching boundary while preserving older history groupings
 - Privacy:
   - Local storage by default
   - External transmission only for summary generation with explicit user consent (during registration)
 
 ### Out of Scope (MVP)
 - Windows / Linux support
-- On-demand custom date-range summaries
+- Arbitrary custom date-range summaries outside the configured history grouping periods
 - OAuth (Google/GitHub/etc.) logins
 - Direct third‑party integrations (Jira, Git, Asana, Git repos)
 - Continuous cloud sync / remote backup
@@ -346,7 +348,8 @@ Current Implementation:
 - Core scaffold (Electron + React + TypeScript): Implemented
 - Styling (Tailwind v4): Implemented
 - Tooling (Biome, Forge, Vite): Operational
-- Planned (not yet integrated): SQLite persistence, Supabase auth, OpenRouter AI pipeline, react-router navigation, weekly scheduler, settings UI, entry compression logic.
+- History period configuration in settings: Implemented
+- Effective-dated history grouping with per-period summaries: Implemented
 
 Success Metrics Targets (from Product Requirements):
 - >40% authenticated users viewing weekly summary

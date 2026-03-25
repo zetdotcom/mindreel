@@ -1,6 +1,12 @@
+import type {
+  HistoryGroupingRule,
+  HistoryGroupingSettings,
+  UpdateHistoryGroupingInput,
+} from "../lib/historyGrouping";
 import { type Database, database } from "./database";
 import { getCurrentWeekRange, getWeekRangeForDate, type IsoWeekIdentifier } from "./dateUtils";
 import { EntriesRepository } from "./repositories/entriesRepository";
+import { HistoryGroupingRepository } from "./repositories/historyGroupingRepository";
 import { SettingsRepository } from "./repositories/settingsRepository";
 import { SummariesRepository } from "./repositories/summariesRepository";
 import type {
@@ -16,6 +22,7 @@ import type {
 export class DatabaseService {
   private db: Database;
   private entriesRepo: EntriesRepository | null = null;
+  private historyGroupingRepo: HistoryGroupingRepository | null = null;
   private summariesRepo: SummariesRepository | null = null;
   private settingsRepo: SettingsRepository | null = null;
   private isInitialized = false;
@@ -33,11 +40,13 @@ export class DatabaseService {
     const db = this.db.getDatabase();
 
     this.entriesRepo = new EntriesRepository(db);
+    this.historyGroupingRepo = new HistoryGroupingRepository(db);
     this.summariesRepo = new SummariesRepository(db);
     this.settingsRepo = new SettingsRepository(db);
 
     // Initialize default settings
     await this.settingsRepo.initializeDefaults();
+    await this.historyGroupingRepo.initializeDefaults();
 
     this.isInitialized = true;
     console.log("Database service initialized successfully");
@@ -49,6 +58,7 @@ export class DatabaseService {
   async close(): Promise<void> {
     await this.db.close();
     this.entriesRepo = null;
+    this.historyGroupingRepo = null;
     this.summariesRepo = null;
     this.settingsRepo = null;
     this.isInitialized = false;
@@ -58,9 +68,35 @@ export class DatabaseService {
    * Ensure the service is initialized
    */
   private ensureInitialized(): void {
-    if (!this.isInitialized || !this.entriesRepo || !this.summariesRepo || !this.settingsRepo) {
+    if (
+      !this.isInitialized ||
+      !this.entriesRepo ||
+      !this.historyGroupingRepo ||
+      !this.summariesRepo ||
+      !this.settingsRepo
+    ) {
       throw new Error("Database service not initialized. Call initialize() first.");
     }
+  }
+
+  private getEntriesRepo(): EntriesRepository {
+    this.ensureInitialized();
+    return this.entriesRepo;
+  }
+
+  private getHistoryGroupingRepo(): HistoryGroupingRepository {
+    this.ensureInitialized();
+    return this.historyGroupingRepo;
+  }
+
+  private getSummariesRepo(): SummariesRepository {
+    this.ensureInitialized();
+    return this.summariesRepo;
+  }
+
+  private getSettingsRepo(): SettingsRepository {
+    this.ensureInitialized();
+    return this.settingsRepo;
   }
 
   // =============================================================================
@@ -71,114 +107,100 @@ export class DatabaseService {
    * Create a new entry
    */
   async createEntry(input: CreateEntryInput): Promise<Entry> {
-    this.ensureInitialized();
-    return this.entriesRepo!.createEntry(input);
+    return this.getEntriesRepo().createEntry(input);
   }
 
   /**
    * Get entry by ID
    */
   async getEntryById(id: number): Promise<Entry | null> {
-    this.ensureInitialized();
-    return this.entriesRepo!.getEntryById(id);
+    return this.getEntriesRepo().getEntryById(id);
   }
 
   /**
    * Get all entries with optional filters
    */
   async getEntries(filters?: EntryFilters): Promise<Entry[]> {
-    this.ensureInitialized();
-    return this.entriesRepo!.getEntries(filters);
+    return this.getEntriesRepo().getEntries(filters);
   }
 
   /**
    * Get entries for today
    */
   async getTodayEntries(): Promise<Entry[]> {
-    this.ensureInitialized();
     const today = new Date().toISOString().split("T")[0];
-    return this.entriesRepo!.getEntriesForDate(today);
+    return this.getEntriesRepo().getEntriesForDate(today);
   }
 
   /**
    * Get entries for current week
    */
   async getCurrentWeekEntries(): Promise<Entry[]> {
-    this.ensureInitialized();
     const { week_of_year, iso_year } = getCurrentWeekRange();
-    return this.entriesRepo!.getEntriesForIsoWeek(iso_year, week_of_year);
+    return this.getEntriesRepo().getEntriesForIsoWeek(iso_year, week_of_year);
   }
 
   /**
    * Get entries for a specific ISO week
    */
   async getEntriesForIsoWeek(iso_year: number, week_of_year: number): Promise<Entry[]> {
-    this.ensureInitialized();
-    return this.entriesRepo!.getEntriesForIsoWeek(iso_year, week_of_year);
+    return this.getEntriesRepo().getEntriesForIsoWeek(iso_year, week_of_year);
   }
 
   /**
    * Get entries for a specific date
    */
   async getEntriesForDate(date: string): Promise<Entry[]> {
-    this.ensureInitialized();
-    return this.entriesRepo!.getEntriesForDate(date);
+    return this.getEntriesRepo().getEntriesForDate(date);
   }
 
   /**
    * Get entries for a specific week
    */
   async getEntriesForWeek(weekOfYear: number): Promise<Entry[]> {
-    this.ensureInitialized();
-    return this.entriesRepo!.getEntriesForWeek(weekOfYear);
+    return this.getEntriesRepo().getEntriesForWeek(weekOfYear);
   }
 
   /**
    * Get entries for a date range
    */
   async getEntriesForDateRange(startDate: string, endDate: string): Promise<Entry[]> {
-    this.ensureInitialized();
-    return this.entriesRepo!.getEntriesForDateRange(startDate, endDate);
+    return this.getEntriesRepo().getEntriesForDateRange(startDate, endDate);
   }
 
   /**
    * Update entry content
    */
   async updateEntry(id: number, content: string): Promise<Entry | null> {
-    this.ensureInitialized();
-    return this.entriesRepo!.updateEntry(id, content);
+    return this.getEntriesRepo().updateEntry(id, content);
   }
 
   /**
    * Delete entry
    */
   async deleteEntry(id: number): Promise<boolean> {
-    this.ensureInitialized();
-    return this.entriesRepo!.deleteEntry(id);
+    return this.getEntriesRepo().deleteEntry(id);
   }
 
   /**
    * Get all dates that have entries
    */
   async getDatesWithEntries(): Promise<string[]> {
-    this.ensureInitialized();
-    return this.entriesRepo!.getDatesWithEntries();
+    return this.getEntriesRepo().getDatesWithEntries();
   }
 
   /**
    * Get all weeks that have entries
    */
   async getWeeksWithEntries(): Promise<number[]> {
-    this.ensureInitialized();
-    return this.entriesRepo!.getWeeksWithEntries();
+    return this.getEntriesRepo().getWeeksWithEntries();
   }
 
   /**
    * Get all ISO weeks that have entries
    */
   async getIsoWeeksWithEntries(): Promise<IsoWeekIdentifier[]> {
-    this.ensureInitialized();
-    return this.entriesRepo!.getIsoWeeksWithEntries();
+    return this.getEntriesRepo().getIsoWeeksWithEntries();
   }
 
   // =============================================================================
@@ -189,18 +211,16 @@ export class DatabaseService {
    * Create a new summary
    */
   async createSummary(input: CreateSummaryInput): Promise<Summary> {
-    this.ensureInitialized();
-    return this.summariesRepo!.createSummary(input);
+    return this.getSummariesRepo().createSummary(input);
   }
 
   /**
    * Create a summary for the current week using existing entries
    */
   async createCurrentWeekSummary(content: string): Promise<Summary> {
-    this.ensureInitialized();
     const { start_date, end_date, week_of_year, iso_year } = getCurrentWeekRange();
 
-    return this.summariesRepo!.createSummary({
+    return this.getSummariesRepo().createSummary({
       content,
       start_date,
       end_date,
@@ -213,98 +233,100 @@ export class DatabaseService {
    * Get summary by ID
    */
   async getSummaryById(id: number): Promise<Summary | null> {
-    this.ensureInitialized();
-    return this.summariesRepo!.getSummaryById(id);
+    return this.getSummariesRepo().getSummaryById(id);
   }
 
   /**
    * Get summary for a specific week
    */
   async getSummaryByWeek(weekOfYear: number): Promise<Summary | null> {
-    this.ensureInitialized();
-    return this.summariesRepo!.getSummaryByWeek(weekOfYear);
+    return this.getSummariesRepo().getSummaryByWeek(weekOfYear);
   }
 
   /**
    * Get summary for current week
    */
   async getCurrentWeekSummary(): Promise<Summary | null> {
-    this.ensureInitialized();
     const { week_of_year, iso_year } = getCurrentWeekRange();
-    return this.summariesRepo!.getSummaryForIsoWeek(iso_year, week_of_year);
+    return this.getSummariesRepo().getSummaryForIsoWeek(iso_year, week_of_year);
   }
 
   /**
    * Get summary for a specific ISO week
    */
   async getSummaryForIsoWeek(iso_year: number, week_of_year: number): Promise<Summary | null> {
-    this.ensureInitialized();
-    return this.summariesRepo!.getSummaryForIsoWeek(iso_year, week_of_year);
+    return this.getSummariesRepo().getSummaryForIsoWeek(iso_year, week_of_year);
+  }
+
+  /**
+   * Get summary for an exact date range.
+   */
+  async getSummaryForDateRange(startDate: string, endDate: string): Promise<Summary | null> {
+    return this.getSummariesRepo().getSummaryForDateRange(startDate, endDate);
   }
 
   /**
    * Get all summaries
    */
   async getAllSummaries(): Promise<Summary[]> {
-    this.ensureInitialized();
-    return this.summariesRepo!.getAllSummaries();
+    return this.getSummariesRepo().getAllSummaries();
   }
 
   /**
    * Get summaries for a specific year
    */
   async getSummariesByYear(year: number): Promise<Summary[]> {
-    this.ensureInitialized();
-    return this.summariesRepo!.getSummariesByYear(year);
+    return this.getSummariesRepo().getSummariesByYear(year);
   }
 
   /**
    * Update summary content
    */
   async updateSummary(id: number, content: string): Promise<Summary | null> {
-    this.ensureInitialized();
-    return this.summariesRepo!.updateSummary(id, content);
+    return this.getSummariesRepo().updateSummary(id, content);
   }
 
   /**
    * Delete summary
    */
   async deleteSummary(id: number): Promise<boolean> {
-    this.ensureInitialized();
-    return this.summariesRepo!.deleteSummary(id);
+    return this.getSummariesRepo().deleteSummary(id);
   }
 
   /**
    * Check if summary exists for current week
    */
   async currentWeekSummaryExists(): Promise<boolean> {
-    this.ensureInitialized();
     const { week_of_year, iso_year } = getCurrentWeekRange();
-    return this.summariesRepo!.summaryExistsForIsoWeek(iso_year, week_of_year);
+    return this.getSummariesRepo().summaryExistsForIsoWeek(iso_year, week_of_year);
   }
 
   /**
    * Check if summary exists for a specific ISO week
    */
   async summaryExistsForIsoWeek(iso_year: number, week_of_year: number): Promise<boolean> {
-    this.ensureInitialized();
-    return this.summariesRepo!.summaryExistsForIsoWeek(iso_year, week_of_year);
+    return this.getSummariesRepo().summaryExistsForIsoWeek(iso_year, week_of_year);
+  }
+
+  /**
+   * Check if summary exists for an exact date range.
+   */
+  async summaryExistsForDateRange(startDate: string, endDate: string): Promise<boolean> {
+    return this.getSummariesRepo().summaryExistsForDateRange(startDate, endDate);
   }
 
   /**
    * Check if summary exists for a specific week
    */
   async summaryExistsForWeek(weekOfYear: number): Promise<boolean> {
-    this.ensureInitialized();
-    return this.summariesRepo!.summaryExistsForWeek(weekOfYear);
+    return this.getSummariesRepo().summaryExistsForWeek(weekOfYear);
   }
 
   /**
    * Get the most recent summary
    */
   async getLatestSummary(): Promise<Summary | null> {
-    this.ensureInitialized();
-    return this.summariesRepo!.getLatestSummary();
+    return this.getSummariesRepo().getLatestSummary();
   }
 
   // =============================================================================
@@ -315,40 +337,56 @@ export class DatabaseService {
    * Get current settings
    */
   async getSettings(): Promise<Settings | null> {
-    this.ensureInitialized();
-    return this.settingsRepo!.getSettings();
+    return this.getSettingsRepo().getSettings();
   }
 
   /**
    * Update settings
    */
   async updateSettings(input: UpdateSettingsInput): Promise<Settings> {
-    this.ensureInitialized();
-    return this.settingsRepo!.updateSettings(input);
+    return this.getSettingsRepo().updateSettings(input);
   }
 
   /**
    * Update popup interval
    */
   async updatePopupInterval(minutes: number): Promise<Settings> {
-    this.ensureInitialized();
-    return this.settingsRepo!.updatePopupInterval(minutes);
+    return this.getSettingsRepo().updatePopupInterval(minutes);
   }
 
   /**
    * Update global shortcut
    */
   async updateGlobalShortcut(shortcut: string | null): Promise<Settings> {
-    this.ensureInitialized();
-    return this.settingsRepo!.updateGlobalShortcut(shortcut);
+    return this.getSettingsRepo().updateGlobalShortcut(shortcut);
   }
 
   /**
    * Reset settings to defaults
    */
   async resetSettings(): Promise<Settings> {
-    this.ensureInitialized();
-    return this.settingsRepo!.resetSettings();
+    return this.getSettingsRepo().resetSettings();
+  }
+
+  /**
+   * Get effective-dated history grouping rules.
+   */
+  async getHistoryGroupingRules(): Promise<HistoryGroupingRule[]> {
+    return this.getHistoryGroupingRepo().getRules();
+  }
+
+  /**
+   * Get the current and configured history grouping settings.
+   */
+  async getHistoryGroupingSettings(): Promise<HistoryGroupingSettings> {
+    return this.getHistoryGroupingRepo().getGroupingSettings();
+  }
+
+  /**
+   * Update history grouping settings and schedule them from the next matching day.
+   */
+  async updateHistoryGrouping(input: UpdateHistoryGroupingInput): Promise<HistoryGroupingSettings> {
+    return this.getHistoryGroupingRepo().updateGrouping(input);
   }
 
   // =============================================================================
@@ -393,8 +431,6 @@ export class DatabaseService {
     recentSummaries: Summary[];
     settings: Settings | null;
   }> {
-    this.ensureInitialized();
-
     const [todayEntries, currentWeekSummary, recentSummaries, settings] = await Promise.all([
       this.getTodayEntries(),
       this.getCurrentWeekSummary(),

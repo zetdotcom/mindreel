@@ -6,7 +6,7 @@ const translations = {
     "hero-badge": "Free & Open Source",
     "hero-title": "Never forget your achievements again",
     "hero-subtitle":
-      "MindReel is a free desktop app that automatically logs your work with gentle hourly reminders and generates AI-powered weekly summaries. Perfect for standups, reviews, and career tracking.",
+      "MindReel is a free desktop app that automatically logs your work with gentle hourly reminders and generates AI-powered weekly or sprint-length summaries. Perfect for standups, reviews, and career tracking.",
     "hero-feature1": "Automatic logging",
     "hero-feature2": "AI summaries",
     "hero-feature3": "100% local data",
@@ -21,7 +21,7 @@ const translations = {
     "feature1-preview": "Popup window screenshot",
     "feature2-title": "AI-powered summaries",
     "feature2-text":
-      "Weekly AI summaries analyze your work and create professional highlights perfect for meetings and reviews.",
+      "AI summaries can follow your default week or a custom sprint grouping, creating professional highlights for meetings and reviews.",
     "feature2-preview": "Weekly summary card",
     "feature3-title": "Local & private",
     "feature3-text":
@@ -66,7 +66,7 @@ const translations = {
     "hero-badge": "Darmowe i Open Source",
     "hero-title": "Nigdy nie zapomnij swoich osiągnięć",
     "hero-subtitle":
-      "MindReel to darmowa aplikacja na komputer, która automatycznie rejestruje Twoją pracę dzięki delikatnym przypomnieniom co godzinę i generuje cotygodniowe podsumowania AI. Idealna na standupy, oceny i śledzenie kariery.",
+      "MindReel to darmowa aplikacja na komputer, która automatycznie rejestruje Twoją pracę dzięki delikatnym przypomnieniom co godzinę i generuje podsumowania AI dla tygodni lub sprintów. Idealna na standupy, oceny i śledzenie kariery.",
     "hero-feature1": "Automatyczne rejestrowanie",
     "hero-feature2": "Podsumowania AI",
     "hero-feature3": "100% dane lokalne",
@@ -81,7 +81,7 @@ const translations = {
     "feature1-preview": "Zrzut ekranu okna popup",
     "feature2-title": "Podsumowania napędzane AI",
     "feature2-text":
-      "Cotygodniowe podsumowania AI analizują Twoją pracę i tworzą profesjonalne wyróżnienia idealne na spotkania i oceny.",
+      "Podsumowania AI mogą działać według domyślnego tygodnia albo własnego grupowania sprintu, tworząc profesjonalne wyróżnienia na spotkania i oceny.",
     "feature2-preview": "Karta cotygodniowego podsumowania",
     "feature3-title": "Lokalne i prywatne",
     "feature3-text":

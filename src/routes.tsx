@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from "react";
+import { lazy, Suspense } from "react";
 import type { RouteObject } from "react-router";
 import { Navigate, useRoutes } from "react-router";
 import ProfileView from "./views/Profile/ProfileView";
@@ -25,12 +25,10 @@ import SettingsView from "./views/Settings/SettingsView";
  */
 
 // --- Lazy View Imports -------------------------------------------------------
-const HistoryPageView = lazy(() =>
-  import("@/views/History/HistoryPageView").then((m) => ({
-    // Support either default export or named export fallback
-    default: m.default || (m as any).HistoryPageView,
-  })),
-);
+const HistoryPageView = lazy(async () => {
+  const module = await import("@/views/History/HistoryPageView");
+  return { default: module.HistoryPageView };
+});
 // (Settings/Profile are trivial placeholders; keeping them non-lazy is fine)
 
 // --- Placeholder / Mock Views ------------------------------------------------

@@ -1,21 +1,16 @@
 import { format, parseISO } from "date-fns";
-import {
-  getWeekRange,
-  makeWeekKey,
-  parseWeekKey,
-} from "../../../sqlite/dateUtils";
+import { getHistoryGroupingShortLabel, getHistoryGroupKey } from "../../../lib/historyGrouping";
 import type { Entry, Summary } from "../../../sqlite/types";
-import {
-  type DayGroupViewModel,
-  type DuplicateDetectionResult,
-  type DuplicateGroupViewModel,
-  type EntryViewModel,
-  IsoWeekIdentifier,
-  type RawWeekData,
-  type SummaryCardState,
-  type SummaryViewModel,
-  type WeekGroupViewModel,
-  type WeekKey,
+import type {
+  DayGroupViewModel,
+  DuplicateDetectionResult,
+  DuplicateGroupViewModel,
+  EntryViewModel,
+  RawWeekData,
+  SummaryCardState,
+  SummaryViewModel,
+  WeekGroupViewModel,
+  WeekKey,
 } from "./types";
 
 /**
@@ -23,7 +18,7 @@ import {
  * Handles grouping by day and duplicate detection
  */
 export function transformWeekData(rawWeek: RawWeekData): WeekGroupViewModel {
-  const weekKey = makeWeekKey(rawWeek.iso_year, rawWeek.week_of_year);
+  const weekKey = getHistoryGroupKey(rawWeek.start_date, rawWeek.end_date);
 
   // Group entries by date
   const entriesByDate = groupEntriesByDate(rawWeek.entries, weekKey);
@@ -37,23 +32,24 @@ export function transformWeekData(rawWeek: RawWeekData): WeekGroupViewModel {
   const totalEntries = days.reduce((sum, day) => sum + day.totalEntries, 0);
 
   // Transform summary if exists
-  const summaryViewModel = rawWeek.summary
-    ? transformSummary(rawWeek.summary, weekKey)
-    : undefined;
+  const summaryViewModel = rawWeek.summary ? transformSummary(rawWeek.summary, weekKey) : undefined;
 
   // Determine summary state
   const summaryState = determineSummaryState(summaryViewModel, totalEntries);
 
-  // Create week header label
+  // Create period header label
   const headerLabel = createWeekHeaderLabel(rawWeek);
+  const groupingLabel = getHistoryGroupingShortLabel(rawWeek);
 
   return {
-    iso_year: rawWeek.iso_year,
-    week_of_year: rawWeek.week_of_year,
     weekKey,
     start_date: rawWeek.start_date,
     end_date: rawWeek.end_date,
     headerLabel,
+    groupingLabel,
+    period_weeks: rawWeek.period_weeks,
+    start_weekday: rawWeek.start_weekday,
+    effective_start_date: rawWeek.effective_start_date,
     days,
     summary: summaryViewModel,
     summaryState,
@@ -66,10 +62,7 @@ export function transformWeekData(rawWeek: RawWeekData): WeekGroupViewModel {
 /**
  * Group entries by date and transform to EntryViewModel
  */
-function groupEntriesByDate(
-  entries: Entry[],
-  weekKey: WeekKey,
-): Record<string, EntryViewModel[]> {
+function groupEntriesByDate(entries: Entry[], weekKey: WeekKey): Record<string, EntryViewModel[]> {
   const grouped: Record<string, EntryViewModel[]> = {};
 
   entries.forEach((entry) => {
@@ -87,7 +80,7 @@ function groupEntriesByDate(
 /**
  * Transform Entry to EntryViewModel
  */
-function transformEntry(entry: Entry, weekKey: WeekKey): EntryViewModel {
+function transformEntry(entry: Entry, _weekKey: WeekKey): EntryViewModel {
   return {
     ...entry,
     isEditing: false,
@@ -134,16 +127,12 @@ function transformDayGroup(
  * Detect consecutive duplicate entries and group them
  * Based on the algorithm from the implementation plan
  */
-function detectDuplicates(
-  entries: EntryViewModel[],
-  weekKey: WeekKey,
-): DuplicateDetectionResult {
+function detectDuplicates(entries: EntryViewModel[], weekKey: WeekKey): DuplicateDetectionResult {
   const items: (EntryViewModel | DuplicateGroupViewModel)[] = [];
 
   // Sort entries by creation time
   const sortedEntries = [...entries].sort(
-    (a, b) =>
-      new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
   );
 
   let i = 0;
@@ -182,7 +171,9 @@ function detectDuplicates(
         weekKey,
         content: firstEntry.content,
         count: duplicates.length,
-        entryIds: duplicates.map((e) => e.id!).filter(Boolean),
+        entryIds: duplicates
+          .map((entry) => entry.id)
+          .filter((entryId): entryId is number => typeof entryId === "number"),
         firstEntry,
         entries: duplicates,
         expanded: false, // Default to collapsed
@@ -210,10 +201,7 @@ function normalizeContent(content: string): string {
 /**
  * Transform Summary to SummaryViewModel
  */
-function transformSummary(
-  summary: Summary,
-  weekKey: WeekKey,
-): SummaryViewModel {
+function transformSummary(summary: Summary, weekKey: WeekKey): SummaryViewModel {
   return {
     ...summary,
     isEditing: false,
@@ -244,7 +232,7 @@ function determineSummaryState(
 }
 
 /**
- * Create week header label
+ * Create period header label
  */
 function createWeekHeaderLabel(rawWeek: RawWeekData): string {
   const startDate = parseISO(rawWeek.start_date);
@@ -255,16 +243,16 @@ function createWeekHeaderLabel(rawWeek: RawWeekData): string {
 
   // Handle year boundary
   if (startDate.getFullYear() !== endDate.getFullYear()) {
-    return `${format(startDate, "MMM d, yyyy")} - ${endFormat} (Week ${rawWeek.week_of_year})`;
+    return `${format(startDate, "MMM d, yyyy")} - ${endFormat}`;
   }
 
   // Handle month boundary
   if (startDate.getMonth() !== endDate.getMonth()) {
-    return `${startFormat} - ${endFormat} (Week ${rawWeek.week_of_year})`;
+    return `${startFormat} - ${endFormat}`;
   }
 
   // Same month
-  return `${startFormat} - ${format(endDate, "d, yyyy")} (Week ${rawWeek.week_of_year})`;
+  return `${startFormat} - ${format(endDate, "d, yyyy")}`;
 }
 
 /**
@@ -279,9 +267,7 @@ export function isDuplicateGroup(
 /**
  * Type guard to check if item is an entry
  */
-export function isEntry(
-  item: EntryViewModel | DuplicateGroupViewModel,
-): item is EntryViewModel {
+export function isEntry(item: EntryViewModel | DuplicateGroupViewModel): item is EntryViewModel {
   return !isDuplicateGroup(item);
 }
 
@@ -312,17 +298,16 @@ export function calculateWeekTotalEntries(week: WeekGroupViewModel): number {
 }
 
 /**
- * Sort weeks by ISO year and week number (descending - newest first)
+ * Sort history groups by end date (descending - newest first)
  */
-export function sortWeeksDescending(
-  weeks: WeekGroupViewModel[],
-): WeekGroupViewModel[] {
+export function sortWeeksDescending(weeks: WeekGroupViewModel[]): WeekGroupViewModel[] {
   return weeks
     .sort((a, b) => {
-      if (a.iso_year !== b.iso_year) {
-        return b.iso_year - a.iso_year; // Newer year first
+      if (a.end_date !== b.end_date) {
+        return b.end_date.localeCompare(a.end_date);
       }
-      return b.week_of_year - a.week_of_year; // Higher week number first
+
+      return b.start_date.localeCompare(a.start_date);
     })
     .map((week, index) => ({
       ...week,
@@ -333,8 +318,6 @@ export function sortWeeksDescending(
 /**
  * Filter weeks to only show those with entries or summaries
  */
-export function filterWeeksWithContent(
-  weeks: WeekGroupViewModel[],
-): WeekGroupViewModel[] {
+export function filterWeeksWithContent(weeks: WeekGroupViewModel[]): WeekGroupViewModel[] {
   return weeks.filter((week) => week.totalEntries > 0 || week.summary);
 }

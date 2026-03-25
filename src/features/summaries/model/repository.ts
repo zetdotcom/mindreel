@@ -16,6 +16,8 @@
  *  - SUMMARY_NO_ENTRIES_CURRENT_WEEK: Attempted to create a summary when there are no entries
  *  - SUMMARY_NOT_FOUND: Update/delete target not found
  */
+
+import { getWeekRangeForDate } from "../../../sqlite/dateUtils";
 import type { Entry, Summary } from "../../../sqlite/types";
 
 /* ---------- Types & Interfaces ------------------------------------------------ */
@@ -45,12 +47,15 @@ export interface SummariesDbApi {
   }): Promise<Summary>;
   getCurrentWeekSummary(): Promise<Summary | null>;
   getSummaryByWeek(weekOfYear: number): Promise<Summary | null>;
+  getSummaryForIsoWeek?(iso_year: number, week_of_year: number): Promise<Summary | null>;
   getAllSummaries(): Promise<Summary[]>;
+  getSummaryForDateRange?(startDate: string, endDate: string): Promise<Summary | null>;
   updateSummary(id: number, content: string): Promise<Summary | null>;
   deleteSummary(id: number): Promise<boolean>;
   currentWeekSummaryExists(): Promise<boolean>;
   summaryExistsForWeek(weekOfYear: number): Promise<boolean>;
   summaryExistsForIsoWeek?(iso_year: number, week_of_year: number): Promise<boolean>;
+  summaryExistsForDateRange?(startDate: string, endDate: string): Promise<boolean>;
   getLatestSummary(): Promise<Summary | null>;
 }
 
@@ -87,10 +92,7 @@ export function createSummariesRepository(
   // Resolve runtime API
   const resolved: SummariesDbApi | undefined =
     dbApi ||
-    (typeof window !== "undefined"
-      ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ((window as any)?.appApi?.db as SummariesDbApi | undefined)
-      : undefined);
+    (typeof window !== "undefined" ? (window.appApi?.db as SummariesDbApi | undefined) : undefined);
 
   if (!resolved) {
     throw new Error("Summaries DB API not available. Ensure preload exposes window.appApi.db.");
@@ -181,9 +183,6 @@ export function createSummariesRepository(
      * Throws CREATE_ISO_WEEK_UNSUPPORTED if createSummary not exposed.
      */
     async createForIsoWeek(args: CreateIsoWeekSummaryArgs): Promise<Summary> {
-      if (typeof (resolved as any).createSummary !== "function") {
-        throw new Error("CREATE_ISO_WEEK_UNSUPPORTED");
-      }
       return resolved.createSummary({
         content: args.content,
         start_date: args.start_date,
@@ -194,13 +193,48 @@ export function createSummariesRepository(
     },
 
     /**
+     * Create summary for an exact date range.
+     * The ISO week metadata is derived from the range start because the summaries table
+     * still stores those columns even though period identity is start/end date.
+     */
+    async createForDateRange(args: {
+      start_date: string;
+      end_date: string;
+      content: string;
+    }): Promise<Summary> {
+      const { iso_year, week_of_year } = getWeekRangeForDate(args.start_date);
+
+      return resolved.createSummary({
+        content: args.content,
+        start_date: args.start_date,
+        end_date: args.end_date,
+        week_of_year,
+        iso_year,
+      });
+    },
+
+    /**
      * Check existence for arbitrary ISO week (fallback when iso_year missing server-side).
      */
     async existsForIsoWeek(iso_year: number, week_of_year: number): Promise<boolean> {
       if (typeof resolved.summaryExistsForIsoWeek === "function") {
-        return (resolved as any).summaryExistsForIsoWeek(iso_year, week_of_year);
+        return resolved.summaryExistsForIsoWeek(iso_year, week_of_year);
       }
       return resolved.summaryExistsForWeek(week_of_year);
+    },
+
+    /**
+     * Check existence for an exact date range. Falls back to loading and matching when needed.
+     */
+    async existsForDateRange(startDate: string, endDate: string): Promise<boolean> {
+      if (typeof resolved.summaryExistsForDateRange === "function") {
+        return resolved.summaryExistsForDateRange(startDate, endDate);
+      }
+
+      const all = await resolved.getAllSummaries();
+      return all.some(
+        (summary) => summary.start_date === startDate && summary.end_date === endDate,
+      );
     },
 
     /**
@@ -208,16 +242,31 @@ export function createSummariesRepository(
      * when iso-specific API is unavailable. Returns null if mismatch.
      */
     async getByIsoWeek(iso_year: number, week_of_year: number): Promise<Summary | null> {
-      if (typeof (resolved as any).getSummaryByIsoWeek === "function") {
-        return (resolved as any).getSummaryByIsoWeek(iso_year, week_of_year);
+      if (typeof resolved.getSummaryForIsoWeek === "function") {
+        return resolved.getSummaryForIsoWeek(iso_year, week_of_year);
       }
       // Fallback: week-only lookup then verify iso_year if available
       const summary = await resolved.getSummaryByWeek(week_of_year);
       if (!summary) return null;
-      if (typeof (summary as any).iso_year === "number" && summary.iso_year !== iso_year) {
+      if (summary.iso_year !== iso_year) {
         return null; // Week collision across ISO years (edge case)
       }
       return summary;
+    },
+
+    /**
+     * Fetch summary by exact date range. Falls back to list search when needed.
+     */
+    async getByDateRange(startDate: string, endDate: string): Promise<Summary | null> {
+      if (typeof resolved.getSummaryForDateRange === "function") {
+        return resolved.getSummaryForDateRange(startDate, endDate);
+      }
+
+      const all = await resolved.getAllSummaries();
+      return (
+        all.find((summary) => summary.start_date === startDate && summary.end_date === endDate) ||
+        null
+      );
     },
 
     /**

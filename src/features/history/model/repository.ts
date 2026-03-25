@@ -1,129 +1,77 @@
 import {
-  getCurrentWeekRange,
-  getPreviousIsoWeek,
-  getWeekRange,
-  makeWeekKey,
-} from "../../../sqlite/dateUtils";
+  buildHistoryPeriods,
+  formatDateOnly,
+  getHistoryGroupKey,
+  type HistoryPeriodDescriptor,
+} from "../../../lib/historyGrouping";
+import { getWeekRange } from "../../../sqlite/dateUtils";
 import type { Entry, Summary } from "../../../sqlite/types";
-import {
-  type IsoWeekIdentifier,
-  type LoadWeeksResult,
-  PAGE_WEEK_COUNT,
-  type RawWeekData,
-  WeekKey,
-} from "./types";
+import { type LoadWeeksResult, PAGE_WEEK_COUNT, type RawWeekData } from "./types";
 
-/**
- * Repository for history feature ISO week operations
- * Handles loading entries and summaries by ISO week with pagination
- */
+function sortPeriodsDescending<T extends { end_date: string; start_date: string }>(
+  periods: T[],
+): T[] {
+  return [...periods].sort((left, right) => {
+    if (left.end_date !== right.end_date) {
+      return right.end_date.localeCompare(left.end_date);
+    }
+
+    return right.start_date.localeCompare(left.start_date);
+  });
+}
+
 export class HistoryRepository {
   /**
-   * Load weeks for history view with pagination
-   * @param startingFrom Optional starting week identifier for pagination
-   * @param count Number of weeks to load (defaults to PAGE_WEEK_COUNT)
-   * @returns Promise<LoadWeeksResult>
+   * Load history groups for the current effective-dated grouping rules.
+   * Pagination is offset-based because groups can change length over time.
    */
-  async loadWeeks(
-    startingFrom?: IsoWeekIdentifier,
-    count: number = PAGE_WEEK_COUNT,
-  ): Promise<LoadWeeksResult> {
+  async loadWeeks(offset = 0, count: number = PAGE_WEEK_COUNT): Promise<LoadWeeksResult> {
     try {
-      // Determine starting point
-      let currentWeek = startingFrom;
-      if (!currentWeek) {
-        // Start from current week
-        const current = getCurrentWeekRange();
-        currentWeek = {
-          iso_year: current.iso_year,
-          week_of_year: current.week_of_year,
+      const [rules, datesWithEntries, summaries] = await Promise.all([
+        window.appApi.db.getHistoryGroupingRules(),
+        window.appApi.db.getDatesWithEntries(),
+        window.appApi.db.getAllSummaries(),
+      ]);
+
+      const summaryMap = this.createSummaryMap(summaries);
+      const allRelevantDates = [
+        ...datesWithEntries,
+        ...summaries.map((summary) => summary.start_date),
+      ].sort();
+
+      if (allRelevantDates.length === 0) {
+        return {
+          rawWeeks: [],
+          hasMore: false,
         };
       }
 
-      const rawWeeks: RawWeekData[] = [];
-      let weekToLoad = currentWeek;
+      const earliestDate = allRelevantDates[0];
+      const latestDate = formatDateOnly(new Date());
 
-      // Load the requested number of weeks
-      for (let i = 0; i < count; i++) {
-        const weekData = await this.loadSingleWeek(weekToLoad);
-        if (weekData) {
-          rawWeeks.push(weekData);
-        }
+      const periods = sortPeriodsDescending(
+        buildHistoryPeriods(rules, earliestDate, latestDate),
+      ).filter((period) => {
+        const periodKey = getHistoryGroupKey(period.start_date, period.end_date);
+        const hasEntries = datesWithEntries.some(
+          (date) => date >= period.start_date && date <= period.end_date,
+        );
 
-        // Move to previous week for next iteration
-        weekToLoad = getPreviousIsoWeek(weekToLoad);
-      }
+        return hasEntries || summaryMap.has(periodKey);
+      });
 
-      // Check if there are more weeks available
-      // We do this by trying to load one more week
-      const hasMore = await this.hasEntriesInWeek(weekToLoad);
+      const selectedPeriods = periods.slice(offset, offset + count);
+      const rawWeeks = await Promise.all(
+        selectedPeriods.map((period) => this.loadSingleGroup(period, summaryMap)),
+      );
 
       return {
         rawWeeks,
-        hasMore,
+        hasMore: offset + count < periods.length,
       };
     } catch (error) {
-      console.error("Error loading weeks for history:", error);
+      console.error("Error loading history groups:", error);
       throw error;
-    }
-  }
-
-  /**
-   * Load a single week's data (entries and summary)
-   * @param week ISO week identifier
-   * @returns Promise<RawWeekData | null>
-   */
-  private async loadSingleWeek(week: IsoWeekIdentifier): Promise<RawWeekData | null> {
-    try {
-      const weekKey = makeWeekKey(week.iso_year, week.week_of_year);
-      const { start_date, end_date } = getWeekRange(week.week_of_year, week.iso_year);
-
-      // Load entries and summary in parallel
-      const [entries, summary] = await Promise.all([
-        window.appApi.db.getEntriesForIsoWeek(week.iso_year, week.week_of_year),
-        window.appApi.db.getSummaryForIsoWeek(week.iso_year, week.week_of_year),
-      ]);
-
-      return {
-        iso_year: week.iso_year,
-        week_of_year: week.week_of_year,
-        weekKey,
-        start_date,
-        end_date,
-        entries: entries || [],
-        summary: summary || undefined,
-      };
-    } catch (error) {
-      console.error(`Error loading week ${week.iso_year}-W${week.week_of_year}:`, error);
-      return null;
-    }
-  }
-
-  /**
-   * Check if a week has any entries
-   * @param week ISO week identifier
-   * @returns Promise<boolean>
-   */
-  private async hasEntriesInWeek(week: IsoWeekIdentifier): Promise<boolean> {
-    try {
-      const entries = await window.appApi.db.getEntriesForIsoWeek(week.iso_year, week.week_of_year);
-      return entries && entries.length > 0;
-    } catch (error) {
-      console.error("Error checking entries in week:", error);
-      return false;
-    }
-  }
-
-  /**
-   * Get all ISO weeks that have entries for initial load optimization
-   * @returns Promise<IsoWeekIdentifier[]>
-   */
-  async getWeeksWithEntries(): Promise<IsoWeekIdentifier[]> {
-    try {
-      return await window.appApi.db.getIsoWeeksWithEntries();
-    } catch (error) {
-      console.error("Error getting weeks with entries:", error);
-      return [];
     }
   }
 
@@ -186,17 +134,54 @@ export class HistoryRepository {
   }
 
   /**
-   * Check if summary exists for a specific ISO week
-   * @param week ISO week identifier
-   * @returns Promise<boolean>
+   * Check if summary exists for an exact period.
    */
-  async summaryExistsForWeek(week: IsoWeekIdentifier): Promise<boolean> {
+  async summaryExistsForRange(startDate: string, endDate: string): Promise<boolean> {
     try {
-      return await window.appApi.db.summaryExistsForIsoWeek(week.iso_year, week.week_of_year);
+      return await window.appApi.db.summaryExistsForDateRange(startDate, endDate);
     } catch (error) {
       console.error("Error checking summary existence:", error);
       return false;
     }
+  }
+
+  /**
+   * Legacy week-based existence check used by older summary hooks.
+   */
+  async summaryExistsForWeek(week: { iso_year: number; week_of_year: number }): Promise<boolean> {
+    const { start_date, end_date } = getWeekRange(week.week_of_year, week.iso_year);
+    return this.summaryExistsForRange(start_date, end_date);
+  }
+
+  private async loadSingleGroup(
+    period: HistoryPeriodDescriptor,
+    summaryMap: Map<string, Summary>,
+  ): Promise<RawWeekData> {
+    const weekKey = getHistoryGroupKey(period.start_date, period.end_date);
+    const entries = await window.appApi.db.getEntriesForDateRange(
+      period.start_date,
+      period.end_date,
+    );
+
+    return {
+      ...period,
+      weekKey,
+      entries: entries || [],
+      summary: summaryMap.get(weekKey),
+    };
+  }
+
+  private createSummaryMap(summaries: Summary[]): Map<string, Summary> {
+    return summaries.reduce((map, summary) => {
+      const key = getHistoryGroupKey(summary.start_date, summary.end_date);
+      const existing = map.get(key);
+
+      if (!existing || existing.created_at < summary.created_at) {
+        map.set(key, summary);
+      }
+
+      return map;
+    }, new Map<string, Summary>());
   }
 }
 

@@ -8,6 +8,10 @@ interface DatabaseVersion {
   created_at: string;
 }
 
+interface TableColumn {
+  name: string;
+}
+
 export class Database {
   private db: sqlite3.Database | null = null;
   private dbPath: string;
@@ -109,11 +113,24 @@ export class Database {
         onboarding_completed INTEGER NOT NULL DEFAULT 0
       );
 
+      -- Create history grouping rules table
+      CREATE TABLE IF NOT EXISTS history_grouping_rules (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        period_weeks INTEGER NOT NULL CHECK (period_weeks >= 1),
+        start_weekday INTEGER NOT NULL CHECK (start_weekday BETWEEN 1 AND 7),
+        effective_start_date TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+      );
+
       -- Create indexes
       CREATE INDEX IF NOT EXISTS idx_entries_date ON entries(date);
       CREATE INDEX IF NOT EXISTS idx_summaries_week ON summaries(week_of_year);
       CREATE INDEX IF NOT EXISTS idx_entries_iso_week ON entries(iso_year, week_of_year);
       CREATE INDEX IF NOT EXISTS idx_summaries_iso_week ON summaries(iso_year, week_of_year);
+      CREATE INDEX IF NOT EXISTS idx_history_grouping_rules_effective_start
+      ON history_grouping_rules(effective_start_date, created_at);
+      CREATE INDEX IF NOT EXISTS idx_summaries_date_range
+      ON summaries(start_date, end_date);
     `;
 
     return new Promise((resolve, reject) => {
@@ -264,7 +281,7 @@ export class Database {
         return;
       }
 
-      this.db.all(`PRAGMA table_info(${tableName})`, [], (err, rows: any[]) => {
+      this.db.all(`PRAGMA table_info(${tableName})`, [], (err, rows: TableColumn[]) => {
         if (err) {
           reject(err);
         } else {
@@ -280,8 +297,8 @@ let database: Database;
 
 try {
   database = new Database();
-} catch (error) {
-  database = null as any;
+} catch (_error) {
+  database = null as unknown as Database;
 }
 
 export { database };

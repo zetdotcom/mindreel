@@ -1,15 +1,5 @@
 import { format, parseISO } from "date-fns";
-import {
-  AlertCircle,
-  Calendar,
-  Check,
-  Edit2,
-  Loader2,
-  Lock,
-  Sparkles,
-  X,
-  Zap,
-} from "lucide-react";
+import { AlertCircle, Calendar, Check, Edit2, Loader2, Lock, Sparkles, X, Zap } from "lucide-react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -18,25 +8,23 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import type {
-  IsoWeekIdentifier,
-  SummaryCardState,
-  SummaryViewModel,
-  WeekKey,
-} from "../model/types";
+import type { SummaryCardState, SummaryViewModel } from "../model/types";
+
+interface HistoryPeriodRange {
+  start_date: string;
+  end_date: string;
+}
 
 interface SummaryCardProps {
   summary?: SummaryViewModel;
   summaryState: SummaryCardState;
-  weekKey: WeekKey;
-  weekIdentifier: IsoWeekIdentifier;
+  periodRange: HistoryPeriodRange;
   totalEntries: number;
   onUpdate?: (summaryId: number, content: string) => void;
-  onGenerate?: (weekIdentifier: IsoWeekIdentifier) => Promise<void>;
-  weekPassed: boolean;
+  onGenerate?: (periodRange: HistoryPeriodRange) => Promise<void>;
+  periodPassed: boolean;
   onStateChange?: (newState: SummaryCardState) => void;
   onLoginRequest?: () => void; // Trigger auth modal from unauthorized state
-  onClearSummary?: (summaryId: number) => Promise<void>; // Delete summary and revert to pending state
   className?: string;
 }
 
@@ -50,16 +38,14 @@ interface SummaryCardProps {
 export function SummaryCard({
   summary,
   summaryState,
-  weekKey,
-  weekIdentifier,
+  periodRange,
   totalEntries,
   onUpdate,
   onGenerate,
-  weekPassed,
+  periodPassed,
   onStateChange,
   onLoginRequest,
   className,
-  onClearSummary,
 }: SummaryCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(summary?.content || "");
@@ -89,8 +75,7 @@ export function SummaryCard({
     if (onGenerate && onStateChange) {
       try {
         onStateChange("generating");
-        await onGenerate(weekIdentifier);
-        onStateChange("success");
+        await onGenerate(periodRange);
       } catch (err) {
         console.error("Error generating summary:", err);
         onStateChange("failed");
@@ -151,26 +136,6 @@ export function SummaryCard({
     }
   };
 
-  const handleClearSummary = async () => {
-    if (!summary?.id) return;
-    try {
-      // Prefer dedicated clear handler if provided
-      if (onClearSummary) {
-        await onClearSummary(summary.id);
-      } else if (onUpdate) {
-        // Fallback: overwrite content with empty string
-        await onUpdate(summary.id, "");
-      }
-      setEditContent("");
-      // Move back to pending so generate button reappears
-      if (onStateChange) {
-        onStateChange("pending");
-      }
-    } catch (err) {
-      console.error("Error clearing summary (TEST ONLY):", err);
-    }
-  };
-
   const formatSummaryDate = (dateStr: string) => {
     try {
       return format(parseISO(dateStr), "MMM d, yyyy");
@@ -210,9 +175,7 @@ export function SummaryCard({
 
     if (sections.length === 0) {
       return (
-        <div className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-          {content}
-        </div>
+        <div className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{content}</div>
       );
     }
 
@@ -221,10 +184,7 @@ export function SummaryCard({
         {sections.map((section, idx) => (
           <div
             key={section.project}
-            className={cn(
-              "space-y-3",
-              idx > 0 && "pt-4 border-t-2 border-border/30",
-            )}
+            className={cn("space-y-3", idx > 0 && "pt-4 border-t-2 border-border/30")}
           >
             <Badge variant="neon" size="default" className="font-black text-xs">
               {section.project}
@@ -271,7 +231,7 @@ export function SummaryCard({
       case "generating":
         return "Generating Summary...";
       case "success":
-        return "Weekly Summary";
+        return "Period Summary";
       case "failed":
         return "Summary Generation Failed";
       case "unauthorized":
@@ -281,9 +241,9 @@ export function SummaryCard({
       case "unsupported":
         return "AI Summary (Persistence Unsupported)";
       case "alreadyExists":
-        return "Weekly Summary";
+        return "Period Summary";
       default:
-        return "Weekly Summary";
+        return "Period Summary";
     }
   };
 
@@ -292,19 +252,15 @@ export function SummaryCard({
       case "pending":
         return (
           <div className="text-center py-6 space-y-4">
-            {weekPassed ? (
+            {periodPassed ? (
               <>
                 <div className="text-sm text-muted-foreground">
                   {totalEntries === 0
-                    ? "Add entries this week to enable AI summary generation"
+                    ? "Add entries in this period to enable AI summary generation"
                     : `Ready to generate summary for ${totalEntries} entries`}
                 </div>
                 {totalEntries > 0 && (
-                  <Button
-                    onClick={handleGenerate}
-                    disabled={!onGenerate}
-                    className="gap-2"
-                  >
+                  <Button onClick={handleGenerate} disabled={!onGenerate} className="gap-2">
                     <Sparkles className="h-4 w-4" />
                     Generate AI Summary
                   </Button>
@@ -312,8 +268,8 @@ export function SummaryCard({
               </>
             ) : (
               <div className="text-sm text-muted-foreground">
-                Week still in progress. Summary generation available after
-                Sunday.
+                This period is still in progress. Summary generation becomes available after it
+                ends.
               </div>
             )}
           </div>
@@ -324,11 +280,9 @@ export function SummaryCard({
           <div className="text-center py-6 space-y-4">
             <div className="flex items-center justify-center space-x-2 text-primary">
               <Loader2 className="h-5 w-5 animate-spin" />
-              <span className="text-sm">Generating your weekly summary...</span>
+              <span className="text-sm">Generating your period summary...</span>
             </div>
-            <div className="text-xs text-muted-foreground">
-              This may take a few moments
-            </div>
+            <div className="text-xs text-muted-foreground">This may take a few moments</div>
           </div>
         );
 
@@ -343,7 +297,7 @@ export function SummaryCard({
                 onKeyDown={handleKeyDown}
                 disabled={isSaving}
                 className="min-h-[120px] resize-none"
-                placeholder="Enter your weekly summary..."
+                placeholder="Enter your period summary..."
               />
 
               {error && (
@@ -380,24 +334,16 @@ export function SummaryCard({
             </div>
           );
         }
-        console.log("--- summary", summary);
         return (
           <div className="space-y-4">
             {summary?.content && renderFormattedContent(summary.content)}
 
             <div className="flex items-center justify-between border-t pt-3">
               <div className="text-xs text-muted-foreground">
-                {summary?.created_at && (
-                  <>Generated {formatSummaryDate(summary.created_at)}</>
-                )}
+                {summary?.created_at && <>Generated {formatSummaryDate(summary.created_at)}</>}
               </div>
               <div className="flex items-center space-x-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleStartEdit}
-                  className="gap-2"
-                >
+                <Button variant="ghost" size="sm" onClick={handleStartEdit} className="gap-2">
                   <Edit2 className="h-3 w-3" />
                   Edit
                 </Button>
@@ -425,8 +371,8 @@ export function SummaryCard({
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Failed to generate summary. Please try again or contact support
-                if the problem persists.
+                Failed to generate summary. Please try again or contact support if the problem
+                persists.
               </AlertDescription>
             </Alert>
             <Button
@@ -445,13 +391,9 @@ export function SummaryCard({
         return (
           <div className="text-center py-6 space-y-4">
             <div className="text-sm text-muted-foreground">
-              Sign in to generate AI-powered weekly summaries
+              Sign in to generate AI-powered summaries for this history period
             </div>
-            <Button
-              variant="outline"
-              className="gap-2"
-              onClick={onLoginRequest}
-            >
+            <Button variant="outline" className="gap-2" onClick={onLoginRequest}>
               <Lock className="h-4 w-4" />
               Sign In to Generate
             </Button>
@@ -464,13 +406,10 @@ export function SummaryCard({
             <Alert>
               <Zap className="h-4 w-4" />
               <AlertDescription>
-                You've reached your monthly AI summary limit. Limit resets on
-                the 1st of each month.
+                You've reached your monthly AI summary limit. Limit resets on the 1st of each month.
               </AlertDescription>
             </Alert>
-            <div className="text-xs text-muted-foreground">
-              Upgrade to increase your limit
-            </div>
+            <div className="text-xs text-muted-foreground">Upgrade to increase your limit</div>
           </div>
         );
 
@@ -480,8 +419,7 @@ export function SummaryCard({
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Generating summaries for arbitrary past weeks is not yet
-                supported in this build.
+                Generating summaries for this history period is not supported in this build.
               </AlertDescription>
             </Alert>
           </div>
@@ -516,7 +454,8 @@ export function SummaryCard({
           {summaryState === "success" && (
             <div className="flex items-center space-x-3">
               <div className="text-xs text-muted-foreground font-normal">
-                Week {weekIdentifier.week_of_year}, {weekIdentifier.iso_year}
+                {formatSummaryDate(periodRange.start_date)} -{" "}
+                {formatSummaryDate(periodRange.end_date)}
               </div>
               {/* Duplicate clear button in header (optional). Commented out.
               <Button

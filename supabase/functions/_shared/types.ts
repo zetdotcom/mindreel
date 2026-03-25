@@ -6,8 +6,8 @@ export interface Entry {
 }
 
 export interface RequestPayload {
-  week_start: string; // Monday (YYYY-MM-DD)
-  week_end: string; // Sunday (YYYY-MM-DD)
+  week_start: string; // Period start (YYYY-MM-DD)
+  week_end: string; // Period end (YYYY-MM-DD)
   entries: Entry[];
   language?: "pl" | "en";
   client_meta?: Record<string, unknown>;

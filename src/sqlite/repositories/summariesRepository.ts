@@ -1,6 +1,9 @@
 import type sqlite3 from "sqlite3";
-import { IsoWeekIdentifier } from "../dateUtils";
 import type { CreateSummaryInput, Summary } from "../types";
+
+interface TableColumnInfo {
+  name: string;
+}
 
 export class SummariesRepository {
   constructor(private db: sqlite3.Database) {}
@@ -29,7 +32,7 @@ export class SummariesRepository {
           created_at,
         ],
         function (err) {
-          if (err && err.message.includes("no such column: iso_year")) {
+          if (err?.message.includes("no such column: iso_year")) {
             // Fallback to old schema without iso_year
             const sqlLegacy = `
               INSERT INTO summaries (content, start_date, end_date, week_of_year, created_at)
@@ -116,12 +119,36 @@ export class SummariesRepository {
   }
 
   /**
+   * Get summary for an exact date range.
+   */
+  async getSummaryForDateRange(startDate: string, endDate: string): Promise<Summary | null> {
+    return new Promise((resolve, reject) => {
+      const sql = `
+        SELECT *
+        FROM summaries
+        WHERE start_date = ? AND end_date = ?
+        ORDER BY created_at DESC
+        LIMIT 1
+      `;
+
+      this.db.get(sql, [startDate, endDate], (err, row: Summary) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        resolve(row || null);
+      });
+    });
+  }
+
+  /**
    * Get summary for a specific ISO week
    */
   async getSummaryForIsoWeek(isoYear: number, weekOfYear: number): Promise<Summary | null> {
     return new Promise((resolve, reject) => {
       // Check if iso_year column exists
-      this.db.all("PRAGMA table_info(summaries)", [], (err, columns: any[]) => {
+      this.db.all("PRAGMA table_info(summaries)", [], (err, columns: TableColumnInfo[]) => {
         if (err) {
           reject(err);
           return;
@@ -167,7 +194,8 @@ export class SummariesRepository {
    */
   async getAllSummaries(): Promise<Summary[]> {
     return new Promise((resolve, reject) => {
-      const sql = "SELECT * FROM summaries ORDER BY iso_year DESC, week_of_year DESC";
+      const sql =
+        "SELECT * FROM summaries ORDER BY start_date DESC, end_date DESC, created_at DESC";
 
       this.db.all(sql, [], (err, rows: Summary[]) => {
         if (err) {
@@ -224,7 +252,7 @@ export class SummariesRepository {
 
         // Get the updated summary using the captured database reference
         const selectSql = "SELECT * FROM summaries WHERE id = ?";
-        db.get(selectSql, [id], (err: any, row: Summary) => {
+        db.get(selectSql, [id], (err: Error | null, row: Summary) => {
           if (err) {
             reject(err);
             return;
@@ -314,7 +342,7 @@ export class SummariesRepository {
   async summaryExistsForIsoWeek(isoYear: number, weekOfYear: number): Promise<boolean> {
     return new Promise((resolve, reject) => {
       // Check if iso_year column exists
-      this.db.all("PRAGMA table_info(summaries)", [], (err, columns: any[]) => {
+      this.db.all("PRAGMA table_info(summaries)", [], (err, columns: TableColumnInfo[]) => {
         if (err) {
           reject(err);
           return;
@@ -352,6 +380,28 @@ export class SummariesRepository {
   }
 
   /**
+   * Check if a summary exists for an exact date range.
+   */
+  async summaryExistsForDateRange(startDate: string, endDate: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      const sql = `
+        SELECT COUNT(*) as count
+        FROM summaries
+        WHERE start_date = ? AND end_date = ?
+      `;
+
+      this.db.get(sql, [startDate, endDate], (err, row: { count: number }) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        resolve((row?.count || 0) > 0);
+      });
+    });
+  }
+
+  /**
    * Get the most recent summary
    */
   async getLatestSummary(): Promise<Summary | null> {
@@ -377,7 +427,7 @@ export class SummariesRepository {
       const sql = `
         SELECT * FROM summaries
         WHERE start_date >= ? AND end_date <= ?
-        ORDER BY week_of_year DESC
+        ORDER BY start_date DESC, end_date DESC, created_at DESC
       `;
 
       this.db.all(sql, [startDate, endDate], (err, rows: Summary[]) => {

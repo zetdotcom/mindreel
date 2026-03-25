@@ -1,5 +1,4 @@
 import { ChevronDown, Loader2 } from "lucide-react";
-import React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +11,7 @@ interface PaginationControlProps {
 }
 
 /**
- * PaginationControl component for loading more weeks in history view
+ * PaginationControl component for loading more history periods
  * Shows load more button or loading state, with count information
  */
 export function PaginationControl({
@@ -51,8 +50,8 @@ export function PaginationControl({
 
           <div className="text-sm text-muted-foreground text-center">
             {loading
-              ? "Loading older weeks..."
-              : `Showing ${loadedCount} weeks • Click to load more`}
+              ? "Loading older history periods..."
+              : `Showing ${loadedCount} history periods • Click to load more`}
           </div>
         </>
       ) : (
@@ -63,7 +62,9 @@ export function PaginationControl({
               : "You've reached the beginning of your history"}
           </div>
           {loadedCount > 0 && (
-            <div className="text-xs text-muted-foreground">Total: {loadedCount} weeks loaded</div>
+            <div className="text-xs text-muted-foreground">
+              Total: {loadedCount} history periods loaded
+            </div>
           )}
         </div>
       )}
