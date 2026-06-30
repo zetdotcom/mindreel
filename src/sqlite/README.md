@@ -45,12 +45,18 @@ interface Summary {
 }
 ```
 
-### Settings
+### Todo
 ```typescript
-interface Settings {
-  id: 1;
-  popup_interval_minutes: number;
-  global_shortcut: string | null;
+interface Todo {
+  id?: number;
+  content: string;
+  created_at: string;       // ISO 8601 timestamp
+  completed_at: string | null;
+  completed_entry_id: number | null;
+}
+
+interface CreateTodoInput {
+  content: string;
 }
 ```
 
@@ -320,6 +326,38 @@ const handleUpdateSettings = async (newSettings: Partial<Settings>) => {
     console.error("Failed to update settings:", error);
   }
 };
+```
+
+## Todo Management
+
+### `window.appApi.db.createTodo(input: CreateTodoInput): Promise<Todo>`
+Creates an active todo. Content is trimmed; empty or >500 char strings are rejected.
+
+### `window.appApi.db.getActiveTodos(): Promise<Todo[]>`
+Returns all incomplete todos ordered by `created_at DESC`.
+
+### `window.appApi.db.getCompletedTodos(): Promise<Todo[]>`
+Returns all completed todos ordered by `completed_at DESC`.
+
+### `window.appApi.db.completeTodo(id: number): Promise<{ todo: Todo; entry: Entry } | null>`
+Atomically marks todo completed and creates a history entry (`✓ [content]`). Returns `null` if already completed or not found. Emits `todo:completed` and `entry:created` events to all windows.
+
+### `window.appApi.db.deleteTodo(id: number): Promise<boolean>`
+Deletes a todo (active or completed). Deleting a completed todo does **not** delete its generated history entry. Emits `todo:deleted` to all windows.
+
+### Cross-window events
+
+| Event | Payload | When |
+|-------|---------|------|
+| `todo:created` | `Todo` | After `createTodo` succeeds |
+| `todo:completed` | `Todo` | After `completeTodo` succeeds |
+| `todo:deleted` | `{ id: number }` | After `deleteTodo` succeeds |
+
+Subscribe via preload listeners:
+```typescript
+window.appApi.events.onTodoCreated(handler)
+window.appApi.events.onTodoCompleted(handler)
+window.appApi.events.onTodoDeleted(handler)
 ```
 
 ## Utility Methods

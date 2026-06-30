@@ -9,13 +9,16 @@ import { EntriesRepository } from "./repositories/entriesRepository";
 import { HistoryGroupingRepository } from "./repositories/historyGroupingRepository";
 import { SettingsRepository } from "./repositories/settingsRepository";
 import { SummariesRepository } from "./repositories/summariesRepository";
+import { TodosRepository } from "./repositories/todosRepository";
 import type {
   CreateEntryInput,
   CreateSummaryInput,
+  CreateTodoInput,
   Entry,
   EntryFilters,
   Settings,
   Summary,
+  Todo,
   UpdateSettingsInput,
 } from "./types";
 
@@ -25,6 +28,7 @@ export class DatabaseService {
   private historyGroupingRepo: HistoryGroupingRepository | null = null;
   private summariesRepo: SummariesRepository | null = null;
   private settingsRepo: SettingsRepository | null = null;
+  private todosRepo: TodosRepository | null = null;
   private isInitialized = false;
 
   constructor(customDatabase?: Database) {
@@ -43,6 +47,7 @@ export class DatabaseService {
     this.historyGroupingRepo = new HistoryGroupingRepository(db);
     this.summariesRepo = new SummariesRepository(db);
     this.settingsRepo = new SettingsRepository(db);
+    this.todosRepo = new TodosRepository(db);
 
     // Initialize default settings
     await this.settingsRepo.initializeDefaults();
@@ -61,6 +66,7 @@ export class DatabaseService {
     this.historyGroupingRepo = null;
     this.summariesRepo = null;
     this.settingsRepo = null;
+    this.todosRepo = null;
     this.isInitialized = false;
   }
 
@@ -73,7 +79,8 @@ export class DatabaseService {
       !this.entriesRepo ||
       !this.historyGroupingRepo ||
       !this.summariesRepo ||
-      !this.settingsRepo
+      !this.settingsRepo ||
+      !this.todosRepo
     ) {
       throw new Error("Database service not initialized. Call initialize() first.");
     }
@@ -97,6 +104,11 @@ export class DatabaseService {
   private getSettingsRepo(): SettingsRepository {
     this.ensureInitialized();
     return this.settingsRepo;
+  }
+
+  private getTodosRepo(): TodosRepository {
+    this.ensureInitialized();
+    return this.todosRepo;
   }
 
   // =============================================================================
@@ -387,6 +399,95 @@ export class DatabaseService {
    */
   async updateHistoryGrouping(input: UpdateHistoryGroupingInput): Promise<HistoryGroupingSettings> {
     return this.getHistoryGroupingRepo().updateGrouping(input);
+  }
+
+  // =============================================================================
+  // TODOS METHODS
+  // =============================================================================
+
+  async createTodo(input: CreateTodoInput): Promise<Todo> {
+    return this.getTodosRepo().createTodo(input);
+  }
+
+  async getActiveTodos(): Promise<Todo[]> {
+    return this.getTodosRepo().getActiveTodos();
+  }
+
+  async getCompletedTodos(): Promise<Todo[]> {
+    return this.getTodosRepo().getCompletedTodos();
+  }
+
+  async deleteTodo(id: number): Promise<boolean> {
+    return this.getTodosRepo().deleteTodo(id);
+  }
+
+  /**
+   * Atomically completes a todo and creates a corresponding history entry.
+   *
+   * Uses BEGIN IMMEDIATE to prevent duplicate completion when both windows
+   * act on the same todo concurrently. Returns null if the todo was already
+   * completed or does not exist.
+   */
+  async completeTodo(id: number): Promise<{ todo: Todo; entry: Entry } | null> {
+    const rawDb = this.db.getDatabase();
+    const todosRepo = this.getTodosRepo();
+    const entriesRepo = this.getEntriesRepo();
+
+    return new Promise((resolve, reject) => {
+      rawDb.run("BEGIN IMMEDIATE", async (beginErr) => {
+        if (beginErr) {
+          // Another completeTodo is already in-flight on this connection;
+          // treat as concurrent duplicate — the first caller will complete it.
+          if (beginErr.message?.includes("cannot start a transaction within a transaction")) {
+            resolve(null);
+            return;
+          }
+          reject(beginErr);
+          return;
+        }
+
+        const rollback = (err: Error) => {
+          rawDb.run("ROLLBACK", () => reject(err));
+        };
+
+        try {
+          const todo = await todosRepo.getTodoById(id);
+
+          if (!todo || todo.completed_at !== null) {
+            rawDb.run("ROLLBACK", () => resolve(null));
+            return;
+          }
+
+          const completedAt = new Date().toISOString();
+          const entry = await entriesRepo.createEntry({ content: `✓ ${todo.content}` });
+
+          if (!entry.id) {
+            rawDb.run("ROLLBACK", () =>
+              reject(new Error("Entry creation returned no id")),
+            );
+            return;
+          }
+
+          const updatedTodo = await todosRepo.markTodoCompleted(id, completedAt, entry.id);
+
+          if (!updatedTodo) {
+            // Another process completed it between our read and write
+            rawDb.run("ROLLBACK", () => resolve(null));
+            return;
+          }
+
+          rawDb.run("COMMIT", (commitErr) => {
+            if (commitErr) {
+              rawDb.run("ROLLBACK", () => reject(commitErr));
+              return;
+            }
+            resolve({ todo: updatedTodo, entry });
+          });
+        } catch (err) {
+          rollback(err instanceof Error ? err : new Error(String(err)));
+        }
+      });
+    });
   }
 
   // =============================================================================

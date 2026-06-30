@@ -4,6 +4,7 @@ import { databaseService } from "../sqlite/databaseService";
 import type {
   CreateEntryInput,
   CreateSummaryInput,
+  CreateTodoInput,
   EntryFilters,
   UpdateSettingsInput,
 } from "../sqlite/types";
@@ -437,7 +438,87 @@ export function registerDatabaseHandlers(): void {
     }
   });
 
+  registerTodoHandlers();
   console.log("Database IPC handlers registered successfully");
+}
+
+// =============================================================================
+// TODOS HANDLERS
+// =============================================================================
+
+function registerTodoHandlers(): void {
+  ipcMain.handle("db:createTodo", async (_event, input: CreateTodoInput) => {
+    try {
+      const trimmed = input.content.trim();
+      if (!trimmed || trimmed.length > 500) {
+        throw new Error("Todo content must be 1–500 characters.");
+      }
+
+      const todo = await databaseService.createTodo({ content: trimmed });
+
+      BrowserWindow.getAllWindows().forEach((win) => {
+        win.webContents.send("todo:created", todo);
+      });
+
+      return todo;
+    } catch (error) {
+      console.error("Error creating todo:", error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle("db:getActiveTodos", async (_event) => {
+    try {
+      return await databaseService.getActiveTodos();
+    } catch (error) {
+      console.error("Error getting active todos:", error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle("db:getCompletedTodos", async (_event) => {
+    try {
+      return await databaseService.getCompletedTodos();
+    } catch (error) {
+      console.error("Error getting completed todos:", error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle("db:completeTodo", async (_event, id: number) => {
+    try {
+      const result = await databaseService.completeTodo(id);
+
+      if (result) {
+        BrowserWindow.getAllWindows().forEach((win) => {
+          win.webContents.send("todo:completed", result.todo);
+          win.webContents.send("entry:created", result.entry);
+        });
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Error completing todo:", error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle("db:deleteTodo", async (_event, id: number) => {
+    try {
+      const deleted = await databaseService.deleteTodo(id);
+
+      if (deleted) {
+        BrowserWindow.getAllWindows().forEach((win) => {
+          win.webContents.send("todo:deleted", { id });
+        });
+      }
+
+      return deleted;
+    } catch (error) {
+      console.error("Error deleting todo:", error);
+      throw error;
+    }
+  });
 }
 
 /**

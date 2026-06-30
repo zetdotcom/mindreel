@@ -42,6 +42,18 @@ export interface UpdateSettingsInput {
   onboarding_completed?: number;
 }
 
+export interface Todo {
+  id?: number;
+  content: string;
+  created_at: string;
+  completed_at: string | null;
+  completed_entry_id: number | null;
+}
+
+export interface CreateTodoInput {
+  content: string;
+}
+
 export interface WeekRange {
   start_date: string;
   end_date: string;

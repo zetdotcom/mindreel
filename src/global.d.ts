@@ -4,6 +4,8 @@ import {
   Settings,
   CreateEntryInput,
   CreateSummaryInput,
+  CreateTodoInput,
+  Todo,
   UpdateSettingsInput,
   EntryFilters,
 } from "./sqlite/types";
@@ -92,6 +94,13 @@ declare global {
           recentSummaries: Summary[];
           settings: Settings | null;
         }>;
+
+        // Todos
+        createTodo: (input: CreateTodoInput) => Promise<Todo>;
+        getActiveTodos: () => Promise<Todo[]>;
+        getCompletedTodos: () => Promise<Todo[]>;
+        completeTodo: (id: number) => Promise<{ todo: Todo; entry: Entry } | null>;
+        deleteTodo: (id: number) => Promise<boolean>;
       };
       // Capture popup API
       capture: {
@@ -109,6 +118,9 @@ declare global {
       // Events API
       events: {
         onEntryCreated: (callback: (entry: Entry) => void) => () => void;
+        onTodoCreated: (callback: (todo: Todo) => void) => () => void;
+        onTodoCompleted: (callback: (todo: Todo) => void) => () => void;
+        onTodoDeleted: (callback: (payload: { id: number }) => void) => () => void;
       };
     };
   }

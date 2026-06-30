@@ -29,6 +29,11 @@ const HistoryPageView = lazy(async () => {
   const module = await import("@/views/History/HistoryPageView");
   return { default: module.HistoryPageView };
 });
+
+const TodosPageView = lazy(async () => {
+  const module = await import("@/views/Todos/TodosPageView");
+  return { default: module.TodosPageView };
+});
 // (Settings/Profile are trivial placeholders; keeping them non-lazy is fine)
 
 // --- Placeholder / Mock Views ------------------------------------------------
@@ -53,6 +58,14 @@ export const routes: RouteObject[] = [
     element: (
       <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Loading…</div>}>
         <HistoryPageView />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/todos",
+    element: (
+      <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Loading…</div>}>
+        <TodosPageView />
       </Suspense>
     ),
   },

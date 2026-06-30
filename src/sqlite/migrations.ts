@@ -493,12 +493,97 @@ const migration005: Migration = {
   },
 };
 
+/**
+ * Migration 6: Add todos table
+ */
+const migration006: Migration = {
+  id: 6,
+  name: "add_todos_table",
+  up: async (db: sqlite3.Database): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      db.serialize(() => {
+        db.run(
+          `
+            CREATE TABLE IF NOT EXISTS todos (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              content TEXT NOT NULL,
+              created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+              completed_at TEXT NULL,
+              completed_entry_id INTEGER NULL
+            )
+          `,
+          (createErr) => {
+            if (createErr) {
+              reject(createErr);
+              return;
+            }
+
+            db.run(
+              "CREATE INDEX IF NOT EXISTS idx_todos_created_at ON todos(created_at)",
+              (idx1Err) => {
+                if (idx1Err) {
+                  reject(idx1Err);
+                  return;
+                }
+
+                db.run(
+                  "CREATE INDEX IF NOT EXISTS idx_todos_completed_at ON todos(completed_at)",
+                  (idx2Err) => {
+                    if (idx2Err) {
+                      reject(idx2Err);
+                      return;
+                    }
+
+                    db.run(
+                      "CREATE INDEX IF NOT EXISTS idx_todos_completed_entry_id ON todos(completed_entry_id)",
+                      (idx3Err) => {
+                        if (idx3Err) {
+                          reject(idx3Err);
+                          return;
+                        }
+
+                        console.log("Migration 006 completed: Added todos table and indexes");
+                        resolve();
+                      },
+                    );
+                  },
+                );
+              },
+            );
+          },
+        );
+      });
+    });
+  },
+  down: async (db: sqlite3.Database): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      db.serialize(() => {
+        db.run("DROP INDEX IF EXISTS idx_todos_completed_entry_id", (err) => {
+          if (err) { reject(err); return; }
+          db.run("DROP INDEX IF EXISTS idx_todos_completed_at", (err) => {
+            if (err) { reject(err); return; }
+            db.run("DROP INDEX IF EXISTS idx_todos_created_at", (err) => {
+              if (err) { reject(err); return; }
+              db.run("DROP TABLE IF EXISTS todos", (err) => {
+                if (err) { reject(err); return; }
+                console.log("Migration 006 rolled back: Dropped todos table");
+                resolve();
+              });
+            });
+          });
+        });
+      });
+    });
+  },
+};
+
 export const migrations: Migration[] = [
   migration001,
   migration002,
   migration003,
   migration004,
   migration005,
+  migration006,
 ];
 
 export class MigrationRunner {

@@ -34,9 +34,14 @@ export function HistoryView() {
   const { deleteEntry, loading: deletingEntry } = useEntryOperations();
   const { authenticated, openAuthModal } = useAuthContext();
 
+  // Manual refresh shows a success toast; background refresh (entry:created) is silent.
+  const handleManualRefresh = React.useCallback(() => {
+    refreshWeeks();
+  }, [refreshWeeks]);
+
   React.useEffect(() => {
     const unsubscribe = window.appApi.events.onEntryCreated(() => {
-      refreshWeeks();
+      refreshWeeks({ silent: true });
     });
 
     return () => unsubscribe();
@@ -87,7 +92,7 @@ export function HistoryView() {
           <p className="text-sm text-muted-foreground mb-4">{error}</p>
           <button
             type="button"
-            onClick={refreshWeeks}
+            onClick={handleManualRefresh}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
           >
             Try Again
@@ -107,7 +112,7 @@ export function HistoryView() {
           </p>
           <HistoryHeader
             showAddButton={true}
-            onRefresh={refreshWeeks}
+            onRefresh={handleManualRefresh}
             onAddEntry={handleAddEntry}
           />
         </div>
@@ -118,7 +123,7 @@ export function HistoryView() {
   return (
     <div className="w-full max-w-4xl mx-auto p-4 space-y-6">
       {/* Header */}
-      <HistoryHeader showAddButton={true} onRefresh={refreshWeeks} onAddEntry={handleAddEntry} />
+      <HistoryHeader showAddButton={true} onRefresh={handleManualRefresh} onAddEntry={handleAddEntry} />
       {/* Error Banner */}
       {error && weeks.length > 0 && (
         <div className="bg-destructive/10 border border-destructive/20 rounded-md p-4">
@@ -129,7 +134,7 @@ export function HistoryView() {
             </div>
             <button
               type="button"
-              onClick={refreshWeeks}
+              onClick={handleManualRefresh}
               className="text-sm text-destructive hover:text-destructive/80 underline"
             >
               Retry
@@ -180,7 +185,7 @@ export function HistoryView() {
                 type: "success",
                 text: "Entry deleted successfully.",
               });
-              await refreshWeeks();
+              await refreshWeeks({ silent: true });
             } else {
               addToast({
                 type: "error",

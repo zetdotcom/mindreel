@@ -10,17 +10,40 @@
 /**
  * Get the last N unique entries for quick prefill.
  * Returns distinct content values ordered by most recent timestamp.
+ *
+ * Excludes generated todo-completion entries (those whose id appears as
+ * completed_entry_id on any completed todo). This prevents "✓ …" lines
+ * from polluting the recent-activities suggestions.
  */
 export async function getRecentUniqueEntries(limit = 8): Promise<string[]> {
   try {
-    const allEntries = await window.appApi.db.getEntries();
+    // getCompletedTodos is best-effort: if todo IPC handlers aren't available
+    // (e.g. stale process, first boot), degrade gracefully rather than
+    // wiping the whole suggestions list.
+    const [allEntries, completionEntryIds] = await Promise.all([
+      window.appApi.db.getEntries(),
+      window.appApi.db
+        .getCompletedTodos()
+        .then(
+          (todos) =>
+            new Set<number>(
+              todos
+                .map((t) => t.completed_entry_id)
+                .filter((id): id is number => id !== null),
+            ),
+        )
+        .catch(() => new Set<number>()),
+    ]);
 
     // Extract unique content values, preserving order of most recent occurrence
     const seen = new Set<string>();
     const unique: string[] = [];
 
-    // Iterate from newest to oldest
     for (const entry of allEntries) {
+      if (entry.id !== undefined && completionEntryIds.has(entry.id)) {
+        continue; // skip todo completion entries
+      }
+
       if (!seen.has(entry.content)) {
         seen.add(entry.content);
         unique.push(entry.content);

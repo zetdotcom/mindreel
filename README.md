@@ -311,8 +311,10 @@ git commit -m "feat!: migrate to new database schema"
   - Text input (Save enabled only if non-empty)
   - “Same” button repeating last entry
   - Quick list of recent unique entries
+  - Tab switcher (`Entry` / `Todo`); `Ctrl+Space` toggles tabs
 - Global configurable keyboard shortcut for entry capture
 - Add entry from main window
+- **Todos:** create, complete, and delete todos from the main window (`To Do` nav item) and capture popup; completing a todo atomically creates a `✓ [text]` history entry; syncs across windows via IPC events
 - Daily history view:
   - One card per day (date + weekday)
   - Latest four weeks loaded by default; older weeks available via pagination
@@ -353,6 +355,7 @@ Current Implementation:
 - History period configuration in settings: Implemented
 - Effective-dated history grouping with per-period summaries: Implemented
 - Explicit history period date ranges with optional named sprint headers: Implemented
+- Todo feature (create/complete/delete, cross-window sync, history integration): Implemented
 
 Success Metrics Targets (from Product Requirements):
 - >40% authenticated users viewing weekly summary

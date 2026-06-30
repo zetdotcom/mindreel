@@ -1,4 +1,4 @@
-import { History, Settings, User } from "lucide-react";
+import { History, ListTodo, Settings, User } from "lucide-react";
 import type React from "react";
 import { Suspense } from "react";
 import { NavLink } from "react-router";
@@ -20,6 +20,11 @@ const NAV_ITEMS: NavItem[] = [
     label: "History",
     icon: <History className="h-5 w-5" />,
     exact: true,
+  },
+  {
+    to: "/todos",
+    label: "To Do",
+    icon: <ListTodo className="h-5 w-5" />,
   },
   {
     to: "/settings",

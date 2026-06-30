@@ -123,6 +123,15 @@ export class Database {
         created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
       );
 
+      -- Create todos table
+      CREATE TABLE IF NOT EXISTS todos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        content TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+        completed_at TEXT NULL,
+        completed_entry_id INTEGER NULL
+      );
+
       -- Create indexes
       CREATE INDEX IF NOT EXISTS idx_entries_date ON entries(date);
       CREATE INDEX IF NOT EXISTS idx_summaries_week ON summaries(week_of_year);
@@ -132,6 +141,9 @@ export class Database {
       ON history_grouping_rules(effective_start_date, created_at);
       CREATE INDEX IF NOT EXISTS idx_summaries_date_range
       ON summaries(start_date, end_date);
+      CREATE INDEX IF NOT EXISTS idx_todos_created_at ON todos(created_at);
+      CREATE INDEX IF NOT EXISTS idx_todos_completed_at ON todos(completed_at);
+      CREATE INDEX IF NOT EXISTS idx_todos_completed_entry_id ON todos(completed_entry_id);
     `;
 
     return new Promise((resolve, reject) => {

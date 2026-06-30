@@ -154,8 +154,9 @@ export function useHistoryState() {
 
   /**
    * Refresh the current weeks (reload all loaded weeks)
+   * Pass { silent: true } for background refreshes that should not show a success toast.
    */
-  const refreshWeeks = useCallback(async () => {
+  const refreshWeeks = useCallback(async (options?: { silent?: boolean }) => {
     try {
       setState((prev) => ({ ...prev, error: undefined }));
 
@@ -174,10 +175,12 @@ export function useHistoryState() {
         },
       }));
 
-      addToast({
-        type: "success",
-        text: "History refreshed successfully.",
-      });
+      if (!options?.silent) {
+        addToast({
+          type: "success",
+          text: "History refreshed successfully.",
+        });
+      }
     } catch (error) {
       console.error("Error refreshing weeks:", error);
       addToast({

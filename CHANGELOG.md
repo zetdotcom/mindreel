@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release preparation
 - Configurable history grouping with effective-dated rules so new sprint-style periods start on the selected boundary without regrouping older history
+- Todo feature: create, complete, and delete todos from main window (`/todos`) and capture popup
+- Completing a todo atomically creates a history entry (`✓ [text]`) in a single transaction
+- Cross-window todo sync via IPC events (`todo:created`, `todo:completed`, `todo:deleted`)
+- Capture popup tab switcher (`Entry` / `Todo`); toggle with `Ctrl+Space`, close with `ESC`
 
 ### Changed
 - Refreshed the macOS app icon with a native-first master asset and reproducible icon generation script
@@ -24,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Prevented the main history/settings window from opening before database IPC handlers are registered during app startup
+- Background history refresh (triggered by todo completion) no longer shows success toast spam
 
 ### Security
 

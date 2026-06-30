@@ -3,8 +3,10 @@ import type { UpdateHistoryGroupingInput } from "./lib/historyGrouping";
 import type {
   CreateEntryInput,
   CreateSummaryInput,
+  CreateTodoInput,
   Entry,
   EntryFilters,
+  Todo,
   UpdateSettingsInput,
 } from "./sqlite/types";
 
@@ -70,6 +72,13 @@ const databaseApi = {
   getCurrentWeekInfo: () => ipcRenderer.invoke("db:getCurrentWeekInfo"),
   getWeekInfoForDate: (date: string) => ipcRenderer.invoke("db:getWeekInfoForDate", date),
   getDashboardData: () => ipcRenderer.invoke("db:getDashboardData"),
+
+  // Todos
+  createTodo: (input: CreateTodoInput) => ipcRenderer.invoke("db:createTodo", input),
+  getActiveTodos: () => ipcRenderer.invoke("db:getActiveTodos"),
+  getCompletedTodos: () => ipcRenderer.invoke("db:getCompletedTodos"),
+  completeTodo: (id: number) => ipcRenderer.invoke("db:completeTodo", id),
+  deleteTodo: (id: number) => ipcRenderer.invoke("db:deleteTodo", id),
 };
 
 // Capture window API
@@ -90,6 +99,21 @@ const eventsApi = {
     const listener = (_event: IpcRendererEvent, entry: Entry) => callback(entry);
     ipcRenderer.on("entry:created", listener);
     return () => ipcRenderer.removeListener("entry:created", listener);
+  },
+  onTodoCreated: (callback: (todo: Todo) => void) => {
+    const listener = (_event: IpcRendererEvent, todo: Todo) => callback(todo);
+    ipcRenderer.on("todo:created", listener);
+    return () => ipcRenderer.removeListener("todo:created", listener);
+  },
+  onTodoCompleted: (callback: (todo: Todo) => void) => {
+    const listener = (_event: IpcRendererEvent, todo: Todo) => callback(todo);
+    ipcRenderer.on("todo:completed", listener);
+    return () => ipcRenderer.removeListener("todo:completed", listener);
+  },
+  onTodoDeleted: (callback: (payload: { id: number }) => void) => {
+    const listener = (_event: IpcRendererEvent, payload: { id: number }) => callback(payload);
+    ipcRenderer.on("todo:deleted", listener);
+    return () => ipcRenderer.removeListener("todo:deleted", listener);
   },
 };
 

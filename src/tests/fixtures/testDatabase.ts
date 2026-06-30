@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { Database } from "../../sqlite/database";
 import { DatabaseService } from "../../sqlite/databaseService";
-import type { Entry } from "../../sqlite/types";
+import type { Entry, Todo } from "../../sqlite/types";
 
 export class TestDatabase {
   private testDbPath: string;
@@ -43,6 +43,12 @@ export class TestDatabase {
           }
         });
         db.run("DELETE FROM summaries", (err) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+        });
+        db.run("DELETE FROM todos", (err) => {
           if (err) {
             reject(err);
             return;
@@ -96,7 +102,34 @@ export class TestDatabase {
     });
   }
 
+  async createTestTodo(content: string): Promise<Todo> {
+    const db = this.database.getDatabase();
+    const created_at = new Date().toISOString();
+
+    return new Promise((resolve, reject) => {
+      db.run(
+        "INSERT INTO todos (content, created_at) VALUES (?, ?)",
+        [content, created_at],
+        function (err) {
+          if (err) {
+            reject(err);
+            return;
+          }
+
+          resolve({
+            id: this.lastID,
+            content,
+            created_at,
+            completed_at: null,
+            completed_entry_id: null,
+          });
+        },
+      );
+    });
+  }
+
   getPath(): string {
     return this.testDbPath;
   }
 }
+
